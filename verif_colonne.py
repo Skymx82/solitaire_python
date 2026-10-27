@@ -1,6 +1,7 @@
 from operator import truediv
 
-#cette verification va permettre de vérifier si notre déplacement d'une colonne
+
+# cette verification va permettre de vérifier si notre déplacement d'une colonne
 # a une autre est correct en termes de rouge/noir ainsi que décroissant
 def verif_colonne(carte,destination, piles):
 
