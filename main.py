@@ -14,6 +14,3 @@ while sum(cachees.values()) != 0:
 
     #maintenant, on va appeller le premier mouvement
     deplacement(piles, cachees, index)
-
-if sum(cachees.values()) == 0:
-    
