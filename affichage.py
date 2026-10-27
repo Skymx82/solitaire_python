@@ -94,8 +94,3 @@ def afficher(piles, cachees):
     print()
 
 
-# ---------------------------------------------------------------------
-# Lancement
-# ---------------------------------------------------------------------
-os.system("")    # active les couleurs dans le terminal de Windows
-afficher(piles, cachees)

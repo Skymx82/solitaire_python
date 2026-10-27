@@ -1,5 +1,6 @@
 from affichage import *
 from jeu_depart import piles,cachees, index
+from verif_colonne import *
 
 def deplacement( piles, cachees, index):
 
@@ -10,6 +11,10 @@ def deplacement( piles, cachees, index):
     depart = index[carte]  # la pile où est la carte, ex : "c6"
     position = piles[depart].index(carte)  # sa place dans cette pile
     morceau = piles[depart][position:]  # la carte + toutes celles posées dessus
+
+    #ici on va mettre tout les verifs avant de deplacer les cartes
+    if verif_colonne(carte, destination, piles) == False:
+        return False
 
     del piles[depart][position:]  # on enlève le morceau du départ
     piles[destination].extend(morceau)  # on le pose sur l'arrivée

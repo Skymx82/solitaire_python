@@ -22,17 +22,17 @@ def verif_colonne(carte,destination, piles):
         carte_destination_rouge = False
 
     #Je fais demain pour la carte d'origine
-    if carte[-2] in rouge:
+    if carte[-2:] in rouge:
         carte_rouge = True
     else:
         carte_rouge = False
 
     #ici on vérifie si la couleur est différente
     if carte_rouge==True and carte_destination_rouge==True:
-        print("carte de la même colonne")
+        print("carte de la même couleur")
         return False
     elif carte_rouge==False and carte_destination_rouge==False:
-        print("carte de la même colonne")
+        print("carte de la même couleur")
         return False
 
     #ici on recupère que la valeur de la carte avec le carte[:-2] et ensuite
