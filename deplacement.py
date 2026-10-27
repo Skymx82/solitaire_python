@@ -1,11 +1,19 @@
 from affichage import *
 from jeu_depart import piles,cachees, index
 from verif_colonne import *
+from pioche import *
 
 def deplacement( piles, cachees, index):
 
     #permet de demander la deplacement
     move = input(print("Choisissez la carte a deplacer ainsi que sa direction"))
+
+
+    if move == "p":
+        piocher(piles, cachees)
+        return False
+
+    #obtenir la carte ainsi que la destination dans deux variable différente
     carte, destination = move.split("-")
 
     depart = index[carte]  # la pile où est la carte, ex : "c6"
