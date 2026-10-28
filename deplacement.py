@@ -6,7 +6,7 @@ from pioche import *
 def deplacement( piles, cachees, index):
 
 
-    move_possible
+    move_possible=["c1","c2","c3","c4","c5","c6","c7","fca","fpi","fco","ftr"]
 
     #permet de demander la deplacement
     move = input(print("Choisissez la carte a deplacer ainsi que sa direction"))
@@ -20,7 +20,9 @@ def deplacement( piles, cachees, index):
     #obtenir la carte ainsi que la destination dans deux variable différente
     carte, destination = move.split("-")
 
-    if destination is not in
+    if destination not in move_possible:
+        print("Movement impossible")
+        return False
 
     depart = index[carte]  # la pile où est la carte, ex : "c6"
     position = piles[depart].index(carte)  # sa place dans cette pile
