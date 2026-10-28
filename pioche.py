@@ -1,19 +1,30 @@
-from affichage import *
-import os
+from affichage import afficher
 
-from jeu_depart import piles, cachees
 
-def piocher(piles,cachees):
-    if len(piles["p"]) > 0:
-        cartepiocher = piles["p"].pop()
-        piles["d"].append(cartepiocher)
-    else :
-        while piles["d"]:
+def piocher(piles, cachees, index):       # À AJOUTER : il manque un paramètre (lequel ?)
+    """Joue la commande « p ».
 
-            #une liste vide vaut « faux » et une liste non vide vaut « vrai »
-            #donc le while dis que tant qu'il y a des cartes dans la défausse on les range dans la pioche
-            retournerpioche=piles["d"].pop()
-            piles["p"].append(retournerpioche)
+    - S'il reste des cartes dans la pioche : on retourne la carte du dessus
+      sur la défausse.
+    - Si la pioche est vide : on remet toute la défausse dans la pioche.
+    """
+
+    # Deux noms plus parlants. Ce ne sont PAS des copies : « pioche » et
+    # piles["p"] sont la même liste, donc modifier l'une modifie l'autre.
+    pioche = piles["p"]
+    defausse = piles["d"]
+
+    # ----- Cas 1 : il reste au moins une carte dans la pioche -----
+    if len(pioche) > 0:
+        carte = pioche.pop()          # on enlève la carte du dessus de la pioche...
+        defausse.append(carte)        # ... et on la pose sur la défausse
+        index[carte] = "d"
+
+    # ----- Cas 2 : la pioche est vide, on remet la défausse dans la pioche -----
+    else:
+        while len(defausse) > 0:      # tant qu'il reste des cartes dans la défausse
+            carte = defausse.pop()    # on prend la carte du dessus de la défausse...
+            pioche.append(carte)      # ... et on la remet dans la pioche
+            # À AJOUTER : même question, dans quelle pile est cette carte maintenant ?
 
     afficher(piles, cachees)
-

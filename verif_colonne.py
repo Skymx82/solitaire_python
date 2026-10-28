@@ -7,17 +7,18 @@ def verif_colonne(carte,destination, piles):
 
     #on répertorie dans l'ordre croissant les valeurs d'une carte ainsi que sa couleur
     rouge = ["ca","co"]
-    valeur = ["a","2","3","4","5","6","7","8","9","10","j","d","r"]
+    valeur = ["a","2","3","4","5","6","7","8","9","10","v","d","r"]
 
-    #on récupère la dernière carte de la pile de destination
-    dernière_carte_destination = piles[destination][-1]
+    #on récupère la dernière carte de la pile de destination si elle n'est pas vide
+    if piles[destination] != "":
+        dernière_carte_destination = piles[destination][-1]
 
     if dernière_carte_destination == "" and carte[:-2] != "r":
         print("Seul un roi peut aller sur une colonne vide")
         return False
 
     #on vérifie si notre carte est rouge ou noir
-    if dernière_carte_destination[-2] in rouge:
+    if dernière_carte_destination[-2:] in rouge:
         carte_destination_rouge = True
     else:
         carte_destination_rouge = False
