@@ -4,25 +4,32 @@
 # [-2:] veut dire « à partir de l’avant-avant-dernière lettre jusqu’à la fin »
 # [:-2] veut dire « du début jusqu’à 2 lettres avant la fin »
 
+from jeu_depart import piles
 
-ORDRE = ["a", "2", "3", "4", "5", "6", "7", "8", "9", "10", "v", "d", "r"]
+ordre = ["a", "2", "3", "4", "5", "6", "7", "8", "9", "10", "v", "d", "r"]
 
-def verifier_fondation(carte, piles):
-    couleur = carte[-2:]
-    nom = "f" + couleur
-    nombre = len(piles[nom])
+def verifier_fondation(carte, piles,destination):
+    valeur_cartes_origines=carte[:-2]
+    couleur_carte_origines=carte[-2:]
+    couleur_fondations=destination[-2:]
 
-    if nombre == 13:
-        print("Refusé :", nom, "est déjà complète.")
+    if couleur_carte_origines != couleur_fondations :
         return False
 
-    attendue = ORDRE[nombre] + couleur
+    if len(piles[destination]) == 0:      ## obligé car sinon aucun as ne peut être accepté
+        return valeur_cartes_origines == "a"
 
-    if carte == attendue:
-        return True
+    ordredelacarte = ordre.index(valeur_cartes_origines)
+    derniere = piles[destination][-1]
+    valeur_derniere = derniere[:-2]
+    ordredelacarte_destination = ordre.index(valeur_derniere)
 
-    print("Refusé :", carte, "ne peut pas aller sur", nom, "- il faut", attendue)
-    return False
-piles = {"fpi": ["api", "2pi"], "fco": [], "fca": [], "ftr": []}
 
-print(verifier_fondation("aca", piles))
+    if ordredelacarte != ordredelacarte_destination +1 :
+        return False
+    return True
+
+
+print(verifier_fondation("aco",piles,"fco"))
+print(verifier_fondation("2co",piles,"fco"))
+
