@@ -1,3 +1,4 @@
+from sauvegarder import sauvegarder
 from verif_coup import *
 from affichage import *
 from jeu_depart import piles,cachees, index
@@ -7,7 +8,7 @@ from verif_fondations import *
 from verif_carte import *
 
 
-def deplacement( piles, cachees, index):
+def deplacement( piles, cachees, index, nb_coups ):
 
 
     move_possible=["c1","c2","c3","c4","c5","c6","c7","fca","fpi","fco","ftr"]
@@ -18,6 +19,11 @@ def deplacement( piles, cachees, index):
     #permet de demander la deplacement
     move = input("Choisissez la carte a deplacer ainsi que sa direction :")
 
+
+
+    if move == "sauvegarde":
+        sauvegarder(piles, cachees, index, nb_coups)
+        return False
 
     if move == "p":
         piocher(piles, cachees, index)
