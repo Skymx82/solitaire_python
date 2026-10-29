@@ -41,7 +41,7 @@ def deplacement( piles, cachees, index, nb_coups ):
     morceau = piles[depart][position:]  # la carte + toutes celles posées dessus
 
 
-    if verif_carte(carte, destination, cachees,morceau,index) == False:
+    if verif_carte(carte, destination, cachees,morceau,index,piles) == False:
         return False
 
     #ici on va mettre tout les verifs avant de deplacer les cartes
