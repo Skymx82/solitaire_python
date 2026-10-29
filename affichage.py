@@ -1,96 +1,139 @@
-# =====================================================================
-#  AFFICHAGE DE LA PARTIE DANS LE TERMINAL
-# =====================================================================
-#
-#  Pour lancer :   python affichage.py
-#  (jeu_depart.py doit être dans le même dossier)
+#les codes couleur du terminal
+rouge = "\033[31m"
+gris = "\033[90m"
+gras = "\033[1m"
+normal = "\033[0m"
 
-import os
+#efface l'écran et remonte en haut, comme ça le plateau reste au même endroit
+effacer = "\033[2J\033[H"
 
-from jeu_depart import piles, cachees
+#chaque case fait 8 caractères de large
+largeur = 8
 
-
-COLONNES = ("c1", "c2", "c3", "c4", "c5", "c6", "c7")
-FONDATIONS = ("fca", "fpi", "fco", "ftr")
-
-LARGEUR = 8           # largeur d'une case, en caractères
-ROUGE = "\033[31m"    # code qui écrit en rouge dans le terminal
-NORMAL = "\033[0m"    # code qui revient à la couleur normale
+dos = "[░░]"
+vide = "[  ]"
 
 
-def case(texte):
-    """Met un texte au centre d'une case.
-    Les cartes de cœur et de carreau sont écrites en rouge."""
-    centre = texte.center(LARGEUR)
-    # On colore APRÈS avoir centré : sinon les codes couleur
-    # compteraient comme des caractères et décaleraient tout.
-    if texte[-2:] in ("co", "ca"):
-        return ROUGE + centre + NORMAL
-    return centre
+#ce qu'on voit à l'écran pour une carte, ex : "7tr" -> "[7tr]"
+def nom_carte(carte):
+    if "ca" in carte:
+        carte = carte.replace("ca", "♦")
+
+    if "co" in carte:
+        carte = carte.replace("co", "♥")
+
+    if "pi" in carte:
+        carte = carte.replace("pi","♠")
+
+    if "tr" in carte:
+        carte = carte.replace("tr","♣")
+    return "[" + carte + "]"
 
 
-def dessus(pile):
-    """Carte du dessus d'une pile, ou "--" si la pile est vide."""
-    if pile:
-        return pile[-1]
-    return "--"
+#met un texte au milieu d'une case et le met en couleur
+def case(texte, couleur):
+    return couleur + texte.center(largeur) + normal
 
 
-def afficher(piles, cachees):
-    """Affiche tout le plateau : pioche, défausse, fondations, colonnes."""
+#case pour une vraie carte, en rouge si c'est du coeur ou du carreau
+def case_carte(carte):
+    #on colle la carte à gauche sinon [10co] est décalé par rapport aux autres
+    texte = ("  " + nom_carte(carte)).ljust(largeur)
 
-    # ----- Ligne du haut : pioche, défausse, puis les 4 fondations -----
-    titres = "pioche".center(LARGEUR) + "défausse".center(LARGEUR) + " " * LARGEUR
-    cartes = ""
-
-    # Pioche : on ne montre pas la carte (elle est cachée), juste le nombre.
-    if piles["p"]:
-        cartes += case("[" + str(len(piles["p"])) + "]")
+    if carte[-2:] == "co" or carte[-2:] == "ca":
+        return rouge + texte + normal
     else:
-        cartes += case("--")
+        return normal + texte + normal
 
-    # Défausse : on montre la carte du dessus.
-    cartes += case(dessus(piles["d"]))
 
-    # Une case vide pour que les fondations tombent au-dessus de c4 à c7.
-    cartes += " " * LARGEUR
+def afficher_titre():
+    print(gras + "S O L I T A I R E".center(largeur * 7) + normal)
+    print(gris + "─" * (largeur * 7) + normal)
 
-    for f in FONDATIONS:
-        titres += f.center(LARGEUR)
-        cartes += case(dessus(piles[f]))
 
-    print()
+#affiche la pioche, la défausse et les fondations
+def afficher_haut(piles):
+    fondation = ["fca", "fpi", "fco", "ftr"]
+
+    #la ligne avec les noms
+    titres = case("pioche", gris) + case("défausse", gris) + " " * largeur
+    for f in fondation:
+        titres = titres + case(f, gris)
+
+    #la ligne avec les cartes
+    if len(piles["p"]) > 0:
+        cartes = case(dos, gris)
+    else:
+        cartes = case(vide, gris)
+
+    if len(piles["d"]) > 0:
+        cartes = cartes + case_carte(piles["d"][-1])
+    else:
+        cartes = cartes + case(vide, gris)
+
+    #une case vide pour que les fondations soient au dessus de c4 à c7
+    cartes = cartes + " " * largeur
+
+    for f in fondation:
+        if len(piles[f]) > 0:
+            cartes = cartes + case_carte(piles[f][-1])
+        else:
+            cartes = cartes + case(vide, gris)
+
+    #la ligne avec le nombre de cartes de chaque pile
+    nombres = case(str(len(piles["p"])), gris) + case(str(len(piles["d"])), gris) + " " * largeur
+    for f in fondation:
+        nombres = nombres + case(str(len(piles[f])) + "/13", gris)
+
     print(titres)
     print(cartes)
+    print(nombres)
     print()
 
-    # ----- Les 7 colonnes -----
+
+#affiche les 7 colonnes
+def afficher_colonnes(piles, cachees):
+    colonnes = ["c1", "c2", "c3", "c4", "c5", "c6", "c7"]
+
     titres = ""
-    for c in COLONNES:
-        titres += c.center(LARGEUR)
+    for c in colonnes:
+        titres = titres + case(c, gris)
     print(titres)
 
-    # Nombre de lignes à afficher = la colonne la plus longue.
-    # (au moins 1 ligne, pour voir les "--" même si toutes les colonnes sont vides)
+    #on cherche la colonne la plus longue pour savoir combien de lignes il faut
     hauteur = 1
-    for c in COLONNES:
+    for c in colonnes:
         if len(piles[c]) > hauteur:
             hauteur = len(piles[c])
 
-    # On écrit ligne par ligne : à chaque ligne, une carte de chaque colonne.
+    #on écrit ligne par ligne : à chaque ligne on prend une carte de chaque colonne
     for ligne in range(hauteur):
         texte = ""
-        for c in COLONNES:
+        for c in colonnes:
             colonne = piles[c]
-            if not colonne and ligne == 0:
-                texte += case("--")                 # colonne vide
+
+            if len(colonne) == 0 and ligne == 0:
+                texte = texte + case(vide, gris)
             elif ligne >= len(colonne):
-                texte += " " * LARGEUR              # plus de carte ici
+                #plus de carte dans cette colonne
+                texte = texte + " " * largeur
             elif ligne < cachees[c]:
-                texte += case("##")                 # carte face cachée
+                texte = texte + case(dos, gris)
             else:
-                texte += case(colonne[ligne])       # carte visible
+                texte = texte + case_carte(colonne[ligne])
         print(texte)
     print()
 
 
+def afficher_aide():
+    print(gris + "  p : piocher          jouer : carte-pile   ex : 5ca-c4" + normal)
+    print(gris + "  à taper :  ♠ = pi    ♥ = co    ♦ = ca    ♣ = tr" + normal)
+
+
+#affiche tout le plateau
+def afficher(piles, cachees):
+    print(effacer, end="")
+    afficher_titre()
+    afficher_haut(piles)
+    afficher_colonnes(piles, cachees)
+    afficher_aide()

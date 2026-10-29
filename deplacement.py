@@ -14,7 +14,7 @@ def deplacement( piles, cachees, index):
 
 
     #permet de demander la deplacement
-    move = input("Choisissez la carte a deplacer ainsi que sa direction")
+    move = input("Choisissez la carte a deplacer ainsi que sa direction :")
 
 
     if move == "p":
