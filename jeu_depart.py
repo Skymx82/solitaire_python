@@ -1,25 +1,7 @@
-# =====================================================================
-#  UNE VRAIE PARTIE, JUSTE APRÈS LA DISTRIBUTION
-# =====================================================================
-#
-#  Ce que vous voyez à l'écran au début :
-#
-#     c1 : 7tr
-#     c2 : ## 8tr
-#     c3 : ## ## 3ca
-#     c4 : ## ## ## 6tr
-#     c5 : ## ## ## ## 3tr
-#     c6 : ## ## ## ## ## 5ca
-#     c7 : ## ## ## ## ## ## 9pi
-#
-#     (## = carte face cachée)
-#
-#  Règle à retenir : dans chaque liste, la DERNIÈRE carte est celle du DESSUS.
-
-
 # ---------------------------------------------------------------------
 # 1. Le paquet : les 52 cartes
 # ---------------------------------------------------------------------
+import random
 
 paquet = [
     "api", "2pi", "3pi", "4pi", "5pi", "6pi", "7pi", "8pi", "9pi", "10pi", "vpi", "dpi", "rpi",
@@ -89,29 +71,25 @@ index = {
 }
 
 
-# =====================================================================
-#  EXEMPLES : CE QUI CHANGE QUAND ON JOUE
-# =====================================================================
-#
-#  Coup 1 : le joueur tape  5ca-c4   (5 rouge sur 6 noir : autorisé)
-#
-#     c6 avant : ["vpi", "6co", "2pi", "rca", "3co", "5ca"]
-#     c6 après : ["vpi", "6co", "2pi", "rca", "3co"]
-#
-#     c4 avant : ["dpi", "6pi", "4ca", "6tr"]
-#     c4 après : ["dpi", "6pi", "4ca", "6tr", "5ca"]
-#
-#     index["5ca"] : "c6"  devient  "c4"
-#
-#     Il reste 5 cartes dans c6 et elles sont toutes cachées :
-#     on retourne celle du dessus ("3co").
-#     cachees["c6"] : 5  devient  4
-#
-#
-#  Coup 2 : le joueur pioche
-#
-#     p : la dernière carte ("7co") est enlevée
-#     d avant : []
-#     d après : ["7co"]
-#
-#     index["7co"] : "p"  devient  "d"
+def nouvelle_partie():
+    piles_jeu = {"p":[],"d":[],"c1":[],"c2":[],"c3":[],"c4":[],"c5":[],
+                 "c6":[],"c7":[],"fca":[],"fpi":[],"fco":[],"ftr":[],}
+    paquet_jeu = list(paquet)
+    random.shuffle(paquet_jeu)
+    nbr_colonne = 1
+    while nbr_colonne <= 7:
+        distrib_par_colonne = 1
+        while distrib_par_colonne <= nbr_colonne:
+            distrib = paquet_jeu.pop()
+            piles_jeu["c"+str(nbr_colonne)].append(distrib)
+            distrib_par_colonne = distrib_par_colonne + 1
+        nbr_colonne = nbr_colonne + 1
+
+
+
+
+
+
+
+
+nouvelle_partie()
