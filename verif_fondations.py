@@ -14,11 +14,11 @@ def verifier_fondation(carte, piles,destination):
     couleur_fondations=destination[-2:]
 
     if couleur_carte_origines != couleur_fondations :
-        print("la couleur de la carte ne correspond pas à la couleur de la fondations")
+        print("Il faut mettre la bonne couleur dans la bonne fondation")
         return False
 
     if len(piles[destination]) == 0:      ## obligé car sinon aucun as ne peut être accepté
-        print("la pile est vide donc uniquement un as peut être placé")
+        print("Seul un as peut aller sur la fondation quand il n'y a rien")
         return valeur_cartes_origines == "a"
 
     ordredelacarte = ordre.index(valeur_cartes_origines)
@@ -28,7 +28,7 @@ def verifier_fondation(carte, piles,destination):
 
 
     if ordredelacarte != ordredelacarte_destination +1 :
-        print("on ne peut pas mettre cette carte ici maintenant dans les fondations")
+        print("Seul une carte avec une valeur supérieur de 1 est accepté")
         return False
     return True
 

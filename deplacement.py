@@ -1,15 +1,20 @@
+from verif_coup import *
 from affichage import *
 from jeu_depart import piles,cachees, index
 from verif_colonne import *
 from pioche import *
+from verif_fondations import *
 
 def deplacement( piles, cachees, index):
 
 
-    move_possible
+    move_possible=["c1","c2","c3","c4","c5","c6","c7","fca","fpi","fco","ftr"]
+    colonne = ["c1","c2","c3","c4","c5","c6","c7"]
+    fondation = ["fca","fco","fpi","ftr"]
+
 
     #permet de demander la deplacement
-    move = input(print("Choisissez la carte a deplacer ainsi que sa direction"))
+    move = input("Choisissez la carte a deplacer ainsi que sa direction")
 
 
     if move == "p":
@@ -17,18 +22,25 @@ def deplacement( piles, cachees, index):
         return False
 
 
-    #obtenir la carte ainsi que la destination dans deux variable différente
-    carte, destination = move.split("-")
+    if verif_coup(move) == False:
+        return False
+    else :
+        carte, destination = verif_coup(move)
 
-    if destination is not in
 
     depart = index[carte]  # la pile où est la carte, ex : "c6"
     position = piles[depart].index(carte)  # sa place dans cette pile
     morceau = piles[depart][position:]  # la carte + toutes celles posées dessus
 
     #ici on va mettre tout les verifs avant de deplacer les cartes
-    if verif_colonne(carte, destination, piles) == False:
-        return False
+    if destination in colonne :
+        if verif_colonne(carte, destination, piles) == False:
+            return False
+
+    if destination in fondation :
+        if verifier_fondation(carte, piles, destination) == False:
+            return False
+
 
     del piles[depart][position:]  # on enlève le morceau du départ
     piles[destination].extend(morceau)  # on le pose sur l'arrivée
@@ -43,3 +55,4 @@ def deplacement( piles, cachees, index):
             cachees[depart] = cachees[depart] - 1
 
     afficher(piles, cachees)
+    return True
