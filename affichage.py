@@ -126,7 +126,7 @@ def afficher_colonnes(piles, cachees):
 
 
 def afficher_aide():
-    print(gris + "  p : piocher          jouer : carte-pile   ex : 5ca-c4" + normal)
+    print(gris + "  p : piocher   sauvegarde : enregistrer   ex : 5ca-c4" + normal)
     print(gris + "  à taper :  ♠ = pi    ♥ = co    ♦ = ca    ♣ = tr" + normal)
 
 
