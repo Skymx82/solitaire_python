@@ -4,6 +4,8 @@ from jeu_depart import piles,cachees, index
 from verif_colonne import *
 from pioche import *
 from verif_fondations import *
+from verif_carte import *
+
 
 def deplacement( piles, cachees, index):
 
@@ -31,6 +33,10 @@ def deplacement( piles, cachees, index):
     depart = index[carte]  # la pile où est la carte, ex : "c6"
     position = piles[depart].index(carte)  # sa place dans cette pile
     morceau = piles[depart][position:]  # la carte + toutes celles posées dessus
+
+
+    if verif_carte(morceau,carte, destination, cachees) == False:
+        return False
 
     #ici on va mettre tout les verifs avant de deplacer les cartes
     if destination in colonne :
