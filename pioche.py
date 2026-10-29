@@ -24,7 +24,7 @@ def piocher(piles, cachees, index):       # À AJOUTER : il manque un paramètre
     else:
         while len(defausse) > 0:      # tant qu'il reste des cartes dans la défausse
             carte = defausse.pop()    # on prend la carte du dessus de la défausse...
-            pioche.append(carte)      # ... et on la remet dans la pioche
-            # À AJOUTER : même question, dans quelle pile est cette carte maintenant ?
+            pioche.append(carte)
+            index[carte] = "p"
 
     afficher(piles, cachees)

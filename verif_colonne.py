@@ -9,13 +9,16 @@ def verif_colonne(carte,destination, piles):
     rouge = ["ca","co"]
     valeur = ["a","2","3","4","5","6","7","8","9","10","v","d","r"]
 
-    #on récupère la dernière carte de la pile de destination si elle n'est pas vide
-    if piles[destination] != "":
-        dernière_carte_destination = piles[destination][-1]
+    # si la colonne est vide, seul un roi peut y aller
+    if len(piles[destination]) == 0:
+        if carte[:-2] == "r":
+            return True
+        else:
+            print("Seul un roi peut aller sur une colonne vide")
+            return False
 
-    if dernière_carte_destination == "" and carte[:-2] != "r":
-        print("Seul un roi peut aller sur une colonne vide")
-        return False
+    # sinon on récupère la dernière carte de la pile de destination
+    dernière_carte_destination = piles[destination][-1]
 
     #on vérifie si notre carte est rouge ou noir
     if dernière_carte_destination[-2:] in rouge:

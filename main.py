@@ -2,6 +2,8 @@ import os
 from affichage import *
 from deplacement import deplacement
 from jeu_depart import *
+from verif_gagnee import *
+from victoire import *
 
 # ---------------------------------------------------------------------
 # Lancement
@@ -9,8 +11,15 @@ from jeu_depart import *
 os.system("")    # active les couleurs dans le terminal de Windows
 afficher(piles, cachees)#permet de lancer le premier affichage
 
-#continue tant que toutes les cartes ne sont pas retournée
-while sum(cachees.values()) != 0:
+#nombre de coup jouer
+nb_coups=0
+
+#tant que toute les fondations ne sont pas rempli
+while verif_gagnee(piles) == False:
 
     #maintenant, on va appeller le premier mouvement
-    deplacement(piles, cachees, index)
+    if deplacement(piles, cachees, index):
+        nb_coups+=1
+
+
+animation_victoire(nb_coups)
