@@ -74,6 +74,7 @@ index = {
 def nouvelle_partie():
     piles_jeu = {"p":[],"d":[],"c1":[],"c2":[],"c3":[],"c4":[],"c5":[],
                  "c6":[],"c7":[],"fca":[],"fpi":[],"fco":[],"ftr":[],}
+    cachees_jeu = {}
     paquet_jeu = list(paquet)
     random.shuffle(paquet_jeu)
     nbr_colonne = 1
@@ -83,13 +84,20 @@ def nouvelle_partie():
             distrib = paquet_jeu.pop()
             piles_jeu["c"+str(nbr_colonne)].append(distrib)
             distrib_par_colonne = distrib_par_colonne + 1
+        #toutes les cartes de la colonne sont cachées sauf la dernière
+        cachees_jeu["c"+str(nbr_colonne)] = nbr_colonne - 1
         nbr_colonne = nbr_colonne + 1
 
+    #les cartes qui restent dans le paquet vont dans la pioche
+    while len(paquet_jeu) > 0:
+        distrib = paquet_jeu.pop()
+        piles_jeu["p"].append(distrib)
 
+    #pour chaque carte on note dans quelle pile elle est
+    index_jeu = {}
+    for nom in piles_jeu:
+        for carte in piles_jeu[nom]:
+            index_jeu[carte] = nom
 
+    return piles_jeu, cachees_jeu, index_jeu
 
-
-
-
-
-nouvelle_partie()
