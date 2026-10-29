@@ -18,8 +18,11 @@ def verifier_fondation(carte, piles,destination):
         return False
 
     if len(piles[destination]) == 0:      ## obligé car sinon aucun as ne peut être accepté
-        print("Seul un as peut aller sur la fondation quand il n'y a rien")
-        return valeur_cartes_origines == "a"
+        if valeur_cartes_origines != "a":
+            print("Seul un as peut aller sur la fondation vide")
+            return False
+        if valeur_cartes_origines == "a" :
+            return True
 
     ordredelacarte = ordre.index(valeur_cartes_origines)
     derniere = piles[destination][-1]
