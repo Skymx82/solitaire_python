@@ -23,6 +23,11 @@ def verif_carte(carte, destination, cachees, morceau,index,piles):
         print("la carte se trouve dans la défausse")
         return False
 
+    if position == "d" and morceau > 1 :
+        print("la carte se trouve en dessous dans la défausse")
+        return False
+
+
     if destination[0] == "f" and len(morceau) > 1 : # seulement 1 cartes à la fois dans les fondations
         print("une seule carte à la fois dans fondations")
         return False
