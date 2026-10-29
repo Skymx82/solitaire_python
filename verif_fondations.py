@@ -14,9 +14,11 @@ def verifier_fondation(carte, piles,destination):
     couleur_fondations=destination[-2:]
 
     if couleur_carte_origines != couleur_fondations :
+        print("la couleur de la carte ne correspond pas à la couleur de la fondations")
         return False
 
     if len(piles[destination]) == 0:      ## obligé car sinon aucun as ne peut être accepté
+        print("la pile est vide donc uniquement un as peut être placé")
         return valeur_cartes_origines == "a"
 
     ordredelacarte = ordre.index(valeur_cartes_origines)
@@ -26,10 +28,7 @@ def verifier_fondation(carte, piles,destination):
 
 
     if ordredelacarte != ordredelacarte_destination +1 :
+        print("on ne peut pas mettre cette carte ici maintenant dans les fondations")
         return False
     return True
-
-
-print(verifier_fondation("aco",piles,"fco"))
-print(verifier_fondation("2co",piles,"fco"))
 
