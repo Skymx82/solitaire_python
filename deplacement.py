@@ -10,7 +10,6 @@ from verif_carte import *
 
 def deplacement( piles, cachees, index, nb_coups , difficulte):
 
-
     move_possible=["c1","c2","c3","c4","c5","c6","c7","fca","fpi","fco","ftr"]
     colonne = ["c1","c2","c3","c4","c5","c6","c7"]
     fondation = ["fca","fco","fpi","ftr"]
@@ -25,9 +24,10 @@ def deplacement( piles, cachees, index, nb_coups , difficulte):
         sauvegarder(piles, cachees, index, nb_coups, difficulte)
         return False
 
+    #la pioche change le plateau sans compter comme un coup, main.py doit le savoir
     if move == "p":
         piocher(piles, cachees, index, difficulte)
-        return False
+        return "pioche"
 
     #affiche les règles, puis on revient au plateau (ce n'est pas un coup)
     if move == "?":
@@ -35,6 +35,11 @@ def deplacement( piles, cachees, index, nb_coups , difficulte):
         input("Appuyez sur Entrée pour revenir au jeu")
         afficher(piles, cachees)
         return False
+
+    #c'est main.py qui garde la copie de la partie, on le prévient juste
+    if move == "annuler":
+        return "annuler"
+
 
 
     if verif_coup(move) == False:
@@ -46,7 +51,6 @@ def deplacement( piles, cachees, index, nb_coups , difficulte):
     depart = index[carte]  # la pile où est la carte, ex : "c6"
     position = piles[depart].index(carte)  # sa place dans cette pile
     morceau = piles[depart][position:]  # la carte + toutes celles posées dessus
-
 
     if verif_carte(carte, destination, cachees,morceau,index,piles) == False:
         return False
