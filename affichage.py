@@ -126,8 +126,32 @@ def afficher_colonnes(piles, cachees):
 
 
 def afficher_aide():
-    print(gris + "  p : piocher   sauvegarde : enregistrer   ex : 5ca-c4" + normal)
+    print(gris + "  p : piocher   sauvegarde : enregistrer   ? : règles" + normal)
     print(gris + "  à taper :  ♠ = pi    ♥ = co    ♦ = ca    ♣ = tr" + normal)
+
+
+#affiche les règles et toutes les commandes quand le joueur tape "?"
+def afficher_regles():
+    print(effacer, end="")
+    print(gras + "R È G L E S   D U   J E U".center(largeur * 7) + normal)
+    print(gris + "─" * (largeur * 7) + normal)
+    print("  But : ranger les 52 cartes dans les 4 fondations,")
+    print("        de l'as au roi, une famille par fondation.")
+    print()
+    print("  Jouer : carte-pile      ex : 5ca-c4   aca-fca")
+    print("  - sur une colonne : couleur alternée, et une valeur")
+    print("    juste en dessous (5♦ sur 6♣)")
+    print("  - sur une colonne vide : seulement un roi")
+    print("  - sur une fondation : même famille, de l'as au roi")
+    print("  - une carte part avec toutes celles posées dessus")
+    print()
+    print("  valeurs : a = as   v = valet   d = dame   r = roi")
+    print("  familles : ♠ = pi   ♥ = co   ♦ = ca   ♣ = tr")
+    print()
+    print("  p          : piocher (1 à 3 cartes selon le niveau)")
+    print("  sauvegarde : enregistrer la partie pour plus tard")
+    print("  ?          : afficher ces règles")
+    print()
 
 
 #affiche tout le plateau

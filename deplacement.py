@@ -29,6 +29,13 @@ def deplacement( piles, cachees, index, nb_coups , difficulte):
         piocher(piles, cachees, index, difficulte)
         return False
 
+    #affiche les règles, puis on revient au plateau (ce n'est pas un coup)
+    if move == "?":
+        afficher_regles()
+        input("Appuyez sur Entrée pour revenir au jeu")
+        afficher(piles, cachees)
+        return False
+
 
     if verif_coup(move) == False:
         return False

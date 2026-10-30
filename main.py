@@ -49,6 +49,7 @@ else:
     #tant que toute les fondations ne sont pas rempli
     while verif_gagnee(piles) == False:
 
+
         #maintenant, on va appeller le premier mouvement
         if deplacement(piles, cachees, index, nb_coups, difficulte):
             nb_coups+=1
