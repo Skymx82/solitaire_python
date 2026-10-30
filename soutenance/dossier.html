@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Le Solitaire : dossier de soutenance</title>
+<!--
+  Source du dossier de soutenance.
+  Pour refaire le PDF : voir soutenance/CHANTIER_SOUTENANCE.md
+  (ou ouvrir ce fichier dans Chrome, Imprimer, Enregistrer au format PDF,
+  en décochant « En-têtes et pieds de page »).
+-->
+<style>
+  @page {
+    size: A4;
+    margin: 16mm 17mm 18mm 17mm;
+    @bottom-left {
+      content: "Le Solitaire · Mattias Mathevon et Jules Damour";
+      font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+      font-size: 7.5pt;
+      color: #8a918b;
+    }
+    @bottom-right {
+      content: counter(page) " / " counter(pages);
+      font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+      font-size: 7.5pt;
+      color: #8a918b;
+    }
+  }
+  @page :first {
+    @bottom-left { content: none; }
+    @bottom-right { content: none; }
+  }
+
+  :root {
+    --vert: #1d5c3f;
+    --vert-clair: #e9f1eb;
+    --encre: #1f2421;
+    --gris: #666d68;
+    --filet: #d6ddd7;
+    --rouge: #c0322b;
+    --fond-term: #f4f6f3;
+  }
+
+  html {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    margin: 0;
+    background: #fff;
+    color: var(--encre);
+    font-family: "Charter", "Iowan Old Style", Georgia, serif;
+    font-size: 10.2pt;
+    line-height: 1.45;
+  }
+
+  h1, h2, h3, th, .sur-titre, .sous-titre, .auteurs, .date, .legende, .sommaire {
+    font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  }
+
+  h2 {
+    font-size: 15.5pt;
+    font-weight: 600;
+    color: var(--vert);
+    margin: 0 0 4mm;
+    padding-bottom: 1.8mm;
+    border-bottom: 1.2pt solid var(--vert);
+    break-after: avoid;
+  }
+  h2 .num { display: inline-block; min-width: 7mm; }
+
+  h3 {
+    font-size: 11pt;
+    font-weight: 600;
+    margin: 5.5mm 0 1.8mm;
+    break-after: avoid;
+  }
+
+  p { margin: 0 0 2.4mm; }
+  ul, ol { margin: 0 0 2.6mm; padding-left: 6mm; }
+  li { margin-bottom: 1.3mm; }
+  .rg { color: var(--rouge); }
+
+  code {
+    font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace;
+    font-size: 8.4pt;
+    background: #eef2ee;
+    padding: 0.2mm 0.9mm;
+    border-radius: 2px;
+  }
+  code.nw { white-space: nowrap; }
+
+  pre {
+    font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace;
+    margin: 0;
+  }
+
+  pre.code {
+    font-size: 8.2pt;
+    line-height: 1.42;
+    background: #f7f9f7;
+    border-left: 2pt solid var(--vert);
+    padding: 2.2mm 4mm;
+    margin: 1mm 0 3mm;
+    break-inside: avoid;
+    white-space: pre-wrap;
+  }
+
+  pre.term {
+    font-size: 7.3pt;
+    line-height: 1.3;
+    background: var(--fond-term);
+    border: 0.8pt solid var(--filet);
+    border-radius: 4px;
+    padding: 2.6mm 3.4mm;
+    width: max-content;
+    break-inside: avoid;
+  }
+  pre.term .r { color: var(--rouge); }
+  pre.term .g { color: #8b928c; }
+  pre.term .b { font-weight: 700; }
+  pre.term .coupe { color: #a3aaa4; font-style: italic; }
+
+  figure { margin: 0 0 3mm; break-inside: avoid; }
+
+  .legende {
+    font-size: 7.8pt;
+    color: var(--gris);
+    margin-top: 1.5mm;
+    max-width: 100mm;
+  }
+
+  .cote {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 6mm;
+    align-items: start;
+    margin: 1mm 0 3mm;
+    break-inside: avoid;
+  }
+  .cote p { font-size: 9.6pt; }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1mm 0 3.6mm;
+    font-size: 9.1pt;
+    line-height: 1.38;
+    break-inside: avoid;
+  }
+  th {
+    text-align: left;
+    font-size: 8.2pt;
+    font-weight: 600;
+    color: var(--vert);
+    background: var(--vert-clair);
+    padding: 1.5mm 2.2mm;
+    border-bottom: 0.8pt solid var(--vert);
+  }
+  td {
+    padding: 1.4mm 2.2mm;
+    border-bottom: 0.5pt solid var(--filet);
+    vertical-align: top;
+  }
+  td.nom { white-space: nowrap; font-weight: 600; }
+  td.rang { font-weight: 700; color: var(--vert); text-align: center; width: 6mm; }
+  table.etroit td, table.etroit th { padding-top: 1.1mm; padding-bottom: 1.1mm; }
+  .leger { font-weight: 400; }
+
+  .encadre {
+    background: var(--vert-clair);
+    border-radius: 4px;
+    padding: 2.6mm 4mm;
+    margin: 1mm 0 3.4mm;
+    break-inside: avoid;
+  }
+  .encadre p:last-child { margin-bottom: 0; }
+
+  .rubrique { margin-top: 10mm; }
+  #r1 { break-before: page; margin-top: 0; }
+  .nouvelle-page { break-before: page; margin-top: 0; }
+
+  /* page de garde */
+  .garde { text-align: center; padding-top: 14mm; }
+  .sur-titre {
+    font-size: 9pt;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--gris);
+    margin-bottom: 9mm;
+  }
+  h1 {
+    font-size: 38pt;
+    font-weight: 700;
+    color: var(--vert);
+    margin: 0 0 1mm;
+    letter-spacing: -0.01em;
+  }
+  .sous-titre { font-size: 14pt; margin-bottom: 7mm; }
+  .auteurs { font-size: 12pt; font-weight: 600; margin-bottom: 1mm; }
+  .date { font-size: 10pt; color: var(--gris); margin-bottom: 10mm; }
+  .garde figure { display: inline-block; text-align: left; }
+  .garde pre.term { font-size: 9pt; padding: 4mm 5mm; }
+  .garde .legende { max-width: none; text-align: center; }
+
+  .sommaire {
+    text-align: left;
+    width: 140mm;
+    margin: 9mm auto 0;
+    font-size: 9.6pt;
+  }
+  .sommaire h3 { margin: 0 0 2mm; font-size: 10pt; color: var(--vert); }
+  .sommaire ol { list-style: none; padding: 0; margin: 0; }
+  .sommaire li { display: flex; gap: 2mm; margin-bottom: 1.4mm; }
+  .sommaire .t { flex: none; }
+  .sommaire .pts { flex: 1; border-bottom: 0.8pt dotted #b7beb8; transform: translateY(-1.1mm); }
+  .sommaire .pg { flex: none; color: var(--gris); }
+</style>
+</head>
+<body>
+
+<!-- ================================================================ -->
+<section class="garde">
+  <p class="sur-titre">L3 MIAGE · Algorithmique et programmation Python</p>
+  <h1>Le Solitaire</h1>
+  <p class="sous-titre">Dossier de soutenance</p>
+  <p class="auteurs">Mattias Mathevon et Jules Damour</p>
+  <p class="date">Soutenance du vendredi 6 novembre 2026</p>
+
+  <figure>
+<pre class="term"><span class="b">                   S O L I T A I R E</span>
+<span class="g">────────────────────────────────────────────────────────</span>
+<span class="g"> pioche défausse          fca     fpi     fco     ftr</span>
+<span class="g">  [░░]    [  ]            [  ]    [  ]    [  ]    [  ]</span>
+<span class="g">   24      0              0/13    0/13    0/13    0/13</span>
+
+<span class="g">   c1      c2      c3      c4      c5      c6      c7</span>
+  [7♣]  <span class="g">  [░░]    [░░]    [░░]    [░░]    [░░]    [░░]</span>
+          [8♣]  <span class="g">  [░░]    [░░]    [░░]    [░░]    [░░]</span>
+                <span class="r">  [3♦]</span>  <span class="g">  [░░]    [░░]    [░░]    [░░]</span>
+                          [6♣]  <span class="g">  [░░]    [░░]    [░░]</span>
+                                  [3♣]  <span class="g">  [░░]    [░░]</span>
+                                        <span class="r">  [5♦]</span>  <span class="g">  [░░]</span>
+                                                  [9♠]
+
+<span class="g">  p : piocher  h : coups  ia : auto  annuler  ? : règles</span>
+<span class="g">  à taper :  ♠ = pi    ♥ = co    ♦ = ca    ♣ = tr</span>
+Choisissez la carte à déplacer ainsi que sa direction :</pre>
+    <p class="legende">Le plateau au démarrage de la partie de démonstration (choix 5 du menu) : 18 lignes sur 56 caractères.</p>
+  </figure>
+
+  <nav class="sommaire">
+    <h3>Sommaire</h3>
+    <ol>
+      <li><span class="t">1. Les structures de données : pioche, défausse, colonnes, fondations</span><span class="pts"></span><span class="pg">2</span></li>
+      <li><span class="t">2. Les commandes de jeu et les menus</span><span class="pts"></span><span class="pg">5</span></li>
+      <li><span class="t">3. Comment l'ordinateur propose les coups, et joue tout seul</span><span class="pts"></span><span class="pg">7</span></li>
+      <li><span class="t">4. Les points forts et les particularités du jeu</span><span class="pts"></span><span class="pg">10</span></li>
+      <li><span class="t">5. Les niveaux de jeu et le paramétrage</span><span class="pts"></span><span class="pg">11</span></li>
+      <li><span class="t">Annexes : les fichiers, les modules Python, lancer le jeu</span><span class="pts"></span><span class="pg">12</span></li>
+    </ol>
+  </nav>
+</section>
+
+<!-- ================================================================ -->
+<section class="rubrique" id="r1">
+  <h2><span class="num">1.</span>Les structures de données</h2>
+
+  <p>Le sujet interdit les classes. Tout le jeu tient donc dans les types vus en cours : des <strong>textes</strong> pour les cartes, des <strong>listes</strong> pour les piles, des <strong>dictionnaires</strong> pour ranger les piles et retrouver les cartes, et des <strong>tuples</strong> quand une fonction renvoie plusieurs valeurs.</p>
+
+  <h3>1.1 Une carte : un petit texte</h3>
+  <p>Chaque carte est un texte : sa <strong>valeur</strong>, suivie de sa <strong>famille</strong> en deux lettres.</p>
+  <table class="etroit">
+    <tr><td class="nom">Valeurs</td><td><code>a</code> (as), <code>2</code> à <code>10</code>, <code>v</code> (valet), <code>d</code> (dame), <code>r</code> (roi)</td></tr>
+    <tr><td class="nom">Familles</td><td><code>pi</code> pique ♠, <code>co</code> cœur <span class="rg">♥</span>, <code>ca</code> carreau <span class="rg">♦</span>, <code>tr</code> trèfle ♣</td></tr>
+    <tr><td class="nom">Exemples</td><td><code>"7tr"</code> : 7 de trèfle, <code>"10co"</code> : 10 de cœur, <code>"dpi"</code> : dame de pique</td></tr>
+  </table>
+  <p>Comme la famille fait toujours deux lettres, deux tranches suffisent pour séparer une carte : <code>carte[:-2]</code> donne la valeur (<code>"10co"</code> → <code>"10"</code>) et <code>carte[-2:]</code> donne la famille (<code>"10co"</code> → <code>"co"</code>). La couleur s'en déduit : une carte est rouge si sa famille est <code>"co"</code> ou <code>"ca"</code>.</p>
+  <p>Pour comparer deux valeurs, on cherche leur place dans la liste ordonnée <code>["a", "2", "3", …, "10", "v", "d", "r"]</code> avec <code>.index()</code> : le 7 est à la place 6 et le 8 à la place 7, donc le 7 est bien juste en dessous du 8.</p>
+  <p>Le <strong>paquet</strong> est la liste des 52 cartes (<code>jeu_depart.py</code>). Pour une nouvelle partie, on le copie avec <code>list()</code> puis on mélange la copie avec <code>random.shuffle()</code>. Il sert aussi à vérifier qu'une carte tapée par le joueur existe.</p>
+
+  <h3>1.2 Les 13 piles dans un seul dictionnaire : <code>piles</code></h3>
+  <p>Toutes les piles du jeu sont rangées dans un dictionnaire : la clé est le nom de la pile, la valeur est la liste de ses cartes. Voici la donne de la partie de démonstration :</p>
+<pre class="code">piles = {
+    #la pioche : 24 cartes, la prochaine carte piochée est la dernière
+    "p": ["atr", "2tr", "7pi", "vca", ..., "aca", "5tr", "7co"],
+    #la défausse, vide au début
+    "d": [],
+    #les colonnes : de la première carte posée jusqu'à la carte visible
+    "c1": ["7tr"],
+    "c2": ["dco", "8tr"],
+    ...
+    "c7": ["rpi", "api", "8ca", "9co", "3pi", "dtr", "9pi"],
+    #les fondations : une par famille, vides au début
+    "fca": [], "fpi": [], "fco": [], "ftr": [],
+}</pre>
+
+  <div class="encadre">
+    <p>Une règle vaut pour toutes les piles : <strong>la dernière carte de la liste est la carte du dessus</strong>. On la lit avec <code>piles[nom][-1]</code>, on la retire avec <code>pop()</code> et on pose une carte avec <code>append()</code>.</p>
+  </div>
+
+  <table>
+    <tr><th>Élément</th><th>Clé</th><th>Ce que contient la liste</th><th>Au départ</th></tr>
+    <tr><td class="nom">Pioche</td><td><code>"p"</code></td><td>les cartes face cachée ; la dernière est la prochaine piochée</td><td>24 cartes</td></tr>
+    <tr><td class="nom">Défausse</td><td><code>"d"</code></td><td>les cartes piochées ; seule la dernière est jouable</td><td>vide</td></tr>
+    <tr><td class="nom">Colonnes</td><td><code>"c1"</code> à <code>"c7"</code></td><td>de la première carte posée (indice 0) jusqu'à la carte du dessus, la seule qu'on voit en entier</td><td>1 à 7 cartes</td></tr>
+    <tr><td class="nom">Fondations</td><td><code>"fca"</code>, <code>"fpi"</code>, <code>"fco"</code>, <code>"ftr"</code></td><td>une famille par fondation, de l'as (indice 0) jusqu'au roi</td><td>vides</td></tr>
+  </table>
+
+  <p><strong>La pioche et la défausse.</strong> Taper <code>p</code> fait un <code>pop()</code> sur la pioche et un <code>append()</code> sur la défausse, une à trois fois selon le niveau. Quand la pioche est vide, <code>p</code> remet toute la défausse dans la pioche en reprenant les cartes par le dessus : les cartes retrouvent l'ordre qu'elles avaient avant d'être piochées. À l'écran, la défausse montre ses 1, 2 ou 3 dernières cartes selon le niveau, avec <code>piles["d"][-difficulte:]</code> (partie 5).</p>
+  <p><strong>Les colonnes.</strong> À l'écran, une colonne s'affiche de haut en bas dans l'ordre de la liste : la carte d'indice 0 est en haut, la dernière carte, celle qu'on peut jouer, est en bas. Pour dessiner les 7 colonnes côte à côte, on écrit l'écran ligne par ligne : la ligne <code>n</code> affiche la carte d'indice <code>n</code> de chaque colonne.</p>
+  <p><strong>Les fondations.</strong> Le nom d'une fondation se termine par sa famille : <code>destination[-2:]</code> donne directement la famille attendue (<code>"fca"</code> → <code>"ca"</code>). Une fondation est complète à 13 cartes, et la partie est gagnée quand les quatre le sont (<code>verif_gagnee.py</code>).</p>
+
+  <h3>1.3 Les cartes cachées : <code>cachees</code></h3>
+  <p>Dans une colonne, les cartes face cachée sont toujours en dessous, et les cartes visibles au dessus. Un seul nombre par colonne suffit donc : combien de cartes sont cachées.</p>
+<pre class="code">cachees = {"c1": 0, "c2": 1, "c3": 2, "c4": 3, "c5": 4, "c6": 5, "c7": 6}</pre>
+  <p>Par exemple, <code>cachees["c4"]</code> vaut 3 : les cartes d'indice 0, 1 et 2 de c4 sont cachées, seule celle d'indice 3 est visible. Le même test sert à l'affichage et aux vérifications : <strong>une carte est cachée si sa position est plus petite que <code>cachees[colonne]</code></strong>. Quand un déplacement ne laisse plus que des cartes cachées dans une colonne, on retire 1 à ce nombre : la carte du dessus se retourne.</p>
+
+  <h3>1.4 Où est chaque carte : <code>index</code></h3>
+  <p><code>index</code> associe chaque carte au nom de la pile où elle se trouve :</p>
+<pre class="code">index = {"7tr": "c1", "dco": "c2", "8tr": "c2", ..., "5ca": "c6", ..., "7co": "p"}</pre>
+  <p>Quand le joueur tape <code>5ca-c4</code>, <code>index["5ca"]</code> donne tout de suite la pile de départ, <code>"c6"</code>, sans chercher la carte dans les 13 piles. Ensuite <code>piles["c6"].index("5ca")</code> donne sa position dans la colonne. En contrepartie, il faut tenir <code>index</code> à jour : à chaque déplacement, chaque carte déplacée reçoit sa nouvelle pile, et chaque carte piochée passe à <code>"d"</code>.</p>
+
+  <h3>1.5 Un coup pas à pas : <code>5ca-c4</code></h3>
+  <p>Au départ de la partie de démonstration, le joueur tape <code>5ca-c4</code> pour poser le 5<span class="rg">♦</span> (la carte visible de c6) sur le 6♣ (la carte visible de c4).</p>
+  <ol>
+    <li><code>verif_coup()</code> découpe la saisie avec <code>split("-")</code> et renvoie le tuple <code>("5ca", "c4")</code>.</li>
+    <li><code>index["5ca"]</code> donne le départ, <code>"c6"</code>, et <code>piles["c6"].index("5ca")</code> donne la position : 5.</li>
+    <li>Le morceau à déplacer est <code>piles["c6"][5:]</code>, c'est-à-dire la carte et toutes celles posées dessus : ici <code>["5ca"]</code>.</li>
+    <li>Les vérifications passent : la carte est visible (5 n'est pas plus petit que <code>cachees["c6"]</code>, qui vaut 5), le 5<span class="rg">♦</span> rouge va sur un 6♣ noir, et 5 est juste en dessous de 6.</li>
+    <li><code>del piles["c6"][5:]</code> retire le morceau, <code>piles["c4"].extend(morceau)</code> le pose sur c4, et <code>index["5ca"]</code> devient <code>"c4"</code>.</li>
+    <li>c6 n'a plus que 5 cartes, toutes cachées : <code>cachees["c6"]</code> passe de 5 à 4, et le 3<span class="rg">♥</span> se retourne.</li>
+  </ol>
+
+  <table>
+    <tr><th></th><th>Avant</th><th>Après</th></tr>
+    <tr><td class="nom"><code>piles["c4"]</code></td><td><code>["dpi", "6pi", "4ca", "6tr"]</code></td><td><code>["dpi", "6pi", "4ca", "6tr", "5ca"]</code></td></tr>
+    <tr><td class="nom"><code>piles["c6"]</code></td><td><code>["vpi", "6co", "2pi", "rca", "3co", "5ca"]</code></td><td><code>["vpi", "6co", "2pi", "rca", "3co"]</code></td></tr>
+    <tr><td class="nom"><code>cachees["c6"]</code></td><td><code>5</code></td><td><code>4</code></td></tr>
+    <tr><td class="nom"><code>index["5ca"]</code></td><td><code>"c6"</code></td><td><code>"c4"</code></td></tr>
+  </table>
+
+  <div class="cote">
+    <figure>
+<pre class="term"><span class="b">                   S O L I T A I R E</span>
+<span class="g">────────────────────────────────────────────────────────</span>
+<span class="g"> pioche défausse          fca     fpi     fco     ftr</span>
+<span class="g">  [░░]    [  ]            [  ]    [  ]    [  ]    [  ]</span>
+<span class="g">   24      0              0/13    0/13    0/13    0/13</span>
+
+<span class="g">   c1      c2      c3      c4      c5      c6      c7</span>
+  [7♣]  <span class="g">  [░░]    [░░]    [░░]    [░░]    [░░]    [░░]</span>
+          [8♣]  <span class="g">  [░░]    [░░]    [░░]    [░░]    [░░]</span>
+                <span class="r">  [3♦]</span>  <span class="g">  [░░]    [░░]    [░░]    [░░]</span>
+                          [6♣]  <span class="g">  [░░]    [░░]    [░░]</span>
+                        <span class="r">  [5♦]</span>    [3♣]  <span class="r">  [3♥]</span>  <span class="g">  [░░]</span>
+                                                <span class="g">  [░░]</span>
+                                                  [9♠]
+
+<span class="g">  p : piocher  h : coups  ia : auto  annuler  ? : règles</span>
+<span class="g">  à taper :  ♠ = pi    ♥ = co    ♦ = ca    ♣ = tr</span></pre>
+    </figure>
+    <div>
+      <p class="legende">Le plateau juste après <code>5ca-c4</code> : le 5<span class="rg">♦</span> est posé sur le 6♣ en c4, et en c6 le 3<span class="rg">♥</span> s'est retourné.</p>
+      <p class="legende">À comparer avec le plateau de départ, sur la page de garde.</p>
+    </div>
+  </div>
+
+  <h3>1.6 Les autres données</h3>
+  <ul>
+    <li><strong>Le nombre de coups</strong> (<code>nb_coups</code>) et <strong>le niveau</strong> (<code>difficulte</code> : 1, 2 ou 3) sont de simples entiers, gardés par <code>main.py</code>. Pour le jeu automatique, <code>main.py</code> garde aussi <code>auto</code> (<code>True</code> quand l'ordinateur joue tout seul) et <code>nb_tours</code> (partie 3).</li>
+    <li><strong>La sauvegarde</strong> est un dictionnaire <code>{"piles": …, "cachees": …, "index": …, "nbr_coup": …, "difficulte": …}</code> écrit dans <code>sauvegarde.json</code> avec le module <code>json</code>.</li>
+    <li><strong>La copie pour annuler.</strong> Avant chaque coup, <code>main.py</code> copie la partie. Chaque liste de <code>piles</code> est copiée une par une avec <code>list()</code>, sinon la copie et la partie partageraient les mêmes listes de cartes. Pour <code>cachees</code> et <code>index</code>, <code>dict()</code> suffit : leurs valeurs sont des nombres et des textes, qu'on ne modifie jamais sur place.</li>
+    <li><strong>Les coups possibles</strong> sont une liste de textes, comme <code>["aca-fca", "5ca-c4", "p"]</code>, rangée du plus utile au moins utile (partie 3).</li>
+  </ul>
+</section>
+
+<!-- ================================================================ -->
+<section class="rubrique nouvelle-page" id="r2">
+  <h2><span class="num">2.</span>Les commandes de jeu et les menus</h2>
+
+  <h3>2.1 Le menu de départ</h3>
+  <div class="cote">
+    <figure>
+<pre class="term"><span class="b">                   S O L I T A I R E</span>
+<span class="g">────────────────────────────────────────────────────────</span>
+
+   1 : nouvelle partie
+   2 : reprendre la partie sauvegardée
+   3 : difficulté (actuellement : facile)
+   4 : quitter
+   5 : partie de démonstration (toujours la même donne)
+
+Votre choix : <span class="b">5</span></pre>
+    </figure>
+    <table class="etroit">
+      <tr><th>Choix</th><th>Ce qui se passe</th></tr>
+      <tr><td class="nom">1</td><td>Nouvelle partie : le paquet est mélangé puis distribué (1 carte en c1, 2 en c2, … 7 en c7, les 24 autres dans la pioche).</td></tr>
+      <tr><td class="nom">2</td><td>Reprend la partie sauvegardée, avec son nombre de coups et son niveau. Sans sauvegarde : « Aucune partie sauvegardée », puis retour au menu.</td></tr>
+      <tr><td class="nom">3</td><td>Choix du niveau (partie 5), puis retour au menu.</td></tr>
+      <tr><td class="nom">4</td><td>Quitter.</td></tr>
+      <tr><td class="nom">5</td><td>Partie de démonstration : toujours la même donne.</td></tr>
+    </table>
+  </div>
+  <p>Le choix est vérifié : tant que le joueur ne tape pas un nombre de 1 à 5, le menu redemande. Le menu affiche aussi le niveau en cours.</p>
+
+  <h3>2.2 Les commandes pendant la partie</h3>
+  <p>Chaque commande se tape en une seule saisie, suivie d'Entrée. Le rappel des commandes et des codes des familles reste affiché sous le plateau.</p>
+  <table>
+    <tr><th>Saisie</th><th>Effet</th><th>Compte comme un coup</th></tr>
+    <tr><td class="nom"><code>carte-pile</code><br><span class="leger">ex : <code>5ca-c4</code></span></td><td>déplace la carte, et toutes celles posées dessus, vers la pile</td><td>oui</td></tr>
+    <tr><td class="nom"><code>p</code></td><td>pioche 1, 2 ou 3 cartes selon le niveau ; si la pioche est vide, remet la défausse dans la pioche</td><td>non</td></tr>
+    <tr><td class="nom"><code>h</code></td><td>affiche les coups possibles, du plus utile au moins utile (partie 3)</td><td>non</td></tr>
+    <tr><td class="nom"><code>ia</code></td><td>l'ordinateur joue tout seul, jusqu'à gagner ou jusqu'à ne plus trouver de coup utile (partie 3)</td><td>oui, chacun de ses coups</td></tr>
+    <tr><td class="nom"><code>annuler</code></td><td>remet la partie comme avant le dernier coup, ou la dernière pioche</td><td>le compteur revient à sa valeur d'avant</td></tr>
+    <tr><td class="nom"><code>sauvegarde</code></td><td>enregistre la partie pour la reprendre plus tard (choix 2 du menu)</td><td>non</td></tr>
+    <tr><td class="nom"><code>?</code></td><td>affiche les règles du jeu et toutes les commandes</td><td>non</td></tr>
+  </table>
+
+  <h3>2.3 Écrire un déplacement</h3>
+  <p>Un déplacement s'écrit <strong>carte-pile</strong> : la carte, un tiret, puis la pile d'arrivée (<code>c1</code> à <code>c7</code>, ou une fondation : <code>fca</code>, <code>fpi</code>, <code>fco</code>, <code>ftr</code>). Le joueur n'a pas besoin de dire d'où part la carte : <code>index</code> le sait. Le même format sert pour tous les déplacements : depuis une colonne, la défausse ou une fondation, vers une colonne ou une fondation.</p>
+  <p><strong>Plusieurs cartes d'un coup.</strong> On tape la première carte du groupe à déplacer, la plus haute à l'écran : toutes les cartes posées dessus partent avec elle, car le morceau déplacé est <code>piles[depart][position:]</code>. On peut ainsi déplacer toutes les cartes visibles d'une colonne, ou seulement une partie. Par exemple, si une colonne montre 9♠, 8<span class="rg">♥</span>, 7♣, taper <code>8co-c2</code> emmène le 8<span class="rg">♥</span> et le 7♣, et laisse le 9♠ en place (si c2 se termine par le 9♣).</p>
+
+  <h3>2.4 Toutes les saisies sont vérifiées</h3>
+  <p>Un déplacement passe par quatre vérifications, dans cet ordre. Dès que l'une échoue, le jeu affiche la raison, rien ne bouge, et le coup n'est pas compté. Les exemples sont pris au départ de la partie de démonstration.</p>
+  <table>
+    <tr><th>Vérification</th><th>Ce qui est contrôlé</th><th>Exemples refusés</th></tr>
+    <tr><td class="nom">1. La saisie<br><span class="leger"><code>verif_coup.py</code></span></td><td>un seul tiret, une carte qui existe, une pile d'arrivée qui existe</td><td><code>5ca c4</code> (pas de tiret)<br><code>xyz-c4</code>, <code>5ca-c9</code></td></tr>
+    <tr><td class="nom">2. La carte<br><span class="leger"><code>verif_carte.py</code></span></td><td>elle n'est ni dans la pioche, ni face cachée ; dans la défausse ou une fondation, c'est celle du dessus ; une seule carte à la fois vers une fondation</td><td><code>7co-c2</code> (encore dans la pioche)<br><code>dpi-c1</code> (face cachée)</td></tr>
+    <tr><td class="nom">3. Vers une colonne<br><span class="leger"><code>verif_colonne.py</code></span></td><td>sur une colonne vide, seulement un roi ; sinon une couleur différente et une valeur juste en dessous</td><td><code>6tr-c2</code> (noir sur noir)<br><code>3ca-c2</code> (3<span class="rg">♦</span> sur 8♣)</td></tr>
+    <tr><td class="nom">4. Vers une fondation<br><span class="leger"><code>verif_fondations.py</code></span></td><td>la bonne famille ; un as sur une fondation vide ; sinon la valeur juste au dessus</td><td><code>3tr-fpi</code> (mauvaise famille)<br><code>3ca-fca</code> (ce n'est pas un as)</td></tr>
+  </table>
+  <p>Le menu et le choix du niveau vérifient aussi leurs saisies : ils redemandent tant que la réponse n'est pas dans la liste des choix possibles.</p>
+</section>
+
+<!-- ================================================================ -->
+<section class="rubrique nouvelle-page" id="r3">
+  <h2><span class="num">3.</span>Comment l'ordinateur propose les coups, et joue tout seul</h2>
+
+  <p>Quand le joueur tape <code>h</code>, l'ordinateur affiche tous les coups jouables, <strong>classés du plus utile au moins utile</strong>. Avec <code>ia</code>, il joue tout seul en suivant ce classement. Le code est dans <code>coup_iav1.py</code> (<code>trouver_coups()</code> et <code>afficher_coups()</code>) et dans la boucle de <code>main.py</code>.</p>
+
+  <h3>3.1 Trouver les coups : essayer chaque carte sur chaque pile</h3>
+  <p>L'ordinateur ne devine rien : il essaie toutes les combinaisons et garde celles que le jeu accepterait.</p>
+  <ol>
+    <li>Il parcourt les 52 cartes de <code>index</code>. Une carte encore dans la pioche est passée, puisqu'elle est face cachée. Pour les autres, il calcule la pile de départ, la position et le morceau, exactement comme pour un vrai coup.</li>
+    <li>Pour chaque carte, il essaie les 11 piles d'arrivée (c1 à c7 et les 4 fondations), sauf celle où la carte est déjà.</li>
+    <li>Il appelle <code>verif_carte()</code>, puis <code>verifier_fondation()</code> si l'arrivée est une fondation, ou <code>verif_colonne()</code> si c'est une colonne. Si tout est bon, le coup <code>"carte-pile"</code> est gardé.</li>
+    <li>S'il reste des cartes dans la pioche ou dans la défausse, il ajoute <code>p</code>.</li>
+  </ol>
+  <p>Cela fait au plus 52 × 11 = 572 essais : la réponse est immédiate. Si aucun coup n'existe, le jeu affiche « Aucun coup possible. ».</p>
+
+  <h3>3.2 Les mêmes vérifications que pour le joueur</h3>
+  <p>Plutôt que d'écrire les règles une deuxième fois, l'ordinateur réutilise les trois fonctions de vérification du joueur. On leur a ajouté un paramètre <code>parler</code> : avec <code>parler=False</code>, elles répondent <code>True</code> ou <code>False</code> sans afficher leur message de refus. Sans ça, <code>h</code> afficherait des dizaines de messages, un par essai raté. Pendant le jeu, <code>parler</code> vaut <code>True</code> par défaut, donc les messages s'affichent normalement.</p>
+  <div class="encadre">
+    <p>L'avantage : <strong>un coup proposé par l'ordinateur est forcément accepté par le jeu</strong>, puisque c'est le même code qui décide. Et si on corrige une règle, l'ordinateur suit tout seul.</p>
+  </div>
+
+  <h3>3.3 Classer les coups, du plus utile au moins utile</h3>
+  <p>Chaque coup trouvé est rangé dans une liste selon son type. À la fin, les listes sont mises bout à bout avec <code>+</code>, dans cet ordre :</p>
+  <table class="etroit">
+    <tr><th style="width:7%">Rang</th><th style="width:51%">Type de coup</th><th style="width:23%">Pourquoi</th><th style="width:19%">Liste</th></tr>
+    <tr><td class="rang">1</td><td>une carte monte sur sa fondation</td><td>c'est le but du jeu</td><td><code>vers_fondation</code></td></tr>
+    <tr><td class="rang">2</td><td>la carte part et une carte cachée se retourne</td><td>une carte de plus à jouer</td><td><code>retourne_carte</code></td></tr>
+    <tr><td class="rang">3</td><td>une carte de la défausse va sur une colonne</td><td>la pioche se vide</td><td><code>depuis_defausse</code></td></tr>
+    <tr><td class="rang">4</td><td>une carte change de colonne et libère celle d'en dessous pour sa fondation</td><td>prépare un rang 1</td><td><code>libere_carte</code></td></tr>
+    <tr><td class="rang">5</td><td>toute une colonne part : un roi attend une place, et aucune colonne n'est vide</td><td>fait de la place au roi</td><td><code>vide_colonne</code></td></tr>
+    <tr><td class="rang">6</td><td>piocher : <code>p</code></td><td>une nouvelle carte arrive</td><td></td></tr>
+    <tr><td class="rang">7</td><td>les autres changements de colonne</td><td>la carte change de place</td><td><code>entre_colonnes</code></td></tr>
+    <tr><td class="rang">8</td><td>une carte redescend d'une fondation</td><td>la partie recule</td><td><code>depuis_fondation</code></td></tr>
+  </table>
+  <p>Pour reconnaître le rang 2, on regarde si la carte qui part est la première carte visible d'une colonne qui a des cartes cachées : <code>position == cachees[depart]</code> et <code>position &gt; 0</code>. Pour le rang 4, on teste la carte d'en dessous avec <code>verifier_fondation()</code>. Pour le rang 5, un roi « attend » quand il est posé sur des cartes cachées, ou sur le dessus de la défausse.</p>
+  <p>Deux choix volontaires : <strong>la pioche reste secrète</strong> (<code>h</code> propose <code>p</code> sans dire quelle carte va sortir), et <strong>un roi qui est déjà la première carte de sa colonne</strong> n'est pas proposé vers une autre colonne vide, ça ne changerait rien. Il peut toujours monter sur sa fondation.</p>
+
+  <div class="cote">
+    <figure>
+<pre class="term"><span class="b">                   S O L I T A I R E</span>
+<span class="g">────────────────────────────────────────────────────────</span>
+<span class="g"> pioche défausse          fca     fpi     fco     ftr</span>
+<span class="g">  [  ]</span>    [7♠]          <span class="r">  [6♦]</span>  <span class="g">  [  ]    [  ]</span>    [5♣]
+<span class="g">   0       7              6/13    0/13    0/13    5/13</span>
+
+<span class="g">   c1      c2      c3      c4      c5      c6      c7</span>
+<span class="r">  [r♦]    [d♥]    [d♦]</span>    [d♠]  <span class="g">  [░░]    [░░]    [░░]</span>
+  [d♣]            [v♣]  <span class="r">  [v♦]</span>  <span class="g">  [░░]</span>  <span class="r">  [6♥]</span>  <span class="g">  [░░]</span>
+<span class="r">  [v♥]            [10♦]</span>           [8♠]    [5♠]  <span class="g">  [░░]</span>
+                  [9♠]          <span class="r">  [7♦]    [4♥]    [9♥]</span>
+                <span class="r">  [8♥]</span>            [6♠]    [3♠]    [8♣]
+                  [7♣]          <span class="r">  [5♥]    [2♥]    [7♥]</span>
+                                  [4♠]            [6♣]
+                                <span class="r">  [3♥]</span>
+                                  [2♠]
+
+<span class="g">  p : piocher  h : coups  ia : auto  annuler  ? : règles</span>
+<span class="g">  à taper :  ♠ = pi    ♥ = co    ♦ = ca    ♣ = tr</span>
+Choisissez la carte à déplacer ainsi que sa direction : <span class="b">h</span>
+
+Coups possibles, du plus utile au moins utile :
+    6tr-ftr
+    6co-c3
+    p
+    5co-c7
+    vtr-c2
+    6ca-c3
+Appuyez sur Entrée pour continuer</pre>
+    </figure>
+    <div>
+      <p><strong>Exemple</strong>, au milieu de notre partie gagnante (après 41 coups et 24 pioches) :</p>
+      <ul>
+        <li><code>6tr-ftr</code> monte le 6♣ sur sa fondation (rang 1) ;</li>
+        <li><code>6co-c3</code> pose le 6<span class="rg">♥</span> sur le 7♣ et retourne la carte cachée de c6 (rang 2) ;</li>
+        <li>puis <code>p</code> (rang 6) ;</li>
+        <li><code>5co-c7</code> et <code>vtr-c2</code> changent seulement des cartes de colonne (rang 7) ;</li>
+        <li><code>6ca-c3</code> ferait redescendre le 6<span class="rg">♦</span> de sa fondation (rang 8).</li>
+      </ul>
+      <p>Après Entrée, le plateau se réaffiche. Afficher les coups ne compte pas comme un coup.</p>
+    </div>
+  </div>
+
+  <h3>3.4 L'ordinateur joue tout seul : la commande <code>ia</code></h3>
+  <p>Quand le joueur tape <code>ia</code>, <code>main.py</code> met <code>auto</code> à <code>True</code>. À chaque tour de la boucle de jeu, au lieu de demander un coup au joueur, il appelle <code>trouver_coups(piles, cachees, index, seulement_utiles=True)</code> et joue <strong>le premier coup de la liste</strong>. Il le joue avec la même fonction <code>deplacement()</code> que le joueur : le coup lui est donné dans le paramètre <code>coup_ordi</code>, au lieu d'être lu avec <code>input()</code>. Chaque coup reste affiché 0,2 seconde, avec « L'ordinateur a joué : … ». Les coups comptent et <code>annuler</code> marche comme d'habitude.</p>
+  <ul>
+    <li><strong>Pas d'allers-retours.</strong> Avec <code>seulement_utiles=True</code>, la liste s'arrête après <code>p</code> : l'ordinateur ne joue jamais les rangs 7 et 8. Sinon il pourrait déplacer un 7 noir d'un 8 rouge à l'autre, puis revenir, sans fin. Chaque coup qu'il joue fait donc avancer la partie : une carte monte, une carte se retourne, la pioche diminue, ou l'un de ces coups se prépare.</li>
+    <li><strong>Pas de pioche à l'infini.</strong> <code>nb_tours</code> compte combien de fois il a retourné la défausse sans rien jouer d'autre. S'il doit la retourner une deuxième fois, c'est qu'il a vu toutes les cartes de la pioche sans pouvoir en placer une : il s'arrête, affiche « L'ordinateur ne trouve plus de coup utile, à vous de jouer » et rend la main.</li>
+  </ul>
+  <div class="cote">
+    <figure>
+<pre class="term"><span class="b">                   S O L I T A I R E</span>
+<span class="g">────────────────────────────────────────────────────────</span>
+<span class="g"> pioche défausse          fca     fpi     fco     ftr</span>
+<span class="g">  [░░]</span>    [5♠]          <span class="r">  [3♦]</span>  <span class="g">  [  ]    [  ]    [  ]</span>
+<span class="g">   8       5              3/13    0/13    0/13    0/13</span>
+
+<span class="g">   c1      c2      c3      c4      c5      c6      c7</span>
+  [7♣]  <span class="g">  [░░]</span>  <span class="r">  [d♦]</span>    [d♠]  <span class="g">  [░░]    [░░]    [░░]</span>
+<span class="r">  [6♦]</span>    [8♣]    [v♣]          <span class="g">  [░░]    [░░]    [░░]</span>
+  [5♣]  <span class="r">  [7♥]    [10♦]</span>           [8♠]  <span class="g">  [░░]    [░░]</span>
+<span class="r">  [4♦]</span>    [6♣]    [9♠]          <span class="r">  [7♦]    [r♦]</span>  <span class="g">  [░░]</span>
+  [3♣]  <span class="r">  [5♦]    [8♥]</span>            [6♠]    [d♣]    [3♠]
+<span class="r">  [2♥]</span>    [4♣]                  <span class="r">  [5♥]</span>
+        <span class="r">  [3♥]</span>                    [4♠]
+
+<span class="g">  p : piocher  h : coups  ia : auto  annuler  ? : règles</span>
+<span class="g">  à taper :  ♠ = pi    ♥ = co    ♦ = ca    ♣ = tr</span>
+L'ordinateur a joué : 8co-c3</pre>
+    </figure>
+    <div>
+      <p class="legende">La partie de démonstration après <code>ia</code> : l'ordinateur vient de poser le 8<span class="rg">♥</span> sur le 9♠ en c3.</p>
+      <div class="encadre">
+        <p><strong>Résultats.</strong> L'ordinateur gagne la partie de démonstration aux trois niveaux (en 91 coups au niveau facile). Sur 500 parties mélangées au hasard, il en gagne 41 % au niveau facile, 21 % au niveau moyen et 11 % au niveau difficile.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>3.5 La fin automatique, comme dans le vrai solitaire</h3>
+  <p>Dans le vrai solitaire, la partie est gagnée dès que toutes les cartes sont retournées : le jeu range alors tout seul les cartes dans les fondations. Notre jeu fait pareil. Au début de chaque tour, <code>tout_est_retourne()</code> (<code>verif_gagnee.py</code>) regarde s'il n'y a plus aucune carte cachée dans les colonnes, et si la pioche et la défausse sont vides. Si oui, <code>main.py</code> affiche « Toutes les cartes sont retournées, la partie est gagnée » et passe <code>auto</code> à <code>True</code> : l'ordinateur monte les cartes une à une, jusqu'à la victoire.</p>
+  <p><strong>Pourquoi c'est forcément gagné.</strong> Prenons la plus petite carte qui n'est pas encore en fondation. Elle est forcément sur le dessus de sa colonne, car les cartes posées sur elle seraient encore plus petites. Et toutes les cartes plus petites de sa famille sont déjà sur la fondation : elle peut donc monter. On recommence jusqu'à la dernière carte. On attend que la pioche soit vide, sinon au niveau difficile une carte coincée dans la pioche pourrait ne jamais sortir.</p>
+</section>
+
+<!-- ================================================================ -->
+<section class="rubrique nouvelle-page" id="r4">
+  <h2><span class="num">4.</span>Les points forts et les particularités du jeu</h2>
+  <ul>
+    <li><strong>L'ordinateur sait jouer tout seul.</strong> Avec <code>ia</code>, il suit le même classement que <code>h</code> en évitant les coups inutiles, et il gagne la partie de démonstration aux trois niveaux. Quand il est bloqué, il rend la main au joueur au lieu de tourner en rond.</li>
+    <li><strong>La fin automatique</strong>, comme dans le vrai solitaire : dès que tout est retourné et que la pioche est finie, les cartes montent toutes seules dans les fondations.</li>
+    <li><strong>Un coup, une saisie.</strong> Tous les déplacements s'écrivent <code>carte-pile</code>, y compris pour déplacer plusieurs cartes d'un coup. Le joueur n'a jamais à dire d'où part la carte.</li>
+    <li><strong>Chaque refus est expliqué.</strong> Le jeu dit pourquoi un coup est impossible (carte cachée, même couleur, mauvaise famille…), sans rien changer à la partie.</li>
+    <li><strong>Annuler le dernier coup.</strong> <code>annuler</code> remet la partie comme avant le dernier coup, même si c'était une pioche ou un coup de l'ordinateur, et le compteur de coups revient en arrière. Pour cela, <code>main.py</code> copie la partie avant chaque coup. On ne peut annuler qu'un coup : un deuxième <code>annuler</code> affiche « Il n'y a rien à annuler ».</li>
+    <li><strong>Sauvegarder et reprendre.</strong> <code>sauvegarde</code> enregistre toute la partie (piles, cartes cachées, index, nombre de coups et niveau) dans un fichier JSON. Le choix 2 du menu la reprend exactement où elle en était.</li>
+    <li><strong>Un plateau compact et lisible.</strong> Au démarrage, le jeu tient en 18 lignes sur 56 caractères, sous la limite de 20 × 60. Les cœurs et les carreaux sont en rouge, les cartes cachées s'affichent <code>[░░]</code> et les emplacements vides <code>[&nbsp;&nbsp;]</code>. On voit le nombre de cartes de la pioche et de la défausse, et le remplissage de chaque fondation (sur 13). La défausse s'affiche en éventail, comme dans le vrai solitaire (partie 5). L'écran est effacé avant chaque affichage : le plateau reste toujours au même endroit.</li>
+    <li><strong>De l'aide à tout moment.</strong> Le rappel des commandes sous le plateau, l'écran des règles avec <code>?</code>, et les coups possibles classés avec <code>h</code>.</li>
+    <li><strong>Une partie de démonstration et une partie gagnante.</strong> Le choix 5 donne toujours la même donne. Le fichier <code>partie_gagnante.txt</code> contient les saisies qui la gagnent en 95 coups : <code class="nw">python3 main.py &lt; partie_gagnante.txt</code> rejoue toute la partie jusqu'à la victoire. Après chaque modification, on s'en est servi pour vérifier qu'on n'avait rien cassé.</li>
+    <li><strong>Une animation de victoire.</strong> « VICTOIRE » s'affiche en grandes lettres qui changent de couleur, suivi du nombre de coups joués.</li>
+    <li><strong>Uniquement des listes, des dictionnaires et des tuples</strong>, comme le demande le sujet : aucune classe.</li>
+    <li><strong>Un fichier par grande fonction, et git pour travailler à deux.</strong> Chaque partie du jeu a son fichier (affichage, pioche, vérifications, sauvegarde…, voir l'annexe A). Chacun travaillait sur sa branche GitHub, puis on fusionnait par pull request : on a pu avancer en même temps sans écraser le travail de l'autre.</li>
+  </ul>
+</section>
+
+<!-- ================================================================ -->
+<section class="rubrique nouvelle-page" id="r5">
+  <h2><span class="num">5.</span>Les niveaux de jeu et le paramétrage</h2>
+  <p>Le niveau se choisit avec le choix 3 du menu, avant de lancer la partie. Il fixe le <strong>nombre de cartes tirées à chaque pioche</strong>.</p>
+  <div class="cote">
+    <figure>
+<pre class="term">   1 : facile    (1 carte à chaque pioche)
+   2 : moyen     (2 cartes à chaque pioche)
+   3 : difficile (3 cartes à chaque pioche)
+Votre niveau : <span class="b">3</span></pre>
+    </figure>
+    <table class="etroit">
+      <tr><th>Niveau</th><th>Ce que ça change</th></tr>
+      <tr><td class="nom">1 : facile<br><span class="leger">par défaut</span></td><td>les cartes de la pioche passent une par une sur la défausse, et chacune peut être jouée</td></tr>
+      <tr><td class="nom">2 : moyen</td><td>2 cartes à chaque pioche : seule celle du dessus est jouable, l'autre reste bloquée tant que la première n'est pas jouée</td></tr>
+      <tr><td class="nom">3 : difficile</td><td>3 cartes à chaque pioche : deux sur trois sont bloquées</td></tr>
+    </table>
+  </div>
+  <p><strong>La défausse en éventail.</strong> Comme dans le vrai solitaire, l'écran montre les cartes de la dernière pioche : 1 au niveau facile, 2 au niveau moyen, 3 au niveau difficile. Seule la dernière, à droite et en couleur, peut être jouée ; les autres sont en gris. <code>afficher_defausse()</code> prend <code>piles["d"][-difficulte:]</code>, et compte la largeur des cartes pour que les fondations restent à leur place.</p>
+  <figure>
+<pre class="term"><span class="g"> pioche défausse          fca     fpi     fco     ftr</span>
+<span class="g">  [░░]    [9♦][v♣]</span><span class="r">[2♦]</span>  <span class="g">  [  ]    [  ]    [  ]    [  ]</span>
+<span class="g">   18      6              0/13    0/13    0/13    0/13</span></pre>
+    <p class="legende">Niveau difficile, après deux pioches : le 9<span class="rg">♦</span> et le valet de trèfle sont visibles mais bloqués, seul le 2<span class="rg">♦</span> est jouable.</p>
+  </figure>
+  <p><strong>Pourquoi c'est plus dur.</strong> Avec 24 cartes et 3 cartes par pioche, si le joueur ne joue aucune carte de la défausse, ce sont toujours les 8 mêmes cartes qui arrivent sur le dessus, tour de pioche après tour de pioche. Pour atteindre les autres, il faut jouer des cartes de la défausse : ça décale toute la suite de la pioche. On le voit avec l'ordinateur : sur 500 parties, il en gagne 41 % au niveau facile, mais 11 % seulement au niveau difficile.</p>
+  <p><strong>Dans le code</strong>, le niveau est un simple entier, <code>difficulte</code>, égal au nombre de cartes à tirer. <code>choisir_difficulte()</code> renvoie <code>int(choix)</code>, et <code>piocher()</code> s'en sert directement dans sa boucle <code class="nw">while i &lt;= difficulte</code>. La boucle s'arrête plus tôt si la pioche se vide en cours de route.</p>
+  <p><strong>Le niveau est gardé dans la sauvegarde</strong> : une partie reprise continue au même niveau. Le menu affiche toujours le niveau en cours (« difficulté (actuellement : facile) »).</p>
+  <p><strong>Autres réglages.</strong> La pioche peut être retournée autant de fois qu'on veut. La partie de démonstration se joue au niveau choisi ; notre partie gagnante en 95 coups est prévue pour le niveau facile.</p>
+</section>
+
+<!-- ================================================================ -->
+<section class="rubrique" id="r6">
+  <h2>Annexes</h2>
+
+  <h3>A. Les fichiers du programme</h3>
+  <table class="etroit">
+    <tr><th>Fichier</th><th>Rôle</th></tr>
+    <tr><td class="nom"><code>main.py</code></td><td>lance le jeu : menu, boucle de la partie, compteur de coups, annuler, et le jeu automatique (<code>ia</code> et fin automatique)</td></tr>
+    <tr><td class="nom"><code>menu.py</code></td><td>le menu de départ et le choix du niveau</td></tr>
+    <tr><td class="nom"><code>jeu_depart.py</code></td><td>le paquet de 52 cartes, la donne de démonstration, et <code>nouvelle_partie()</code> qui mélange et distribue</td></tr>
+    <tr><td class="nom"><code>affichage.py</code></td><td>le plateau (avec la défausse en éventail), les couleurs et l'écran des règles</td></tr>
+    <tr><td class="nom"><code>deplacement.py</code></td><td>lit la commande du joueur (ou reçoit celle de l'ordinateur), lance les vérifications et déplace les cartes</td></tr>
+    <tr><td class="nom"><code>verif_coup.py</code></td><td>vérifie la forme de la saisie <code>carte-pile</code></td></tr>
+    <tr><td class="nom"><code>verif_carte.py</code></td><td>vérifie que la carte a le droit de bouger</td></tr>
+    <tr><td class="nom"><code>verif_colonne.py</code></td><td>les règles pour poser sur une colonne</td></tr>
+    <tr><td class="nom"><code>verif_fondations.py</code></td><td>les règles pour poser sur une fondation</td></tr>
+    <tr><td class="nom"><code>pioche.py</code></td><td>la commande <code>p</code></td></tr>
+    <tr><td class="nom"><code>coup_iav1.py</code></td><td>trouve les coups possibles et les classe par priorité : sert à <code>h</code> et à l'ordinateur quand il joue</td></tr>
+    <tr><td class="nom"><code>sauvegarder.py</code></td><td>la sauvegarde et la reprise de la partie</td></tr>
+    <tr><td class="nom"><code>verif_gagnee.py</code></td><td>détecte la victoire (4 fondations de 13 cartes), et le moment où tout est retourné</td></tr>
+    <tr><td class="nom"><code>victoire.py</code></td><td>l'animation de victoire</td></tr>
+    <tr><td class="nom"><code>partie_gagnante.txt</code></td><td>les saisies qui gagnent la partie de démonstration</td></tr>
+  </table>
+
+  <h3>B. Les modules Python utilisés</h3>
+  <table class="etroit">
+    <tr><th>Module</th><th>À quoi il sert</th></tr>
+    <tr><td class="nom"><code>random</code></td><td><code>shuffle()</code> : mélanger le paquet pour une nouvelle partie</td></tr>
+    <tr><td class="nom"><code>json</code></td><td><code>dump()</code> et <code>load()</code> : écrire et relire la sauvegarde</td></tr>
+    <tr><td class="nom"><code>os</code></td><td><code>system("")</code> : activer les couleurs dans le terminal de Windows ; <code>path.exists()</code> : savoir si une sauvegarde existe</td></tr>
+    <tr><td class="nom"><code>time</code></td><td><code>sleep()</code> : laisser le temps de voir chaque coup de l'ordinateur, et faire tourner les couleurs de l'animation de victoire</td></tr>
+  </table>
+  <p>Ces quatre modules sont fournis avec Python : il n'y a rien à installer.</p>
+
+  <h3>C. Lancer le jeu</h3>
+  <p>Dans un terminal : <code class="nw">python3 main.py</code> (sous Windows : <code class="nw">python main.py</code>). Pour rejouer la partie gagnante d'un coup : <code class="nw">python3 main.py &lt; partie_gagnante.txt</code>.</p>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,1109 @@
+<title>Prépa soutenance Solitaire</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  /* Une table de jeu : chaque question est une carte qu'on retourne, les révisions se rangent
+     comme au solitaire (pioche = jamais vues, colonnes = en cours, fondations = sues). */
+  :root {
+    --bg: #F2F5F1;
+    --surface: #FCFDFB;
+    --ink: #17241D;
+    --muted: #56645B;
+    --line: #D5DDD6;
+    --felt: #1D5C3F;
+    --felt-ink: #F3F7F2;
+    --felt-soft: #E2ECE5;
+    --red: #B3332B;
+    --red-soft: #F7E4E1;
+    --warn: #8A5A00;
+    --warn-soft: #F6EBD3;
+    --code-bg: #EDF2EE;
+    --font-ui: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+    --font-code: "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F1813; --surface: #17231C; --ink: #E7EFE9; --muted: #A2B3A8; --line: #2B3A31;
+      --felt: #5DB889; --felt-ink: #0F1813; --felt-soft: #1C3226; --red: #F08B81; --red-soft: #3A2320;
+      --warn: #E5B65C; --warn-soft: #3A2F17; --code-bg: #1E2C24; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F1813; --surface: #17231C; --ink: #E7EFE9; --muted: #A2B3A8; --line: #2B3A31;
+    --felt: #5DB889; --felt-ink: #0F1813; --felt-soft: #1C3226; --red: #F08B81; --red-soft: #3A2320;
+    --warn: #E5B65C; --warn-soft: #3A2F17; --code-bg: #1E2C24; color-scheme: dark;
+  }
+
+  body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 16px; line-height: 1.5; }
+  [hidden] { display: none !important; }
+  * { box-sizing: border-box; }
+  .app { max-width: 880px; margin: 0 auto; padding-block: 24px 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: flex; flex-direction: column; gap: 20px; }
+
+  header.tete { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
+  .tete h1 { margin: 0; font-size: 28px; line-height: 1.15; font-weight: 700; text-wrap: balance; }
+  .tete p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+  .tete .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--felt-soft); color: var(--ink); white-space: nowrap; }
+  .chip.j { background: var(--felt); color: var(--felt-ink); letter-spacing: 0.02em; }
+  .chip.statut[data-mode="memoire"] { background: var(--warn-soft); color: var(--warn); }
+
+  .piles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .pile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .pile .glyphe { font-family: var(--font-code); font-size: 14px; color: var(--muted); }
+  .pile .nb { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .pile .lib { font-size: 13px; color: var(--muted); }
+  .pile.rouges .nb, .pile.rouges .glyphe { color: var(--red); }
+  .pile.fond .nb { color: var(--felt); }
+
+  nav.onglets { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--line); }
+  nav.onglets a { flex: none; text-decoration: none; color: var(--muted); font-weight: 600; font-size: 15px; padding: 10px 14px; border-bottom: 3px solid transparent; }
+  nav.onglets a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--felt); }
+  nav.onglets a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus-visible { outline: 3px solid var(--felt); outline-offset: 2px; }
+
+  .vue { display: flex; flex-direction: column; gap: 16px; }
+  .vue > h2 { margin: 0; font-size: 22px; line-height: 1.2; text-wrap: balance; }
+  .intro { margin: 0; color: var(--muted); max-width: 65ch; }
+  .rang { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+  button { font: inherit; font-weight: 600; font-size: 15px; border-radius: 10px; padding: 10px 16px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+  button.principal { background: var(--felt); border-color: var(--felt); color: var(--felt-ink); }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  button.ok { border-color: var(--felt); color: var(--felt); }
+  button.partiel { border-color: var(--warn); color: var(--warn); }
+  button.faux { border-color: var(--red); color: var(--red); }
+  select, input[type="search"] { font: inherit; font-size: 15px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+
+  .panneau { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .panneau h3 { margin: 0; font-size: 17px; }
+  .compte { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 15px; }
+  .compte b { font-variant-numeric: tabular-nums; }
+
+  /* la carte de question */
+  .carte { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 2px 0 var(--line); }
+  .carte-tete { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .puce { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--felt-soft); color: var(--ink); }
+  .puce.fichier { font-family: var(--font-code); font-weight: 400; background: var(--code-bg); }
+  .puce.proba { background: transparent; border: 1px solid var(--line); color: var(--muted); }
+  .puce.rougeq { background: var(--red-soft); color: var(--red); }
+  .progression { margin-left: auto; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .question { margin: 0; font-size: 20px; line-height: 1.35; font-weight: 600; text-wrap: balance; }
+  pre.code { margin: 0; background: var(--code-bg); border-radius: 10px; padding: 12px 14px; overflow-x: auto; font-family: var(--font-code); font-size: 13.5px; line-height: 1.5; }
+  code { font-family: var(--font-code); font-size: 0.9em; background: var(--code-bg); padding: 1px 5px; border-radius: 5px; }
+  pre.code code { background: none; padding: 0; font-size: inherit; }
+  .rc { color: var(--red); }
+  label.etiquette { font-size: 13px; font-weight: 600; color: var(--muted); }
+  textarea { font: inherit; font-size: 15px; width: 100%; min-height: 76px; resize: vertical; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+  p.etiquette { margin: 0; }
+  button.retourner { border-color: var(--felt); }
+  .dos { font-family: var(--font-code); color: var(--muted); background: var(--code-bg); border-radius: 10px; padding: 14px; font-size: 14px; letter-spacing: 0.15em; overflow: hidden; white-space: nowrap; text-align: center; }
+  .reponse { border-top: 1px dashed var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 12px; }
+  .reponse p { margin: 0; max-width: 70ch; }
+  .reponse .titre { font-size: 13px; font-weight: 700; color: var(--felt); text-transform: uppercase; letter-spacing: 0.06em; }
+  .piege { background: var(--red-soft); border-radius: 10px; padding: 10px 12px; }
+  .piege b { color: var(--red); }
+  .raccourcis { font-size: 12px; color: var(--muted); }
+  .minuteur { height: 8px; border-radius: 999px; background: var(--code-bg); overflow: hidden; }
+  .minuteur > div { height: 100%; background: var(--felt); width: 100%; transition: width 0.25s linear; }
+  .minuteur.fin > div { background: var(--red); }
+  .gros-chrono { font-size: 40px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+  .depasse { color: var(--red); }
+
+  /* fiches */
+  .fiche { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+  .fiche summary { cursor: pointer; display: flex; gap: 10px; align-items: baseline; font-weight: 600; list-style: none; }
+  .fiche summary::-webkit-details-marker { display: none; }
+  .fiche summary .q { flex: 1; min-width: 0; }
+  .fiche .corps { padding-top: 10px; display: flex; flex-direction: column; gap: 10px; }
+  .fiche .corps p { margin: 0; }
+  .groupe-titre { margin: 8px 0 0; font-size: 15px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .etat-pastille { flex: none; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--code-bg); color: var(--muted); }
+  .etat-pastille.fondation { background: var(--felt-soft); color: var(--felt); }
+  .etat-pastille.rouge { background: var(--red-soft); color: var(--red); }
+
+  /* script */
+  .diapo { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }
+  .diapo.courante { border-color: var(--felt); box-shadow: 0 0 0 2px var(--felt-soft); }
+  .diapo .ligne1 { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+  .diapo .num { font-family: var(--font-code); color: var(--muted); font-size: 14px; }
+  .diapo h3 { margin: 0; font-size: 17px; flex: 1; min-width: 0; }
+  .qui { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--felt-soft); }
+  .qui.jules { background: var(--warn-soft); }
+  .duree { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .texte { white-space: pre-line; margin: 0; max-width: 70ch; }
+  .diapo a { color: var(--felt); font-size: 14px; font-weight: 600; }
+  table.temps { border-collapse: collapse; width: 100%; font-size: 14px; }
+  table.temps th, table.temps td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  table.temps td.n { font-variant-numeric: tabular-nums; text-align: right; }
+  .tableau { overflow-x: auto; }
+
+  /* plan */
+  .jour { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .jour.aujourdhui { border-color: var(--felt); box-shadow: 0 0 0 2px var(--felt-soft); }
+  .jour.passe { opacity: 0.7; }
+  .jour h3 { margin: 0; font-size: 16px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .jour h3 .badge { font-size: 12px; color: var(--felt); font-weight: 700; }
+  .tache { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; }
+  .tache input { margin-top: 4px; width: 18px; height: 18px; accent-color: var(--felt); flex: none; }
+  .tache.fait span { text-decoration: line-through; color: var(--muted); }
+  .note { font-size: 13px; color: var(--muted); }
+
+  @media (max-width: 560px) {
+    .piles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .question { font-size: 18px; }
+    .gros-chrono { font-size: 32px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .minuteur > div { transition: none; } }
+</style>
+
+<div class="app">
+  <header class="tete">
+    <div>
+      <h1>Prépa soutenance</h1>
+      <p>Le Solitaire · Mattias et Jules · L3 MIAGE</p>
+    </div>
+    <div class="chips">
+      <span class="chip j" id="compte-a-rebours">J-7</span>
+      <span class="chip statut" id="statut" data-mode="navigateur">Progression : dans ce navigateur</span>
+    </div>
+  </header>
+
+  <div class="piles" aria-label="Où en sont tes cartes">
+    <div class="pile"><span class="glyphe">[░░]</span><span class="nb" id="nb-pioche">0</span><span class="lib">Pioche : jamais vues</span></div>
+    <div class="pile"><span class="glyphe">[ ? ]</span><span class="nb" id="nb-colonnes">0</span><span class="lib">Colonnes : en cours</span></div>
+    <div class="pile fond"><span class="glyphe">[ a♦ ]</span><span class="nb" id="nb-fondations">0</span><span class="lib">Fondations : sues</span></div>
+    <div class="pile rouges"><span class="glyphe">[ ♥ ]</span><span class="nb" id="nb-rouges">0</span><span class="lib">Cartes rouges : fausses alors que tu étais sûr</span></div>
+  </div>
+
+  <nav class="onglets" aria-label="Sections">
+    <a href="#seance" id="o-seance">Séance du jour</a>
+    <a href="#oral" id="o-oral">Oral blanc</a>
+    <a href="#script" id="o-script">Script</a>
+    <a href="#plan" id="o-plan">Plan jusqu’au 6/11</a>
+    <a href="#fiches" id="o-fiches">Fiches</a>
+  </nav>
+
+  <main>
+    <section class="vue" id="v-seance"></section>
+    <section class="vue" id="v-oral" hidden></section>
+    <section class="vue" id="v-script" hidden></section>
+    <section class="vue" id="v-plan" hidden></section>
+    <section class="vue" id="v-fiches" hidden></section>
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- dates ---------- */
+  function dateLocale(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function versDate(s) { var p = s.split("-").map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+  function ajouterJours(s, n) { var d = versDate(s); d.setDate(d.getDate() + n); return dateLocale(d); }
+  function joursEntre(a, b) { return Math.round((versDate(b) - versDate(a)) / 86400000); }
+  var AUJ = dateLocale(new Date());
+  var EXAMEN = "2026-11-06";
+  var VEILLE = "2026-11-05";
+  var DECK = "https://claude.ai/artifact/2KnRT7MPrF2fyRRiivtwMV";
+
+  /* ---------- les questions ---------- */
+  var THEMES = {
+    sujet: "Le sujet et nos choix",
+    donnees: "Structures de données",
+    affichage: "Affichage",
+    coups: "Déplacements et vérifications",
+    pioche: "Pioche et niveaux",
+    sauvegarde: "Sauvegarde, annuler, victoire",
+    ordi: "L’ordinateur : h, ia, fin auto",
+    python: "Pièges Python"
+  };
+  var PROBA = { 3: "très probable", 2: "probable", 1: "possible" };
+
+  var Q = [
+    { id: "s1", t: "sujet", f: "sujet", p: 3, q: "Pourquoi n’avez-vous pas utilisé de classes ?",
+      r: "Parce que le sujet l’interdit : il faut utiliser les structures vues en cours, tuple, liste et dictionnaire. Tout le jeu tient donc dans des listes (les piles), des dictionnaires (`piles`, `cachees`, `index`) et des tuples (ce que renvoient plusieurs fonctions, comme `verif_coup`).",
+      pg: "Ne dites pas « c’était plus simple » : c’est une consigne du sujet." },
+    { id: "s2", t: "sujet", f: "tous les fichiers", p: 3, q: "Donnez la liste des modules ou librairies Python que vous avez utilisés.",
+      r: "Quatre modules fournis avec Python, rien à installer : `random` (shuffle pour mélanger le paquet), `json` (dump et load pour la sauvegarde), `os` (`system(\"\")` pour les couleurs sous Windows, `path.exists` pour savoir si une sauvegarde existe) et `time` (sleep pour l’animation de victoire et pour laisser voir les coups de l’ordinateur).",
+      pg: "Si `from operator import truediv` est encore dans verif_colonne.py, le prof peut demander à quoi il sert : à rien, c’est un import ajouté par erreur. À supprimer avant le rendu." },
+    { id: "s3", t: "sujet", f: "main.py", p: 2, q: "Comment est organisé votre programme ? Pourquoi plusieurs fichiers ?",
+      r: "Un fichier par grande fonction : l’affichage, le déplacement, chaque vérification, la pioche, la sauvegarde, les coups possibles… `main.py` importe le tout et contient la boucle du jeu. Ça nous a permis de travailler à deux en même temps, chacun sur ses fichiers.",
+      pg: "Savoir dire le rôle de chaque fichier : c’est l’annexe A du dossier." },
+    { id: "s4", t: "sujet", f: "git", p: 2, q: "Comment avez-vous travaillé à deux ?",
+      r: "Avec git et GitHub : une branche chacun (mattias et jules), des commits réguliers, puis une pull request pour fusionner dans main. Avant de toucher à un fichier, on récupère la dernière version avec `git pull origin main`." },
+    { id: "s5", t: "sujet", f: "partie_gagnante.txt", p: 1, q: "Comment vérifiez-vous rapidement que le jeu marche toujours après une modification ?",
+      r: "On lance `python3 main.py < partie_gagnante.txt` : le fichier envoie au jeu toutes les saisies d’une partie gagnée, à la place du clavier. Le jeu doit finir par « Partie gagnée en 95 coups ! ».",
+      pg: "Le `<` redirige le fichier vers les `input()` du programme." },
+    { id: "s6", t: "sujet", f: "sujet", p: 2, q: "Si vous aviez plus de temps, qu’amélioreriez-vous ?",
+      r: "Une commande pour quitter pendant la partie, accepter les majuscules dans les saisies, annuler plusieurs coups (garder une liste de copies au lieu d’une seule), et un ordinateur plus fort qui prévoit plusieurs coups à l’avance." },
+    { id: "s7", t: "sujet", f: "main.py", p: 1, q: "Comment quitter une partie en cours ?",
+      r: "Il n’y a pas encore de commande pour quitter pendant la partie : on tape `sauvegarde`, puis on ferme le terminal. Au prochain lancement, le choix 2 du menu reprend la partie.",
+      pg: "Le dire franchement, et le citer comme amélioration possible." },
+
+    { id: "d1", t: "donnees", f: "jeu_depart.py", p: 3, q: "Comment représentez-vous une carte ?",
+      r: "Par un texte : la valeur, puis la famille en deux lettres. `\"7tr\"` = 7 de trèfle, `\"10co\"` = 10 de cœur, `\"dpi\"` = dame de pique. Valeurs : a, 2 à 10, v, d, r. Familles : pi, co, ca, tr." },
+    { id: "d2", t: "donnees", f: "verif_colonne.py", p: 3, q: "Que donnent `carte[:-2]` et `carte[-2:]` pour `\"10co\"` ? Pourquoi couper par la fin ?",
+      r: "`carte[:-2]` donne `\"10\"` (la valeur) et `carte[-2:]` donne `\"co\"` (la famille). La famille fait toujours deux lettres, alors que la valeur fait un ou deux caractères : en coupant par la fin, ça marche pour toutes les cartes.",
+      pg: "`carte[0]` ne marche pas pour le 10 : on obtiendrait `\"1\"`." },
+    { id: "d3", t: "donnees", f: "jeu_depart.py", p: 3, q: "Quelle est la structure de données de la pioche, de la défausse, des colonnes et des fondations ?",
+      r: "Un seul dictionnaire `piles` : la clé est le nom de la pile (`\"p\"`, `\"d\"`, `\"c1\"` à `\"c7\"`, `\"fca\"`, `\"fpi\"`, `\"fco\"`, `\"ftr\"`) et la valeur est la liste de ses cartes. Dans toutes les listes, la dernière carte est celle du dessus.",
+      pg: "C’est la rubrique 1 du dossier : savoir dire, pour chacun des 4 éléments, ce que contient sa liste." },
+    { id: "d4", t: "donnees", f: "jeu_depart.py", p: 3, q: "Pourquoi la dernière carte de la liste est-elle la carte du dessus ?",
+      r: "Parce que tout se fait sur la fin de la liste : `piles[nom][-1]` lit le dessus, `pop()` le retire, `append()` pose une carte dessus. Pour la pioche, la prochaine carte piochée est donc la dernière de la liste." },
+    { id: "d5", t: "donnees", f: "jeu_depart.py", p: 3, q: "À quoi sert le dictionnaire `cachees` ? Pourquoi un nombre, et pas une liste de True et False ?",
+      r: "`cachees` donne, pour chaque colonne, le nombre de cartes face cachée. Dans une colonne, les cartes cachées sont toujours en dessous des visibles, donc un seul nombre suffit : une carte est cachée si sa position est plus petite que `cachees[colonne]`." },
+    { id: "d6", t: "donnees", f: "jeu_depart.py", p: 3, q: "À quoi sert `index` ?",
+      r: "`index` associe chaque carte à la pile où elle se trouve : `index[\"5ca\"]` vaut `\"c6\"`. Quand le joueur tape `5ca-c4`, on trouve la pile de départ tout de suite, sans chercher dans les 13 piles. En contrepartie, il faut le mettre à jour à chaque déplacement et à chaque pioche." },
+    { id: "d7", t: "donnees", f: "deplacement.py", p: 2, q: "Que se passerait-il si on oubliait de mettre `index` à jour après un déplacement ?",
+      r: "`index` dirait que la carte est encore dans son ancienne pile. Au coup suivant avec cette carte, `piles[depart].index(carte)` la chercherait dans la mauvaise liste, et le programme planterait (ValueError). C’est pour ça que `deplacement` fait `for c in morceau: index[c] = destination`." },
+    { id: "d8", t: "donnees", f: "verif_fondations.py", p: 2, q: "Pourquoi le nom de chaque fondation finit-il par sa famille (fca, fpi, fco, ftr) ?",
+      r: "Pour vérifier la famille sans table de correspondance : `destination[-2:]` donne la famille attendue, qu’on compare à `carte[-2:]`." },
+    { id: "d9", t: "donnees", f: "jeu_depart.py", p: 2, q: "Comment distribuez-vous les cartes d’une nouvelle partie ?",
+      code: `nbr_colonne = 1
+while nbr_colonne <= 7:
+    distrib_par_colonne = 1
+    while distrib_par_colonne <= nbr_colonne:
+        distrib = paquet_jeu.pop()
+        piles_jeu["c"+str(nbr_colonne)].append(distrib)
+        distrib_par_colonne = distrib_par_colonne + 1
+    cachees_jeu["c"+str(nbr_colonne)] = nbr_colonne - 1
+    nbr_colonne = nbr_colonne + 1`,
+      r: "`nouvelle_partie` copie le paquet avec `list(paquet)` et le mélange avec `random.shuffle`. Deux `while` imbriqués posent n cartes dans la colonne n (de 1 à 7), avec `pop()` ; toutes sont cachées sauf la dernière, donc `cachees[\"cn\"]` vaut n - 1. Les 24 cartes restantes vont dans la pioche, puis deux `for` remplissent `index`." },
+    { id: "d10", t: "donnees", f: "sauvegarder.py", p: 2, q: "Que contient le fichier de sauvegarde ?",
+      r: "Un dictionnaire écrit en JSON dans `sauvegarde.json`, avec 5 clés : `piles`, `cachees`, `index`, `nbr_coup` et `difficulte`. JSON n’écrit qu’un seul objet, donc on range tout dans un seul dictionnaire." },
+    { id: "d11", t: "donnees", f: "verif_gagnee.py", p: 2, q: "Comment le programme sait-il que la partie est gagnée ?",
+      r: "`verif_gagnee` compte les fondations qui ont 13 cartes ; s’il y en a 4, elle renvoie True. La boucle de `main.py` tourne tant que `verif_gagnee(piles) == False`, puis lance l’animation de victoire." },
+    { id: "d12", t: "donnees", f: "plusieurs fichiers", p: 1, q: "Où utilisez-vous des tuples ?",
+      r: "Pour les valeurs renvoyées par plusieurs fonctions : `verif_coup` renvoie `(carte, destination)`, `nouvelle_partie` renvoie `(piles, cachees, index)`, `recharger_partie` renvoie 5 valeurs. On les récupère en une ligne : `piles, cachees, index = nouvelle_partie()`." },
+
+    { id: "a1", t: "affichage", f: "affichage.py", p: 2, q: "Comment affichez-vous les 7 colonnes à la verticale, côte à côte ?",
+      code: `for ligne in range(hauteur):
+    texte = ""
+    for c in colonnes:
+        colonne = piles[c]
+        if len(colonne) == 0 and ligne == 0:
+            texte = texte + case(vide, gris)
+        elif ligne >= len(colonne):
+            texte = texte + " " * largeur
+        elif ligne < cachees[c]:
+            texte = texte + case(dos, gris)
+        else:
+            texte = texte + case_carte(colonne[ligne])
+    print(texte)`,
+      r: "On écrit l’écran ligne par ligne. On cherche la hauteur de la plus longue colonne, puis pour chaque ligne on prend, dans chaque colonne, la carte de cet indice : une case vide si la colonne est vide, des espaces si elle est plus courte, `[░░]` si la carte est cachée, sinon la carte." },
+    { id: "a2", t: "affichage", f: "affichage.py", p: 2, q: "Comment votre jeu tient-il en moins de 20 × 60 caractères au démarrage ?",
+      r: "Chaque case fait 8 caractères (`largeur = 8`) et il y a 7 colonnes : 56 caractères de large. Au démarrage, le plateau fait 18 lignes en comptant l’invite. La ligne d’aide a été raccourcie exprès (« h : coups », « ia : auto ») pour tenir dans les 56 caractères." },
+    { id: "a3", t: "affichage", f: "affichage.py", p: 1, q: "Comment mettez-vous les cartes en couleur ?",
+      r: "Avec les codes couleur ANSI du terminal : `rouge = \"\\033[31m\"`, `gris = \"\\033[90m\"`, `normal = \"\\033[0m\"`. Une carte de cœur ou de carreau est écrite entre `rouge` et `normal`. Sous Windows, `os.system(\"\")` active ces codes." },
+    { id: "a4", t: "affichage", f: "affichage.py", p: 2, q: "Pourquoi le plateau ne défile-t-il pas à chaque coup ?",
+      r: "Avant chaque affichage, on écrit `effacer = \"\\033[2J\\033[H\"` : ça efface l’écran et remonte le curseur en haut. Le plateau est redessiné au même endroit." },
+    { id: "a5", t: "affichage", f: "affichage.py", p: 2, q: "Comment la défausse affiche-t-elle 1, 2 ou 3 cartes selon le niveau ?",
+      r: "`afficher_defausse` prend les dernières cartes avec `defausse[-difficulte:]`. Seule la dernière est jouable : elle est en couleur, les autres en gris. La fonction compte la largeur des cartes sans les codes couleur, pour compléter avec des espaces et garder les fondations alignées.",
+      pg: "`defausse[-3:]` marche même si la défausse n’a qu’une ou deux cartes : la tranche renvoie ce qu’il y a." },
+    { id: "a6", t: "affichage", f: "affichage.py", p: 1, q: "Que renvoie `nom_carte(\"10co\")` ?",
+      r: "`\"[10♥]\"` : la fonction remplace les deux lettres de la famille par le symbole, puis ajoute les crochets." },
+    { id: "a7", t: "affichage", f: "affichage.py", p: 1, q: "Pourquoi `afficher` a-t-elle besoin de `difficulte` ?",
+      r: "Pour la défausse en éventail : selon le niveau, on montre 1, 2 ou 3 cartes. C’est pour ça que tous les appels sont `afficher(piles, cachees, difficulte)`." },
+
+    { id: "c1", t: "coups", f: "deplacement.py", p: 3, q: "Expliquez ce qui se passe quand le joueur tape `5ca-c4`.",
+      r: "`verif_coup` découpe la saisie en `(\"5ca\", \"c4\")`. `index` donne le départ `\"c6\"`, `piles[\"c6\"].index(\"5ca\")` la position 5, et le morceau vaut `piles[\"c6\"][5:]`. On vérifie la carte (`verif_carte`), puis l’arrivée (`verif_colonne`). Ensuite `del` retire le morceau, `extend` le pose sur c4 et `index` est mis à jour. Comme c6 n’a plus que des cartes cachées, `cachees[\"c6\"]` passe de 5 à 4 : le 3♥ se retourne." },
+    { id: "c2", t: "coups", f: "deplacement.py", p: 3, q: "Comment déplacez-vous plusieurs cartes d’un coup ?",
+      code: `morceau = piles[depart][position:]
+...
+del piles[depart][position:]
+piles[destination].extend(morceau)
+for c in morceau:
+    index[c] = destination`,
+      r: "Le morceau est `piles[depart][position:]` : la carte demandée et toutes celles posées dessus. On le retire avec `del piles[depart][position:]` et on le pose d’un bloc avec `piles[destination].extend(morceau)`. Le joueur tape seulement la première carte du groupe.",
+      pg: "`append(morceau)` mettrait une liste dans la liste ; `extend` ajoute les cartes une par une." },
+    { id: "c3", t: "coups", f: "deplacement.py", p: 3, q: "Dans quel ordre se font les vérifications d’un déplacement ?",
+      r: "1. `verif_coup` : la forme de la saisie (un seul tiret, une carte et une pile qui existent). 2. `verif_carte` : la carte a le droit de bouger. 3. `verif_colonne` si l’arrivée est une colonne, ou `verifier_fondation` si c’est une fondation. Au premier refus, on affiche la raison, rien ne bouge et le coup n’est pas compté." },
+    { id: "c4", t: "coups", f: "verif_colonne.py", p: 3, q: "Quelles règles vérifie `verif_colonne` ?",
+      code: `if position_carte != position_destination - 1:
+    if parler:
+        print("Seul une carte inférieur a la carte de destination est autorisé")
+    return False`,
+      r: "Sur une colonne vide, seul un roi peut aller. Sinon, la carte doit être de couleur différente de la dernière carte de la colonne, et sa valeur juste en dessous : `position_carte == position_destination - 1` dans la liste ordonnée des valeurs." },
+    { id: "c5", t: "coups", f: "verif_fondations.py", p: 3, q: "Quelles règles vérifie `verifier_fondation` ?",
+      r: "La famille de la carte doit être celle de la fondation : `carte[-2:] == destination[-2:]`. Sur une fondation vide, seul un as est accepté. Sinon, la valeur doit être juste au dessus de la dernière carte de la fondation." },
+    { id: "c6", t: "coups", f: "verif_carte.py", p: 3, q: "Que vérifie `verif_carte` ?",
+      r: "Que la carte a le droit de bouger : elle n’est pas dans la pioche, elle n’est pas face cachée (`position < cachees[depart]`), c’est la carte du dessus si elle est dans la défausse ou une fondation, et on ne pose qu’une seule carte à la fois sur une fondation." },
+    { id: "c7", t: "coups", f: "verif_colonne.py", p: 2, q: "Comment savez-vous qu’une carte est rouge ?",
+      r: "Sa famille, `carte[-2:]`, est dans la liste `rouge = [\"ca\", \"co\"]`. Deux cartes ont la même couleur si elles sont toutes les deux rouges, ou toutes les deux noires : dans ce cas, le coup est refusé." },
+    { id: "c8", t: "coups", f: "verif_colonne.py", p: 2, q: "Comment comparez-vous des valeurs comme v, d et r, qui ne sont pas des nombres ?",
+      r: "Avec une liste ordonnée `[\"a\", \"2\", …, \"10\", \"v\", \"d\", \"r\"]` : `valeur.index(carte[:-2])` donne la place de la carte. Le 7 est à la place 6, le 8 à la place 7 : on compare les places." },
+    { id: "c9", t: "coups", f: "verif_coup.py", p: 2, q: "Que se passe-t-il si le joueur tape « 5ca c4 » ou « 5ca-c4-c5 » ?",
+      r: "Sans tiret, `verif_coup` affiche « Il faut un tiret(-) entre la carte et le deplacement ». Avec deux tirets, `move.count(\"-\") != 1`, donc « Ce mouvement n’existe pas ». Dans les deux cas elle renvoie False : rien ne bouge et le coup n’est pas compté." },
+    { id: "c10", t: "coups", f: "verif_carte.py", p: 2, q: "Pourquoi une seule carte à la fois vers une fondation ?",
+      r: "Une fondation monte de un en un, dans une seule famille. Un morceau de plusieurs cartes alterne les couleurs : il ne peut pas y aller en entier. `verif_carte` refuse si `destination[0] == \"f\"` et `len(morceau) > 1`." },
+    { id: "c11", t: "coups", f: "deplacement.py", p: 3, q: "Que renvoie `deplacement` ? Pourquoi pas seulement True ou False ?",
+      r: "True pour un coup joué, False pour un refus ou une commande qui ne change rien (h, ?, sauvegarde), `\"pioche\"` pour p, et `\"annuler\"` ou `\"ia\"` pour prévenir `main.py`. `main.py` doit savoir ce qui s’est passé : seul True compte un coup, et une pioche change le plateau sans compter de coup, mais doit pouvoir s’annuler." },
+    { id: "c12", t: "coups", f: "deplacement.py", p: 2, q: "Comment une carte cachée se retourne-t-elle ?",
+      code: `if depart in cachees:
+    if len(piles[depart]) > 0 and len(piles[depart]) == cachees[depart]:
+        cachees[depart] = cachees[depart] - 1`,
+      r: "Après un déplacement depuis une colonne, si la colonne n’est pas vide et n’a plus que des cartes cachées, on enlève 1 à `cachees[depart]` : la carte du dessus devient visible." },
+    { id: "c13", t: "coups", f: "verif_carte.py", p: 1, q: "Peut-on redescendre une carte d’une fondation vers une colonne ?",
+      r: "Oui : `verif_carte` accepte la carte du dessus d’une fondation, et `verif_colonne` vérifie la couleur et la valeur comme pour les autres cartes. C’est la ligne « Fondation vers Colonne » de la grille." },
+    { id: "c14", t: "coups", f: "verif_coup.py", p: 1, q: "Que se passe-t-il si le joueur tape la carte en majuscules, `5CA-c4` ?",
+      r: "`\"5CA\"` n’est pas dans le paquet, qui est en minuscules : `verif_coup` affiche « La carte n’existe pas » et refuse. On pourrait améliorer ça avec `move.lower()`." },
+    { id: "c15", t: "coups", f: "deplacement.py", p: 1, q: "Pourquoi `deplacement` appelle-t-il `verif_coup` deux fois ?",
+      r: "La première fois pour tester si la saisie est bonne (`== False`), la deuxième pour récupérer le tuple `carte, destination`. Ça marche, mais on aurait pu ranger le résultat dans une variable et ne l’appeler qu’une fois.",
+      pg: "Le prof peut le remarquer : reconnaître que c’est améliorable est une bonne réponse." },
+
+    { id: "p1", t: "pioche", f: "pioche.py", p: 3, q: "Comment marche la commande `p` ?",
+      code: `if len(pioche) > 0:
+    i=1
+    while i <= difficulte:
+        if len(pioche) == 0:
+            break
+        carte = pioche.pop()
+        defausse.append(carte)
+        index[carte] = "d"
+        i=i+1
+else:
+    while len(defausse) > 0:
+        carte = defausse.pop()
+        pioche.append(carte)
+        index[carte] = "p"`,
+      r: "S’il reste des cartes dans la pioche, on fait `difficulte` fois : `pop()` sur la pioche, `append()` sur la défausse, et `index[carte] = \"d\"` (la boucle s’arrête si la pioche se vide). Si la pioche est vide, on remet toute la défausse dans la pioche, carte par carte depuis le dessus, et `index` repasse à `\"p\"`." },
+    { id: "p2", t: "pioche", f: "pioche.py", p: 2, q: "Quand la pioche est retournée, dans quel ordre reviennent les cartes ?",
+      r: "Dans l’ordre d’avant : on reprend la défausse par le dessus et on empile dans la pioche, donc la dernière carte piochée se retrouve tout en dessous, et la première piochée revient sur le dessus." },
+    { id: "p3", t: "pioche", f: "menu.py", p: 3, q: "Quels sont vos niveaux de jeu, et comment fonctionnent-ils dans le code ?",
+      r: "Choix 3 du menu : facile, moyen ou difficile, soit 1, 2 ou 3 cartes tirées à chaque pioche. `choisir_difficulte` renvoie `int(choix)`, et `piocher` s’en sert directement dans `while i <= difficulte`. Le niveau est aussi gardé dans la sauvegarde." },
+    { id: "p4", t: "pioche", f: "pioche.py", p: 2, q: "Pourquoi tirer 3 cartes rend-il le jeu plus difficile ?",
+      r: "Seule la carte du dessus de la défausse est jouable, les deux autres sont bloquées. Avec 24 cartes et 3 par pioche, si on ne joue rien, ce sont toujours les 8 mêmes cartes qui arrivent sur le dessus. L’ordinateur le montre : il gagne 41 % des parties en facile, mais 11 % en difficile." },
+    { id: "p5", t: "pioche", f: "menu.py", p: 1, q: "Pourquoi `choisir_difficulte` renvoie-t-elle `int(choix)` et pas `choix` ?",
+      r: "`input()` renvoie un texte, par exemple `\"3\"`. `piocher` compare `i <= difficulte` et l’affichage fait `defausse[-difficulte:]` : il faut un nombre." },
+    { id: "p6", t: "pioche", f: "pioche.py", p: 1, q: "Que se passe-t-il si on tape `p` alors que la pioche et la défausse sont vides ?",
+      r: "On passe dans le `else`, mais la boucle `while len(defausse) > 0` ne tourne pas : rien ne change. Et `h` ne propose plus `p` dans ce cas." },
+    { id: "p7", t: "pioche", f: "menu.py", p: 1, q: "Dans le menu, pourquoi `noms_difficulte[difficulte - 1]` ?",
+      r: "`difficulte` vaut 1, 2 ou 3, mais les indices d’une liste commencent à 0 : le niveau 1 est `noms_difficulte[0]`, c’est-à-dire `\"facile\"`." },
+
+    { id: "v1", t: "sauvegarde", f: "sauvegarder.py", p: 3, q: "Comment fonctionne la sauvegarde, puis la reprise ?",
+      r: "`sauvegarde` appelle `sauvegarder` : on range `piles`, `cachees`, `index`, le nombre de coups et le niveau dans un dictionnaire, que `json.dump` écrit dans `sauvegarde.json` ouvert en `\"w\"`. Au lancement, le choix 2 appelle `recharger_partie`, qui relit le fichier avec `json.load` et renvoie les 5 valeurs." },
+    { id: "v2", t: "sauvegarde", f: "sauvegarder.py", p: 2, q: "Pourquoi ouvrir le fichier en `\"r\"` pour recharger, et surtout pas en `\"w\"` ?",
+      r: "`\"w\"` vide le fichier dès l’ouverture : on perdrait la sauvegarde. `\"r\"` l’ouvre seulement en lecture." },
+    { id: "v3", t: "sauvegarde", f: "main.py", p: 2, q: "Que se passe-t-il si on choisit « reprendre » sans sauvegarde ?",
+      r: "`sauvegarde_existe()` utilise `os.path.exists` : sans fichier, le jeu affiche « Aucune partie sauvegardée » et revient au menu, grâce à la boucle `while` de `main.py`." },
+    { id: "v4", t: "sauvegarde", f: "main.py", p: 3, q: "Comment marche `annuler` ?",
+      r: "Avant chaque coup, `main.py` copie la partie (`avant_piles`, `avant_cachees`, `avant_index`, `avant_nb_coups`). Si le coup a vraiment changé le plateau (True ou `\"pioche\"`), cette copie devient la copie gardée. Quand le joueur tape `annuler`, `main.py` remet la copie gardée, puis la met à None : on ne peut annuler qu’un coup." },
+    { id: "v5", t: "sauvegarde", f: "main.py", p: 3, q: "Pourquoi copier chaque liste de `piles` une par une, alors que `dict()` suffit pour `cachees` et `index` ?",
+      code: `avant_piles = {}
+for i in piles:
+    avant_piles[i] = list(piles[i])
+avant_cachees = dict(cachees)
+avant_index = dict(index)`,
+      r: "`dict(piles)` ferait un nouveau dictionnaire, mais qui pointe vers les mêmes listes de cartes : un `pop()` sur la partie abîmerait aussi la copie. On copie donc chaque liste avec `list()`. Les valeurs de `cachees` et `index` sont des nombres et des textes, qu’on ne modifie jamais sur place : `dict()` suffit.",
+      pg: "`list(piles)` ne donne que les clés, pas les cartes." },
+    { id: "v6", t: "sauvegarde", f: "main.py", p: 3, q: "Pourquoi la copie pour annuler est-elle dans `main.py`, et pas dans `deplacement` ?",
+      r: "Les variables d’une fonction disparaissent à la fin de chaque appel : une copie faite dans `deplacement` serait perdue avant le coup suivant. Et `piles = copie` dans une fonction ne change que la variable de la fonction. `main.py` existe pendant toute la partie : c’est lui qui garde la copie et qui la remet." },
+    { id: "v7", t: "sauvegarde", f: "deplacement.py", p: 2, q: "Pourquoi `deplacement` n’a-t-il pas besoin de renvoyer `piles` ?",
+      r: "Il modifie les listes sur place (`pop`, `append`, `del`, `extend`) : ce sont les mêmes listes que celles de `main.py`, qui voit donc les changements. Il suffit de prévenir `main.py` de ce qui s’est passé." },
+    { id: "v8", t: "sauvegarde", f: "main.py", p: 1, q: "Que fait `annuler` au tout début de la partie ?",
+      r: "`copie_piles` vaut None, rien n’a encore été joué : le jeu affiche « Il n’y a rien à annuler »." },
+    { id: "v9", t: "sauvegarde", f: "victoire.py", p: 1, q: "Comment marche l’animation de victoire ?",
+      r: "On efface l’écran une fois, puis 15 fois on remonte en haut (`\\033[H`) et on réécrit les 5 lignes de VICTOIRE ; la ligne i prend la couleur `COULEURS[(i + image) % 6]`, donc les couleurs tournent. `time.sleep(0.2)` entre deux images, puis le nombre de coups s’affiche." },
+    { id: "v10", t: "sauvegarde", f: "main.py", p: 2, q: "Une pioche compte-t-elle comme un coup ? Et un coup de l’ordinateur ?",
+      r: "Une pioche, non : seul `resultat == True` fait `nb_coups += 1`. Un coup de l’ordinateur, oui : il passe par `deplacement`, exactement comme un coup du joueur." },
+
+    { id: "o1", t: "ordi", f: "coup_iav1.py", p: 3, q: "Comment l’ordinateur trouve-t-il les coups possibles ?",
+      r: "`trouver_coups` essaie chaque carte de `index`, sauf celles de la pioche, vers chacune des 11 piles d’arrivée, sauf la sienne. Pour chaque essai, il appelle les mêmes vérifications que pour le joueur : `verif_carte`, puis `verifier_fondation` ou `verif_colonne`. Si elles disent oui, il garde le coup. À la fin, il ajoute `p` s’il reste des cartes dans la pioche ou la défausse." },
+    { id: "o2", t: "ordi", f: "verif_carte.py", p: 3, q: "À quoi sert le paramètre `parler` ?",
+      code: `def verif_carte(carte, destination, cachees, morceau, index, piles, parler=True):
+    if index[carte] == "p":
+        if parler:
+            print("la carte se trouve dans la pioche")
+        return False`,
+      r: "Avec `parler=False`, `verif_carte`, `verif_colonne` et `verifier_fondation` testent sans afficher leurs messages de refus : sinon `h` afficherait des dizaines de messages, un par essai raté. `parler` vaut True par défaut, donc en jeu normal les messages s’affichent." },
+    { id: "o3", t: "ordi", f: "coup_iav1.py", p: 3, q: "Pourquoi réutiliser les fonctions de vérification, au lieu de réécrire les règles pour l’ordinateur ?",
+      r: "Un coup proposé est forcément accepté par le jeu, puisque c’est le même code qui décide. Et si on corrige une règle, l’ordinateur suit tout seul : il n’y a qu’un seul endroit à changer." },
+    { id: "o4", t: "ordi", f: "coup_iav1.py", p: 3, q: "Comment les coups sont-ils classés ? Donnez l’ordre.",
+      code: `coups = vers_fondation + retourne_carte + depuis_defausse + libere_carte + vide_colonne
+if len(piles["p"]) > 0 or len(piles["d"]) > 0:
+    coups.append("p")
+if seulement_utiles == False:
+    coups = coups + entre_colonnes + depuis_fondation`,
+      r: "Une liste par type, collées avec `+` : 1 vers une fondation, 2 retourne une carte cachée, 3 défausse vers une colonne, 4 libère une carte pour sa fondation, 5 vide une colonne pour un roi qui attend, 6 `p`, 7 les autres changements de colonne, 8 redescendre d’une fondation." },
+    { id: "o5", t: "ordi", f: "coup_iav1.py", p: 2, q: "Comment reconnaît-on un coup qui retourne une carte cachée ?",
+      r: "La carte qui part est la première visible d’une colonne qui a des cartes cachées : `position == cachees[depart]` et `position > 0`. Quand elle part avec tout ce qui est dessus, il ne reste que des cartes cachées, donc celle du dessus se retourne." },
+    { id: "o6", t: "ordi", f: "coup_iav1.py", p: 2, q: "Que veut dire « un roi attend » (rang 5) ?",
+      r: "Un roi est posé sur des cartes cachées (c’est la première carte visible d’une colonne qui en cache), ou il est sur le dessus de la défausse. Vider une colonne ne sert que dans ce cas, et seulement si aucune colonne n’est déjà vide." },
+    { id: "o7", t: "ordi", f: "coup_iav1.py", p: 2, q: "Pourquoi un roi qui est déjà la première carte de sa colonne n’est-il pas proposé vers une colonne vide ?",
+      r: "Ça ne changerait rien : on échangerait juste une colonne vide contre une autre. Il reste proposé vers sa fondation. Avant, on le sautait pour toutes les destinations, et `h` ratait le coup gagnant en fin de partie : c’était un bug, qu’on a corrigé." },
+    { id: "o8", t: "ordi", f: "coup_iav1.py", p: 2, q: "Que fait `peut_monter(carte, piles)` ?",
+      r: "Elle dit si la carte peut monter tout de suite sur la fondation de sa famille, en appelant `verifier_fondation(carte, piles, \"f\" + carte[-2:], parler=False)`. Elle sert au rang 4 : on teste la carte juste en dessous de celle qui part." },
+    { id: "o9", t: "ordi", f: "main.py", p: 3, q: "Comment l’ordinateur joue-t-il tout seul ?",
+      code: `coup_ordi = ""
+if auto == True:
+    coups = trouver_coups(piles, cachees, index, seulement_utiles=True)
+    if len(coups) > 0:
+        coup_ordi = coups[0]
+resultat = deplacement(piles, cachees, index, nb_coups, difficulte, coup_ordi)`,
+      r: "Le joueur tape `ia` : `deplacement` renvoie `\"ia\"` et `main.py` met `auto` à True. À chaque tour, `main.py` appelle `trouver_coups(..., seulement_utiles=True)` et joue le premier coup de la liste, en le passant à `deplacement` dans `coup_ordi`, au lieu de le lire avec `input()`. Chaque coup s’affiche 0,2 seconde avec « L’ordinateur a joué : … »." },
+    { id: "o10", t: "ordi", f: "main.py", p: 3, q: "Pourquoi l’ordinateur ne tourne-t-il jamais en rond ?",
+      r: "Avec `seulement_utiles=True`, la liste s’arrête après `p` : il ne joue jamais les rangs 7 et 8, ceux qui peuvent faire des allers-retours. Chaque coup qu’il joue fait monter une carte, en retourne une, vide la pioche ou prépare un de ces coups. Pour la pioche, `nb_tours` compte les fois où il retourne la défausse sans rien jouer : à 2, il s’arrête." },
+    { id: "o11", t: "ordi", f: "main.py", p: 2, q: "Pourquoi s’arrêter à la deuxième fois qu’il faut retourner la défausse, et pas à la première ?",
+      r: "La première fois, il a peut-être commencé au milieu de la pioche : il n’a pas encore tout vu. Entre le premier et le deuxième retournement, il fait un tour complet. Si rien n’a pu être joué, le tour suivant serait identique : il est bloqué, il rend la main." },
+    { id: "o12", t: "ordi", f: "main.py", p: 2, q: "Quels résultats obtient l’ordinateur ?",
+      r: "Il gagne la partie de démonstration aux trois niveaux (en 91 coups en facile). Sur 500 parties au hasard, il en gagne environ 41 % en facile, 21 % en moyen et 11 % en difficile. Quand il est bloqué, il rend la main au joueur." },
+    { id: "o13", t: "ordi", f: "verif_gagnee.py", p: 3, q: "Quand la fin automatique se déclenche-t-elle, et pourquoi la partie est-elle alors forcément gagnée ?",
+      r: "Quand `tout_est_retourne()` répond True : plus aucune carte cachée dans les colonnes, et la pioche et la défausse sont vides. La plus petite carte qui reste est forcément sur le dessus d’une colonne (les cartes posées sur elle seraient encore plus petites), et toutes les cartes plus petites de sa famille sont déjà en fondation : elle peut monter. On recommence jusqu’à la dernière." },
+    { id: "o14", t: "ordi", f: "verif_gagnee.py", p: 2, q: "Pourquoi attendre que la pioche soit vide pour la fin automatique ?",
+      r: "Avec des cartes dans la pioche, au niveau difficile, une carte peut rester coincée sous les autres et ne jamais sortir : la victoire ne serait plus garantie. Quand la pioche et la défausse sont vides, il ne reste que les colonnes, et là c’est toujours gagné." },
+    { id: "o15", t: "ordi", f: "coup_iav1.py", p: 1, q: "Pourquoi `p` est-il au rang 6, avant les autres changements de colonne ?",
+      r: "Piocher amène une nouvelle carte. Un changement de colonne qui ne retourne rien, ne libère rien et ne vide rien ne fait souvent que déplacer une carte. Et pour l’ordinateur, la liste utile s’arrête juste après `p`." },
+    { id: "o16", t: "ordi", f: "coup_iav1.py", p: 2, q: "La commande `h` peut-elle révéler une carte cachée ?",
+      r: "Non : les cartes de la pioche ne sont pas testées, et `p` est proposé sans dire quelle carte va sortir. Les cartes cachées des colonnes sont refusées par `verif_carte`." },
+    { id: "o17", t: "ordi", f: "coup_iav1.py", p: 2, q: "Comment avez-vous vérifié que l’ordinateur ne propose jamais un coup refusé ?",
+      r: "Avec un petit programme de test : il joue des parties au hasard et, à chaque tour, il essaie pour de vrai chaque coup proposé par `h`. Sur 25 parties, les 4 268 coups proposés ont tous été acceptés, et aucun coup jouable n’a été oublié." },
+
+    { id: "y1", t: "python", f: "main.py", p: 3, q: "Si `a` est une liste et qu’on écrit `b = a`, puis `b.append(x)`, que vaut `a` ?",
+      r: "`a` contient aussi x : `b = a` ne copie pas la liste, ça donne un deuxième nom à la même liste. Pour copier : `b = list(a)`. C’est le piège qu’on a dû éviter pour `annuler`." },
+    { id: "y2", t: "python", f: "main.py", p: 3, q: "Que donne `list(piles)` ?",
+      r: "La liste des clés du dictionnaire : `[\"p\", \"d\", \"c1\", …]`, sans les cartes. Ce n’est pas une copie de la partie." },
+    { id: "y3", t: "python", f: "deplacement.py", p: 2, q: "Quelle différence entre `append` et `extend` ?",
+      r: "`append` ajoute un seul élément (une liste ajoutée devient un seul élément), `extend` ajoute chaque élément d’une liste. Pour poser un morceau de cartes : `piles[destination].extend(morceau)`." },
+    { id: "y4", t: "python", f: "deplacement.py", p: 2, q: "Que fait `del piles[depart][position:]` ?",
+      r: "Il supprime de la liste toutes les cartes à partir de l’indice `position`, jusqu’à la fin : on retire le morceau, qu’on a copié juste avant dans `morceau`." },
+    { id: "y5", t: "python", f: "deplacement.py", p: 2, q: "Que fait `piles[\"c6\"].index(\"5ca\")`, et que se passe-t-il si la carte n’y est pas ?",
+      r: "Il renvoie la position de la carte dans la liste (chaque carte est unique). Si la carte n’est pas dans la liste, `index()` lève une erreur, ValueError : c’est pour ça que le dictionnaire `index` doit toujours être juste." },
+    { id: "y6", t: "python", f: "jeu_depart.py", p: 2, q: "Sur quoi tourne `for i in piles` quand `piles` est un dictionnaire ?",
+      r: "Sur les clés : `\"p\"`, `\"d\"`, `\"c1\"`… Pour avoir la liste d’une pile, on écrit `piles[i]`." },
+    { id: "y7", t: "python", f: "main.py", p: 2, q: "Pourquoi `piles = copie_piles` marche-t-il dans `main.py`, alors que la même ligne dans une fonction ne changerait rien pour `main.py` ?",
+      r: "Dans `main.py`, on change la vraie variable du programme. Dans une fonction, `=` crée une variable locale du même nom, et `main.py` garde l’ancien dictionnaire. Modifier une liste reçue (pop, append) se voit partout ; la remplacer avec `=`, non." },
+    { id: "y8", t: "python", f: "jeu_depart.py", p: 2, q: "Pourquoi `nouvelle_partie` fait-elle `paquet_jeu = list(paquet)` avant de distribuer ?",
+      r: "Parce qu’elle vide `paquet_jeu` avec `pop()`. Sans copie, c’est la liste `paquet` elle-même qui serait vidée, et `verif_coup`, qui vérifie qu’une carte tapée est dans `paquet`, refuserait toutes les cartes." },
+    { id: "y9", t: "python", f: "main.py", p: 1, q: "Pourquoi écrire `copie_piles is None` ?",
+      r: "None veut dire « rien à annuler ». `is` compare l’identité ; c’est la façon normale de tester None en Python." },
+    { id: "y10", t: "python", f: "victoire.py", p: 1, q: "À quoi sert `if __name__ == \"__main__\":` dans victoire.py ?",
+      r: "Ce bloc ne s’exécute que si on lance victoire.py tout seul (`python victoire.py`), pour tester l’animation. Quand `main.py` importe victoire, il ne s’exécute pas." },
+    { id: "y11", t: "python", f: "menu.py", p: 2, q: "Que fait `while choix not in choix_possibles` dans le menu ?",
+      r: "Tant que le texte tapé n’est pas dans la liste `[\"1\", \"2\", \"3\", \"4\", \"5\"]`, on redemande : c’est la vérification des saisies du menu. On compare des textes, car `input()` renvoie toujours un texte." },
+    { id: "y12", t: "python", f: "verif_coup.py", p: 1, q: "Que fait `move.split(\"-\")` sur `\"5ca-c4\"` ?",
+      r: "Il coupe le texte à chaque tiret et renvoie `[\"5ca\", \"c4\"]`. Comme on a vérifié qu’il y a exactement un tiret, on peut écrire `carte, destination = move.split(\"-\")`." }
+  ];
+  var PARID = {};
+  Q.forEach(function (q) { PARID[q.id] = q; });
+
+  /* ---------- le script de la soutenance (le même que les notes du diaporama) ---------- */
+  var SCRIPT = [
+    { n: 1, titre: "Le Solitaire", qui: "Mattias", s: 30, court: true,
+      txt: "Bonjour. Nous sommes Mattias Mathevon et Jules Damour, et nous allons vous présenter notre Solitaire en mode texte, écrit en Python.\nLe plan : on vous montre d’abord comment le jeu est construit, puis on fait deux démonstrations. Une partie jouée à la main, puis l’ordinateur qui joue tout seul. Le dossier papier reprend tout, avec les détails.\nÀ droite, c’est le vrai plateau au démarrage : 18 lignes sur 56 caractères." },
+    { n: 2, titre: "Les 23 lignes de la grille sont faites", qui: "Jules", s: 45, court: true,
+      txt: "Voici ce que nous avons réalisé, rangé comme dans votre grille.\nAffichage : les cartes avec leur valeur et leur couleur, les cartes retournées, le nombre de cartes de la pioche et de la défausse, les colonnes à la verticale, et un plateau qui tient en 18 lignes sur 56 caractères au démarrage.\nDéplacements : les cinq types, et plusieurs cartes d’un coup.\nJouabilité : une seule saisie par commande, toutes les saisies vérifiées, trois niveaux, la sauvegarde et la reprise, une aide, la victoire détectée et l’annulation.\nEt pour l’IA : l’ordinateur propose les coups, les classe, et sait jouer tout seul.\nToutes les lignes sont faites, et on va vous les montrer en direct." },
+    { n: 3, titre: "Les données : listes et dictionnaires", qui: "Mattias", s: 90, court: true,
+      txt: "Le sujet interdit les classes : tout repose donc sur des listes, des dictionnaires et des tuples.\nUne carte, c’est un texte : la valeur, puis la famille en deux lettres. 7tr, c’est le 7 de trèfle. Comme la famille fait toujours deux lettres, carte[:-2] donne la valeur et carte[-2:] la famille, même pour le 10.\nLes 13 piles sont dans un seul dictionnaire, piles : la pioche p, la défausse d, les colonnes c1 à c7, et une fondation par famille. Chaque pile est une liste, avec une règle pour toutes : la dernière carte de la liste est la carte du dessus. On la lit avec [-1], on l’enlève avec pop, on en pose une avec append.\nÀ côté, deux dictionnaires. cachees donne le nombre de cartes face cachée dans chaque colonne : elles sont toujours en dessous, donc un nombre suffit. Et index dit, pour chaque carte, dans quelle pile elle est : quand le joueur tape une carte, on sait tout de suite où la chercher." },
+    { n: 4, titre: "Un coup en cinq étapes : 5ca-c4", qui: "Mattias", s: 60, court: false,
+      txt: "Voici ce qui se passe pour un coup : 5ca-c4, le 5 de carreau sur le 6 de trèfle.\nUn : verif_coup coupe la saisie au tiret et renvoie le tuple carte, destination.\nDeux : index donne la pile de départ, c6, et la méthode index de la liste donne la position, 5.\nTrois : le morceau, c’est la carte et tout ce qui est posé dessus, piles[\"c6\"][5:]. C’est grâce à ça qu’on déplace plusieurs cartes d’un coup.\nQuatre : les vérifications. Jules va vous les détailler juste après.\nCinq : del retire le morceau de c6, extend le pose sur c4, et chaque carte déplacée change de pile dans index. Comme c6 n’a plus que des cartes cachées, cachees[\"c6\"] passe de 5 à 4 : le 3 de cœur se retourne. C’est le plateau de droite." },
+    { n: 5, titre: "Une saisie par commande, toutes vérifiées", qui: "Jules", s: 60, court: true,
+      txt: "Toutes les commandes se tapent en une seule saisie : carte-pile pour déplacer, p pour piocher, h pour les coups possibles, ia pour faire jouer l’ordinateur, annuler, sauvegarde, et le point d’interrogation pour les règles.\nChaque déplacement passe par des vérifications, dans cet ordre. D’abord verif_coup, la forme de la saisie : un seul tiret, une carte et une pile qui existent. Puis verif_carte : la carte a le droit de bouger. Elle n’est pas dans la pioche, pas cachée, et c’est celle du dessus si elle est sur la défausse ou sur une fondation. Enfin les règles de l’arrivée : verif_colonne pour une colonne, une couleur différente et une valeur juste en dessous, ou verifier_fondation pour une fondation, la même famille et une valeur juste au dessus.\nAu premier refus, le jeu dit pourquoi, et rien ne bouge. On vous le montre tout de suite." },
+    { n: 6, titre: "Démo : on joue une partie", qui: "Mattias au clavier, Jules commente", s: 210, court: true,
+      txt: "Avant de commencer : un terminal ouvert dans le dossier du projet, en grand, et un 2e onglet prêt.\n1. python3 main.py. « Voici le menu. Si je tape 7, il refuse : toutes les saisies sont vérifiées. » Taper 5 : « la partie de démonstration, toujours la même donne. »\n2. Montrer le plateau : « la pioche, 24 cartes face cachée, la défausse, les quatre fondations avec leur compteur sur 13, et les sept colonnes. Les cartes cachées sont en [░░], les cœurs et les carreaux en rouge. En bas, le rappel des commandes. »\n3. h : « l’ordinateur propose 5ca-c4, puis piocher. On y revient tout à l’heure. » Entrée.\n4. 6tr-c2 : « le 6 de trèfle sur le 8 de trèfle : refusé, même couleur. » Puis dpi-c1 : « une carte cachée : refusé aussi. Rien n’a bougé, aucun coup n’est compté. »\n5. 5ca-c4 : « le 5 de carreau va sur le 6 de trèfle, et en c6 le 3 de cœur se retourne. »\n6. annuler : « on revient avant le coup, le 3 de cœur est de nouveau caché. » Rejouer 5ca-c4.\n7. p : « on pioche le 7 de cœur. » Puis 7co-c2 : « il va de la défausse sur le 8 de trèfle. »\n8. 6tr-c2 : « le coup refusé tout à l’heure marche maintenant. Le 6 de trèfle part avec le 5 de carreau posé dessus, deux cartes d’un coup, et le 4 de carreau se retourne en c4. »\n9. ? : « l’écran des règles, avec toutes les commandes. » Entrée.\n10. sauvegarde : « la partie est enregistrée en JSON. » Dans le 2e onglet : python3 main.py, puis 2 : « elle reprend exactement au même coup. »" },
+    { n: 7, titre: "L’ordinateur essaie tout, puis classe", qui: "Jules", s: 75, court: true,
+      txt: "Quand on tape h, l’ordinateur ne devine rien. Il essaie chaque carte sur chacune des 11 piles d’arrivée : au plus 52 fois 11, donc 572 essais, c’est instantané.\nPour chaque essai, il appelle nos fonctions de vérification, celles du joueur, avec le paramètre parler à False pour qu’elles n’affichent pas leurs messages. Du coup, un coup proposé est forcément accepté par le jeu : c’est le même code qui décide. On l’a testé sur plus de 4 000 coups.\nEnsuite, il range chaque coup dans une liste selon son type, et il colle les listes dans l’ordre avec un plus : d’abord ce qui monte sur une fondation, puis ce qui retourne une carte cachée, et ainsi de suite, jusqu’à redescendre une carte d’une fondation, en dernier.\nÀ droite, un exemple au milieu d’une partie : 6tr-ftr monte le 6 de trèfle, rang 1. 6co-c3 retourne une carte, rang 2. Et 6ca-c3, qui ferait redescendre le 6 de carreau, arrive en dernier." },
+    { n: 8, titre: "L’ordinateur joue tout seul, sans boucler", qui: "Mattias", s: 75, court: true,
+      txt: "Avec ia, l’ordinateur joue tout seul. À chaque tour, main.py demande la liste des coups, mais seulement les coups utiles : la liste s’arrête après p. Il prend le premier et le joue avec la même fonction deplacement que le joueur : on lui passe le coup en paramètre, au lieu de le lire avec input.\nIl ne peut pas tourner en rond. Il ne joue jamais les rangs 7 et 8, ceux qui feraient des allers-retours : chaque coup fait monter une carte, en retourne une, vide la pioche, ou prépare un de ces coups. Et s’il doit retourner la défausse une deuxième fois sans avoir rien joué, c’est qu’il a vu toutes les cartes : il s’arrête et rend la main au joueur.\nEnfin, comme dans le vrai solitaire, quand toutes les cartes sont retournées et que la pioche est finie, la partie est gagnée : il range tout seul les cartes dans les fondations. C’est forcément gagné : la plus petite carte qui reste est toujours sur le dessus d’une colonne, et elle peut monter.\nRésultat : il gagne notre partie de démonstration aux trois niveaux, et sur 500 parties au hasard, 41 % en facile, 21 % en moyen et 11 % en difficile." },
+    { n: 9, titre: "Démo : l’ordinateur et les niveaux", qui: "Jules au clavier", s: 120, court: true,
+      txt: "1. Nouvel onglet : python3 main.py, 5, puis ia. « L’ordinateur joue toute la partie de démonstration. Sous le plateau, on voit chaque coup qu’il joue. Il pioche seulement quand il n’a rien de mieux. » Le laisser jouer, environ 25 secondes. « Victoire en 91 coups. »\n2. Nouvel onglet : python3 main.py, 3, 3 : « on passe en difficile, et le menu affiche le niveau. » Puis 5 et p : « en difficile, on tire 3 cartes. La défausse les montre en éventail, comme dans le vrai solitaire : le 7 de cœur et le 5 de trèfle en gris, l’as de carreau en couleur, c’est le seul jouable. »\n3. 7co-c2 : « si on essaie de jouer le 7 de cœur : refusé, il est en dessous. » Puis aca-fca : « l’as de carreau, lui, monte sur sa fondation. »\n4. Si on a le temps : python3 main.py < partie_gagnante.txt. « Ce fichier contient les saisies d’une partie gagnée. Vers la fin, toutes les cartes sont retournées et la pioche est vide : la fin automatique range les dernières cartes, et la partie est gagnée en 95 coups. »" },
+    { n: 10, titre: "Ce qui fait la force de notre jeu", qui: "Jules", s: 45, court: false,
+      txt: "Pour finir, nos points forts. Une seule saisie par coup, même pour plusieurs cartes. Chaque refus est expliqué. On peut annuler, même une pioche, et sauvegarder pour reprendre au même coup. L’ordinateur est fiable, parce qu’il utilise les mêmes vérifications que le joueur, et il gagne notre partie de démonstration. Le plateau est compact, avec la défausse en éventail comme dans le vrai jeu.\nCôté organisation : un fichier par grande fonction, et git, avec une branche chacun et des pull requests. Ça nous a permis d’avancer en même temps sans nous gêner.\nOn n’utilise que quatre modules fournis avec Python : random, json, os et time." },
+    { n: 11, titre: "Merci, place à vos questions", qui: "Mattias et Jules", s: 15, court: true,
+      txt: "Merci de votre attention. Nous sommes prêts pour vos questions.\nPendant les questions : garder le jeu ouvert dans un onglet du terminal, et le code ouvert dans PyCharm, pour montrer une ligne ou rejouer un coup si on vous le demande." }
+  ];
+
+  /* ---------- le plan jusqu'à la soutenance ---------- */
+  var PLAN = [
+    { d: "2026-10-30", nom: "Vendredi 30 octobre", taches: [
+      ["mail", "Envoyer le mail au prof (un ou plusieurs .py, diaporama ?)"],
+      ["pr", "Commit, push et pull request mattias vers main"],
+      ["jules", "Prévenir Jules : la priorité et ia sont faites, il arrête et fait git pull"],
+      ["s30", "Première séance de questions (15 cartes)"] ] },
+    { d: "2026-10-31", nom: "Samedi 31 octobre", taches: [
+      ["s31", "Séance de questions"],
+      ["lire31", "Lire à voix haute le script de ses diapos"] ] },
+    { d: "2026-11-01", nom: "Dimanche 1er novembre", taches: [
+      ["s01", "Séance de questions"],
+      ["demo01", "Faire la démo 1 en entier, chronométrée"],
+      ["oral01", "Un oral blanc de 8 questions"] ] },
+    { d: "2026-11-02", nom: "Lundi 2 novembre", taches: [
+      ["nettoyage", "Nettoyer le code (liste du chantier), puis partie gagnante en 95 coups"],
+      ["s02", "Séance de questions"] ] },
+    { d: "2026-11-03", nom: "Mardi 3 novembre", taches: [
+      ["repet03", "Répétition complète à deux, chronométrée (onglet Script)"],
+      ["s03", "Séance de questions"] ] },
+    { d: "2026-11-04", nom: "Mercredi 4 novembre", taches: [
+      ["croise04", "Oral blanc croisé : Mattias interroge Jules, puis l’inverse"],
+      ["s04", "Séance de questions"] ] },
+    { d: "2026-11-05", nom: "Jeudi 5 novembre, la veille", taches: [
+      ["s05", "Séance finale : cartes rouges et réponses partielles"],
+      ["impr", "Imprimer le dossier papier"],
+      ["moodle", "Déposer le PDF et le .py sur Moodle (un seul dépôt pour le binôme)"],
+      ["pc", "Charger l’ordinateur et préparer les onglets du terminal"] ] },
+    { d: "2026-11-06", nom: "Vendredi 6 novembre, jour J", taches: [
+      ["moodle2", "Vérifier le dépôt Moodle avant 14 h"],
+      ["jourj", "La soutenance"] ] }
+  ];
+  var JOURJ = [
+    ["jj1", "Ordinateur chargé, et le chargeur dans le sac"],
+    ["jj2", "Terminal ouvert dans le dossier du projet, police agrandie"],
+    ["jj3", "python3 main.py testé le matin même"],
+    ["jj4", "Un 2e onglet prêt pour la reprise de la sauvegarde"],
+    ["jj5", "Diaporama ouvert, et le PDF du diaporama téléchargé en secours"],
+    ["jj6", "PyCharm ouvert sur le code, pour montrer une ligne"],
+    ["jj7", "Le dossier papier imprimé"]
+  ];
+
+  /* ---------- état et sauvegarde ---------- */
+  var CLE = "prepa-solitaire-v1";
+  var etat = { v: 1, cartes: {}, plan: {}, repet: null, maj: 0 };
+  var mode = "memoire";
+  var docRef = null, ecritureEnCours = false, aRefaire = false;
+
+  function lireLocal() {
+    try { var s = localStorage.getItem(CLE); if (s) { var o = JSON.parse(s); if (o && o.v === 1) return o; } } catch (e) {}
+    return null;
+  }
+  function ecrireLocal() {
+    try { localStorage.setItem(CLE, JSON.stringify(etat)); return true; } catch (e) { return false; }
+  }
+  function normaliser(o) {
+    return { v: 1, cartes: o.cartes || {}, plan: o.plan || {}, repet: o.repet || null, maj: o.maj || 0 };
+  }
+  function afficherStatut() {
+    var el = document.getElementById("statut");
+    el.dataset.mode = mode;
+    el.textContent = mode === "compte" ? "Progression : sur ton compte" : (mode === "navigateur" ? "Progression : dans ce navigateur" : "Progression : non enregistrée");
+  }
+  function sauver() {
+    etat.maj = Date.now();
+    var okLocal = ecrireLocal();
+    if (docRef) { envoyer(0); }
+    else { mode = okLocal ? "navigateur" : "memoire"; afficherStatut(); }
+  }
+  function envoyer(essai) {
+    if (ecritureEnCours) { aRefaire = true; return; }
+    ecritureEnCours = true;
+    docRef.set(JSON.parse(JSON.stringify(etat))).then(function () {
+      mode = "compte";
+    }, function (e) {
+      if (e && e.code === "unavailable" && essai === 0) {
+        setTimeout(function () { if (docRef) envoyer(1); }, 1000 + Math.random() * 1000);
+      } else {
+        // pas le droit d'écrire sur ce compte : on garde la progression dans le navigateur
+        docRef = null;
+        mode = ecrireLocal() ? "navigateur" : "memoire";
+      }
+    }).then(function () {
+      ecritureEnCours = false;
+      afficherStatut();
+      if (aRefaire && docRef) { aRefaire = false; envoyer(0); }
+    });
+  }
+
+  /* ---------- répétition espacée ---------- */
+  function carteEtat(id) { return etat.cartes[id] || null; }
+  function categorie(id) {
+    var c = carteEtat(id);
+    if (!c) return "pioche";
+    if (c.rouge) return "rouge";
+    if (c.b >= 3) return "fondation";
+    return "colonne";
+  }
+  function plafond(d) {
+    // avant la soutenance, tout revient au plus tard la veille
+    if (AUJ < VEILLE && d > VEILLE) return VEILLE;
+    return d;
+  }
+  function noter(id, note, conf) {
+    var c = etat.cartes[id] || { b: 0, n: 0, ok: 0 };
+    c.n = (c.n || 0) + 1;
+    c.g = note;
+    c.c = conf;
+    c.vu = AUJ;
+    if (note === "faux") {
+      c.b = 1; c.ok = 0; c.due = AUJ;
+      if (conf === "sur") c.rouge = true;
+    } else if (note === "partiel") {
+      c.b = 1; c.ok = 0; c.due = ajouterJours(AUJ, 1);
+    } else if (conf === "sur") {
+      c.b = Math.min((c.b || 0) + 1, 4);
+      c.ok = (c.ok || 0) + 1;
+      if (c.rouge && c.ok >= 2) c.rouge = false;
+      c.due = plafond(ajouterJours(AUJ, [1, 1, 2, 4, 7][c.b]));
+    } else {
+      c.b = Math.max(c.b || 0, 1); c.ok = 0; c.due = ajouterJours(AUJ, 1);
+    }
+    etat.cartes[id] = c;
+    sauver();
+    rendrePiles();
+  }
+  function entrelacer(liste) {
+    var reste = liste.slice(), res = [];
+    while (reste.length) {
+      var prec = res.length ? res[res.length - 1].t : null;
+      var k = -1;
+      for (var i = 0; i < reste.length && i < 4; i++) { if (reste[i].t !== prec) { k = i; break; } }
+      if (k < 0) k = 0;
+      res.push(reste.splice(k, 1)[0]);
+    }
+    return res;
+  }
+  function aRevoir() {
+    var dus = [], nouvelles = [];
+    Q.forEach(function (q) {
+      var c = carteEtat(q.id);
+      if (!c) nouvelles.push(q);
+      else if (c.due <= AUJ) dus.push(q);
+    });
+    function rang(q) {
+      var c = carteEtat(q.id);
+      if (c.rouge) return 0;
+      if (c.g === "faux") return 1;
+      if (c.g === "partiel") return 2;
+      return 3 + (c.b || 0);
+    }
+    dus.sort(function (a, b) { return rang(a) - rang(b) || b.p - a.p; });
+    nouvelles.sort(function (a, b) { return b.p - a.p; });
+    return { dus: dus, nouvelles: nouvelles };
+  }
+  function construireSeance(taille) {
+    var r = aRevoir();
+    return entrelacer(r.dus.concat(r.nouvelles).slice(0, taille)).map(function (q) { return q.id; });
+  }
+
+  /* ---------- outils d'affichage ---------- */
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function fmt(s) {
+    return esc(s).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/[♥♦]/g, function (m) { return '<span class="rc">' + m + "</span>"; });
+  }
+  function mmss(sec) { sec = Math.max(0, Math.round(sec)); return Math.floor(sec / 60) + " min " + String(sec % 60).padStart(2, "0"); }
+  function chrono(sec) { sec = Math.max(0, Math.floor(sec)); return String(Math.floor(sec / 60)).padStart(2, "0") + ":" + String(sec % 60).padStart(2, "0"); }
+  function $(id) { return document.getElementById(id); }
+
+  function rendrePiles() {
+    var n = { pioche: 0, colonne: 0, fondation: 0, rouge: 0 };
+    Q.forEach(function (q) { n[categorie(q.id)]++; });
+    $("nb-pioche").textContent = n.pioche;
+    $("nb-colonnes").textContent = n.colonne + n.rouge;
+    $("nb-fondations").textContent = n.fondation + " / " + Q.length;
+    $("nb-rouges").textContent = n.rouge;
+    var j = joursEntre(AUJ, EXAMEN);
+    $("compte-a-rebours").textContent = j > 0 ? "J-" + j + " · vendredi 6 novembre" : (j === 0 ? "Jour J" : "Soutenance passée");
+  }
+
+  function htmlCarte(q, opts) {
+    var c = carteEtat(q.id);
+    var h = '<article class="carte" aria-live="polite">';
+    h += '<div class="carte-tete"><span class="puce">' + esc(THEMES[q.t]) + '</span><span class="puce fichier">' + esc(q.f) + '</span><span class="puce proba">' + PROBA[q.p] + "</span>";
+    if (c && c.rouge) h += '<span class="puce rougeq">carte rouge</span>';
+    h += '<span class="progression">' + opts.position + "</span></div>";
+    h += '<h3 class="question">' + fmt(q.q) + "</h3>";
+    if (q.code) h += '<pre class="code"><code>' + esc(q.code) + "</code></pre>";
+    if (opts.oral) {
+      h += '<div class="minuteur" id="minuteur"><div id="minuteur-barre"></div></div>';
+      h += '<p class="note" id="minuteur-texte">Réponds à voix haute, comme devant le prof.</p>';
+      h += '<div class="rang"><button class="principal" id="btn-retourner">J’ai fini, retourner la carte</button></div>';
+    } else {
+      h += '<label class="etiquette" for="reponse-libre">Ta réponse, avant de retourner la carte</label>';
+      h += '<textarea id="reponse-libre" placeholder="Écris-la, ou dis-la à voix haute comme devant le prof"></textarea>';
+      h += '<p class="etiquette" id="consigne-conf">Retourne la carte en disant si tu es sûr de toi :</p>';
+      h += '<div class="rang" id="boutons-retourner" role="group" aria-labelledby="consigne-conf">';
+      [["sur", "Je suis sûr"], ["hesitant", "J’hésite"], ["devine", "Je ne sais pas"]].forEach(function (o, i) {
+        h += '<button class="retourner" id="ret-' + o[0] + '">' + (i + 1) + " · " + o[1] + "</button>";
+      });
+      h += '</div><span class="raccourcis">Clavier : 1, 2 ou 3 pour retourner la carte, puis J, P ou F pour noter ta réponse</span>';
+    }
+    h += '<div class="dos" id="dos" aria-hidden="true">' + "[░░] ".repeat(14) + "</div>";
+    h += '<div class="reponse" id="zone-reponse" hidden><span class="titre">Réponse attendue</span><p>' + fmt(q.r) + "</p>";
+    if (!opts.oral) h += '<p class="note" id="conf-dite"></p>';
+    if (q.pg) h += '<p class="piege"><b>Piège :</b> ' + fmt(q.pg) + "</p>";
+    h += '<div class="rang" role="group" aria-label="Ta réponse était"><button class="ok" id="note-juste">J · Juste</button><button class="partiel" id="note-partiel">P · Partiel</button><button class="faux" id="note-faux">F · Faux</button></div>';
+    h += "</div></article>";
+    return h;
+  }
+
+  /* ---------- vue : séance du jour ---------- */
+  var seance = null;
+
+  function rendreSeance() {
+    var v = $("v-seance");
+    if (!seance) {
+      var r = aRevoir();
+      var rouges = r.dus.filter(function (q) { return carteEtat(q.id).rouge; }).length;
+      var h = "<h2>Séance du jour</h2>";
+      h += '<p class="intro">Une carte = une question d’oral. Réponds d’abord, de mémoire. Puis retourne la carte avec l’un des trois boutons, selon que tu es sûr de toi ou non, et note ta réponse. Les cartes ratées reviennent vite, les cartes sues s’espacent, et tout revient au plus tard la veille, le 5 novembre.</p>';
+      h += '<div class="panneau"><h3>À faire aujourd’hui</h3><div class="compte">';
+      h += "<span><b>" + r.dus.length + "</b> carte" + (r.dus.length > 1 ? "s" : "") + " à revoir</span>";
+      h += "<span><b>" + rouges + "</b> carte" + (rouges > 1 ? "s" : "") + " rouge" + (rouges > 1 ? "s" : "") + " en premier</span>";
+      h += "<span><b>" + r.nouvelles.length + "</b> jamais vue" + (r.nouvelles.length > 1 ? "s" : "") + "</span></div>";
+      h += '<div class="rang"><label class="etiquette" for="taille">Nombre de cartes</label><select id="taille"><option value="10">10 cartes, 15 min</option><option value="15" selected>15 cartes, 20 min</option><option value="25">25 cartes, 35 min</option></select>';
+      h += '<button class="principal" id="btn-commencer">Commencer la séance</button></div>';
+      h += '<p class="note">Les questions sont mélangées entre les thèmes, et les plus probables passent en premier.</p></div>';
+      v.innerHTML = h;
+      $("btn-commencer").onclick = function () {
+        var liste = construireSeance(parseInt($("taille").value, 10));
+        if (!liste.length) { return; }
+        seance = { liste: liste, i: 0, conf: null, fini: false, notes: [], remises: {} };
+        rendreSeance();
+      };
+      return;
+    }
+    if (seance.i >= seance.liste.length) { rendreFinSeance(); return; }
+    var q = PARID[seance.liste[seance.i]];
+    v.innerHTML = "<h2>Séance du jour</h2>" + htmlCarte(q, { position: (seance.i + 1) + " / " + seance.liste.length });
+    seance.conf = null;
+    ["sur", "hesitant", "devine"].forEach(function (c) {
+      $("ret-" + c).onclick = function () { retourner(c); };
+    });
+    $("note-juste").onclick = function () { finirCarte("juste"); };
+    $("note-partiel").onclick = function () { finirCarte("partiel"); };
+    $("note-faux").onclick = function () { finirCarte("faux"); };
+  }
+  var CONF_DITE = { sur: "tu étais sûr", hesitant: "tu hésitais", devine: "tu ne savais pas" };
+  function retourner(conf) {
+    var zone = $("zone-reponse");
+    if (!seance || !zone || !zone.hidden) return;
+    seance.conf = conf;
+    $("dos").hidden = true;
+    $("boutons-retourner").hidden = true;
+    zone.hidden = false;
+    $("conf-dite").textContent = "Avant de retourner la carte, " + CONF_DITE[conf] + ". Compare avec la réponse attendue, puis note-toi.";
+    $("note-juste").focus();
+  }
+  function finirCarte(note) {
+    var id = seance.liste[seance.i];
+    var conf = seance.conf || "devine";
+    noter(id, note, conf);
+    seance.notes.push({ id: id, note: note, conf: conf });
+    if (note === "faux" && !seance.remises[id]) {
+      // une carte ratée revient 4 cartes plus loin
+      seance.remises[id] = true;
+      seance.liste.splice(Math.min(seance.i + 5, seance.liste.length), 0, id);
+    }
+    seance.i++;
+    rendreSeance();
+  }
+  function rendreFinSeance() {
+    var v = $("v-seance");
+    var c = { juste: 0, partiel: 0, faux: 0 }, rouges = [];
+    seance.notes.forEach(function (n) { c[n.note]++; if (n.note === "faux" && n.conf === "sur" && rouges.indexOf(n.id) < 0) rouges.push(n.id); });
+    var demain = 0, d = ajouterJours(AUJ, 1);
+    Q.forEach(function (q) { var e = carteEtat(q.id); if (e && e.due <= d) demain++; });
+    var h = "<h2>Séance terminée</h2><div class=\"panneau\"><div class=\"compte\">";
+    h += "<span><b>" + c.juste + "</b> juste" + (c.juste > 1 ? "s" : "") + "</span><span><b>" + c.partiel + "</b> partielle" + (c.partiel > 1 ? "s" : "") + "</span><span><b>" + c.faux + "</b> fausse" + (c.faux > 1 ? "s" : "") + "</span></div>";
+    if (rouges.length) {
+      h += "<h3>Cartes rouges : fausses alors que tu étais sûr</h3><p class=\"note\">C’est la priorité numéro 1 : une erreur dont on est sûr ressort telle quelle devant le prof. Elles reviennent en tête de la prochaine séance.</p><ul>";
+      rouges.forEach(function (id) { h += "<li>" + fmt(PARID[id].q) + "</li>"; });
+      h += "</ul>";
+    }
+    h += "<p>Demain : <b>" + demain + "</b> carte" + (demain > 1 ? "s" : "") + " à revoir.</p>";
+    h += '<div class="rang"><button class="principal" id="btn-retour">Retour</button></div></div>';
+    v.innerHTML = h;
+    $("btn-retour").onclick = function () { seance = null; rendreSeance(); };
+  }
+
+  /* ---------- vue : oral blanc ---------- */
+  var oral = null, minuterie = null;
+
+  function melanger(a) {
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+  function rendreOral() {
+    var v = $("v-oral");
+    if (!oral) {
+      var h = "<h2>Oral blanc</h2><p class=\"intro\">Comme les questions individuelles : une question tirée au hasard, un temps limité, et tu réponds à voix haute, sans rien écrire. Fais-le à deux si possible : l’un lit la question, l’autre répond.</p>";
+      h += '<div class="panneau"><div class="rang"><label class="etiquette" for="oral-n">Questions</label><select id="oral-n"><option value="6">6</option><option value="8" selected>8</option><option value="10">10</option></select>';
+      h += '<label class="etiquette" for="oral-t">Temps par question</label><select id="oral-t"><option value="30">30 s</option><option value="45" selected>45 s</option><option value="60">60 s</option></select>';
+      h += '<button class="principal" id="btn-oral">Lancer l’oral blanc</button></div></div>';
+      v.innerHTML = h;
+      $("btn-oral").onclick = function () {
+        var n = parseInt($("oral-n").value, 10), t = parseInt($("oral-t").value, 10);
+        var pool = melanger(Q.filter(function (q) { return q.p >= 2; }).slice());
+        oral = { liste: entrelacer(pool).slice(0, n).map(function (q) { return q.id; }), i: 0, duree: t, notes: [] };
+        rendreOral();
+      };
+      return;
+    }
+    if (oral.i >= oral.liste.length) { rendreFinOral(); return; }
+    var q = PARID[oral.liste[oral.i]];
+    v.innerHTML = "<h2>Oral blanc</h2>" + htmlCarte(q, { position: (oral.i + 1) + " / " + oral.liste.length, oral: true });
+    var debut = Date.now();
+    clearInterval(minuterie);
+    minuterie = setInterval(function () {
+      var reste = oral.duree - (Date.now() - debut) / 1000;
+      var barre = $("minuteur-barre");
+      if (!barre) { clearInterval(minuterie); return; }
+      barre.style.width = Math.max(0, reste / oral.duree * 100) + "%";
+      $("minuteur-texte").textContent = reste > 0 ? "Il reste " + Math.ceil(reste) + " s. Réponds à voix haute." : "Temps écoulé : compare avec la réponse.";
+      if (reste <= 0) { $("minuteur").classList.add("fin"); retournerOral(); }
+    }, 250);
+    $("btn-retourner").onclick = retournerOral;
+    $("note-juste").onclick = function () { finirOral("juste"); };
+    $("note-partiel").onclick = function () { finirOral("partiel"); };
+    $("note-faux").onclick = function () { finirOral("faux"); };
+  }
+  function retournerOral() {
+    clearInterval(minuterie);
+    if ($("zone-reponse").hidden) {
+      $("dos").hidden = true;
+      $("zone-reponse").hidden = false;
+      $("btn-retourner").disabled = true;
+      $("note-juste").focus();
+    }
+  }
+  function finirOral(note) {
+    var id = oral.liste[oral.i];
+    // à l'oral, une réponse juste dans le temps compte comme une réponse sûre
+    noter(id, note, note === "juste" ? "sur" : "hesitant");
+    oral.notes.push({ id: id, note: note });
+    oral.i++;
+    rendreOral();
+  }
+  function rendreFinOral() {
+    var v = $("v-oral");
+    var pts = 0, rates = [];
+    oral.notes.forEach(function (n) { pts += n.note === "juste" ? 1 : (n.note === "partiel" ? 0.5 : 0); if (n.note !== "juste") rates.push(n.id); });
+    var sur20 = Math.round(pts / oral.notes.length * 20 * 2) / 2;
+    var h = '<h2>Oral blanc terminé</h2><div class="panneau"><p class="gros-chrono">' + String(sur20).replace(".", ",") + " / 20</p>";
+    h += "<p class=\"note\">Une réponse juste vaut 1 point, une partielle 0,5. C’est une indication, pas la note du prof.</p>";
+    if (rates.length) {
+      h += "<h3>À retravailler</h3><ul>";
+      rates.forEach(function (id) { h += "<li>" + fmt(PARID[id].q) + "</li>"; });
+      h += "</ul><p class=\"note\">Elles reviennent dans tes prochaines séances.</p>";
+    }
+    h += '<div class="rang"><button class="principal" id="btn-oral-retour">Retour</button></div></div>';
+    v.innerHTML = h;
+    $("btn-oral-retour").onclick = function () { oral = null; rendreOral(); };
+  }
+
+  /* ---------- vue : script ---------- */
+  var repet = null, minuterieRepet = null;
+  var reglage = { court: false, qui: "tous" };
+
+  function diaposActives() { return SCRIPT.filter(function (d) { return !reglage.court || d.court; }); }
+  function quiClasse(qui) { return /^Jules/.test(qui) ? "qui jules" : "qui"; }
+
+  function rendreScript() {
+    var v = $("v-script");
+    var actives = diaposActives();
+    var total = actives.reduce(function (s, d) { return s + d.s; }, 0);
+    var h = "<h2>Script de la soutenance</h2>";
+    h += '<p class="intro">Le même texte que les notes du diaporama. Lancez la répétition : le chrono montre le temps de chaque diapo, et passe au rouge quand vous dépassez.</p>';
+    h += '<div class="panneau"><div class="rang">';
+    h += '<label class="tache"><input type="checkbox" id="opt-court"' + (reglage.court ? " checked" : "") + "><span>Version courte, sans les diapos 4 et 10</span></label>";
+    h += '<label class="etiquette" for="opt-qui">Afficher</label><select id="opt-qui"><option value="tous">Tout le monde</option><option value="Mattias">Les parties de Mattias</option><option value="Jules">Les parties de Jules</option></select>';
+    h += '</div><p>Durée prévue : <b>' + mmss(total) + "</b>";
+    if (etat.repet) h += ' · dernière répétition le ' + esc(etat.repet.date.split("-").reverse().join("/")) + " : <b>" + mmss(etat.repet.total) + "</b>" + (etat.repet.court ? " (version courte)" : "");
+    h += '</p><div class="rang"><a href="' + DECK + '" target="_blank" rel="noopener">Ouvrir le diaporama</a></div>';
+    h += '<div id="zone-repet"></div></div>';
+    actives.forEach(function (d) {
+      if (reglage.qui !== "tous" && d.qui.indexOf(reglage.qui) < 0) return;
+      h += '<article class="diapo" id="diapo-' + d.n + '"><div class="ligne1"><span class="num">' + String(d.n).padStart(2, "0") + "</span><h3>" + esc(d.titre) + '</h3><span class="' + quiClasse(d.qui) + '">' + esc(d.qui) + '</span><span class="duree">' + mmss(d.s) + "</span></div>";
+      h += '<p class="texte">' + fmt(d.txt) + '</p><a href="' + DECK + "#slide-" + d.n + '" target="_blank" rel="noopener">Voir la diapo ' + d.n + "</a></article>";
+    });
+    v.innerHTML = h;
+    $("opt-qui").value = reglage.qui;
+    $("opt-court").onchange = function () { reglage.court = this.checked; repet = null; clearInterval(minuterieRepet); rendreScript(); };
+    $("opt-qui").onchange = function () { reglage.qui = this.value; rendreScript(); };
+    rendreRepet();
+  }
+  function rendreRepet() {
+    var z = $("zone-repet");
+    if (!z) return;
+    var actives = diaposActives();
+    if (!repet) {
+      z.innerHTML = '<div class="rang"><button class="principal" id="btn-repet">Lancer la répétition</button></div>';
+      $("btn-repet").onclick = function () {
+        repet = { i: 0, debut: Date.now(), debutDiapo: Date.now(), temps: [] };
+        rendreRepet();
+        clearInterval(minuterieRepet);
+        minuterieRepet = setInterval(majChrono, 250);
+      };
+      return;
+    }
+    if (repet.i >= actives.length) {
+      clearInterval(minuterieRepet);
+      var total = repet.temps.reduce(function (s, x) { return s + x; }, 0);
+      var h = "<h3>Répétition terminée : " + mmss(total) + "</h3><div class=\"tableau\"><table class=\"temps\"><tr><th>Diapo</th><th>Qui</th><th>Prévu</th><th>Fait</th></tr>";
+      actives.forEach(function (d, k) {
+        var fait = repet.temps[k] || 0;
+        h += "<tr><td>" + d.n + ". " + esc(d.titre) + "</td><td>" + esc(d.qui) + '</td><td class="n">' + mmss(d.s) + '</td><td class="n' + (fait > d.s * 1.2 ? " depasse" : "") + '">' + mmss(fait) + "</td></tr>";
+      });
+      h += '</table></div><div class="rang"><button id="btn-repet-fin">Fermer</button></div>';
+      z.innerHTML = h;
+      etat.repet = { date: AUJ, total: Math.round(total), court: reglage.court };
+      sauver();
+      $("btn-repet-fin").onclick = function () { repet = null; rendreScript(); };
+      return;
+    }
+    var d = actives[repet.i];
+    z.innerHTML = '<div class="rang"><span class="gros-chrono" id="chrono-total">00:00</span><span>Diapo ' + d.n + " : " + esc(d.titre) + ' · <span class="' + quiClasse(d.qui) + '">' + esc(d.qui) + '</span></span></div><p>Cette diapo : <b id="chrono-diapo">00:00</b> sur ' + chrono(d.s) + '</p><div class="rang"><button class="principal" id="btn-suivante">' + (repet.i === actives.length - 1 ? "Terminer" : "Diapo suivante") + '</button><button id="btn-stop">Arrêter</button></div>';
+    $("btn-suivante").onclick = function () {
+      repet.temps.push((Date.now() - repet.debutDiapo) / 1000);
+      repet.debutDiapo = Date.now();
+      repet.i++;
+      document.querySelectorAll(".diapo.courante").forEach(function (e) { e.classList.remove("courante"); });
+      rendreRepet();
+    };
+    $("btn-stop").onclick = function () { repet = null; clearInterval(minuterieRepet); rendreScript(); };
+    document.querySelectorAll(".diapo.courante").forEach(function (e) { e.classList.remove("courante"); });
+    var art = $("diapo-" + d.n);
+    if (art) art.classList.add("courante");
+    majChrono();
+  }
+  function majChrono() {
+    if (!repet) return;
+    var actives = diaposActives(), d = actives[repet.i];
+    var t = $("chrono-total"), td = $("chrono-diapo");
+    if (!t || !td || !d) return;
+    t.textContent = chrono((Date.now() - repet.debut) / 1000);
+    var ecoule = (Date.now() - repet.debutDiapo) / 1000;
+    td.textContent = chrono(ecoule);
+    td.className = ecoule > d.s ? "depasse" : "";
+  }
+
+  /* ---------- vue : plan ---------- */
+  function rendrePlan() {
+    var v = $("v-plan");
+    var h = "<h2>Plan jusqu’à la soutenance</h2><p class=\"intro\">Vingt minutes de questions par jour valent mieux qu’une nuit blanche la veille. Coche au fur et à mesure : c’est enregistré avec ta progression.</p>";
+    PLAN.forEach(function (j) {
+      var cls = j.d === AUJ ? " aujourdhui" : (j.d < AUJ ? " passe" : "");
+      h += '<section class="jour' + cls + '"><h3>' + esc(j.nom) + (j.d === AUJ ? '<span class="badge">aujourd’hui</span>' : "") + "</h3>";
+      j.taches.forEach(function (t) { h += tacheHtml(t[0], t[1]); });
+      h += "</section>";
+    });
+    h += '<section class="jour"><h3>Le jour J, avant d’entrer</h3>';
+    JOURJ.forEach(function (t) { h += tacheHtml(t[0], t[1]); });
+    h += "</section>";
+    v.innerHTML = h;
+    v.querySelectorAll('input[type="checkbox"][data-tache]').forEach(function (cb) {
+      cb.onchange = function () {
+        if (cb.checked) etat.plan[cb.dataset.tache] = true; else delete etat.plan[cb.dataset.tache];
+        cb.closest(".tache").classList.toggle("fait", cb.checked);
+        sauver();
+      };
+    });
+  }
+  function tacheHtml(id, texte) {
+    var fait = !!etat.plan[id];
+    return '<label class="tache' + (fait ? " fait" : "") + '"><input type="checkbox" id="t-' + id + '" data-tache="' + id + '"' + (fait ? " checked" : "") + "><span>" + esc(texte) + "</span></label>";
+  }
+
+  /* ---------- vue : fiches ---------- */
+  var filtre = { texte: "", theme: "tous" };
+  function rendreFiches() {
+    var v = $("v-fiches");
+    if (!$("recherche")) {
+      var h = "<h2>Fiches</h2><p class=\"intro\">Toutes les questions et leurs réponses. Pour apprendre, passe plutôt par la séance du jour : relire ne suffit pas, il faut d’abord essayer de répondre.</p>";
+      h += '<div class="rang"><input type="search" id="recherche" placeholder="Chercher un mot : index, pop, annuler…" aria-label="Chercher dans les questions"><select id="filtre-theme" aria-label="Thème"><option value="tous">Tous les thèmes</option>';
+      Object.keys(THEMES).forEach(function (k) { h += '<option value="' + k + '">' + esc(THEMES[k]) + "</option>"; });
+      h += '</select></div><div id="liste-fiches" class="vue"></div>';
+      v.innerHTML = h;
+      $("recherche").oninput = function () { filtre.texte = this.value.toLowerCase(); rendreListeFiches(); };
+      $("filtre-theme").onchange = function () { filtre.theme = this.value; rendreListeFiches(); };
+    }
+    rendreListeFiches();
+  }
+  function rendreListeFiches() {
+    var l = $("liste-fiches");
+    if (!l) return;
+    var h = "", n = 0;
+    Object.keys(THEMES).forEach(function (k) {
+      if (filtre.theme !== "tous" && filtre.theme !== k) return;
+      var qs = Q.filter(function (q) {
+        if (q.t !== k) return false;
+        if (!filtre.texte) return true;
+        return (q.q + " " + q.r + " " + (q.pg || "") + " " + q.f).toLowerCase().indexOf(filtre.texte) >= 0;
+      });
+      if (!qs.length) return;
+      h += '<h3 class="groupe-titre">' + esc(THEMES[k]) + "</h3>";
+      qs.forEach(function (q) {
+        n++;
+        var cat = categorie(q.id);
+        var lib = { pioche: "jamais vue", colonne: "en cours", fondation: "sue", rouge: "carte rouge" }[cat];
+        h += '<details class="fiche"><summary><span class="q">' + fmt(q.q) + '</span><span class="etat-pastille ' + cat + '">' + lib + "</span></summary>";
+        h += '<div class="corps"><span class="puce fichier">' + esc(q.f) + "</span>";
+        if (q.code) h += '<pre class="code"><code>' + esc(q.code) + "</code></pre>";
+        h += "<p>" + fmt(q.r) + "</p>";
+        if (q.pg) h += '<p class="piege"><b>Piège :</b> ' + fmt(q.pg) + "</p>";
+        h += "</div></details>";
+      });
+    });
+    l.innerHTML = h || '<p class="note">Aucune question ne contient ce mot.</p>';
+  }
+
+  /* ---------- navigation ---------- */
+  var VUES = { seance: rendreSeance, oral: rendreOral, script: rendreScript, plan: rendrePlan, fiches: rendreFiches };
+  function vueCourante() { var h = (location.hash || "").slice(1); return VUES[h] ? h : "seance"; }
+  function montrer() {
+    var nom = vueCourante();
+    Object.keys(VUES).forEach(function (k) {
+      $("v-" + k).hidden = k !== nom;
+      var a = $("o-" + k);
+      if (k === nom) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+    });
+    VUES[nom]();
+  }
+  window.addEventListener("hashchange", montrer);
+
+  document.addEventListener("keydown", function (e) {
+    var nom = vueCourante();
+    var dansTexte = e.target && (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT" || e.target.tagName === "SELECT");
+    if (nom === "seance" && seance && seance.i < seance.liste.length) {
+      var zone = $("zone-reponse");
+      if (!zone) return;
+      if (zone.hidden) {
+        if (!dansTexte && (e.key === "1" || e.key === "2" || e.key === "3")) {
+          retourner({ "1": "sur", "2": "hesitant", "3": "devine" }[e.key]);
+        }
+      } else if (!dansTexte) {
+        var k = e.key.toLowerCase();
+        if (k === "j") finirCarte("juste"); else if (k === "p") finirCarte("partiel"); else if (k === "f") finirCarte("faux");
+      }
+    }
+  });
+
+  /* ---------- démarrage ---------- */
+  var local = lireLocal();
+  if (local) { etat = normaliser(local); mode = "navigateur"; }
+  else { mode = ecrireLocal() ? "navigateur" : "memoire"; }
+  afficherStatut();
+  rendrePiles();
+  montrer();
+
+  // la progression suit le compte quand la page tourne dans claude.ai
+  if (window.claude && typeof window.claude.use === "function") {
+    Promise.all([window.claude.use("db"), window.claude.use("user")]).then(function (caps) {
+      var db = caps[0], user = caps[1];
+      if (!db || !user) return null;
+      return user.id().then(function (id) {
+        if (!id) return null;
+        var ref = db.doc("data/users/" + id + "/prepa");
+        return ref.get().then(function (snap) {
+          docRef = ref;
+          if (snap.exists) {
+            var distant = normaliser(snap.data() || {});
+            if (distant.maj >= (etat.maj || 0)) {
+              etat = distant;
+              ecrireLocal();
+              rendrePiles();
+              if (!seance && !oral && !repet) montrer();
+            } else {
+              envoyer(0);
+            }
+            mode = "compte";
+            afficherStatut();
+          } else if (etat.maj) {
+            envoyer(0);
+          }
+        });
+      });
+    }).catch(function () { /* on reste sur le navigateur */ });
+  }
+})();
+</script>
