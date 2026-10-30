@@ -6,9 +6,9 @@ nom_sauvegarde = "sauvegarde.json"
 
 
 #enregistre la partie en cours dans le fichier
-def sauvegarder(piles, cachees, index, nbr_coup):
+def sauvegarder(piles, cachees, index, nbr_coup, difficulte):
     #on range tout dans un seul dictionnaire, json ne peut écrire qu'une seule chose
-    sauvegarde={"piles": piles, "cachees": cachees, "index":index, "nbr_coup": nbr_coup}
+    sauvegarde={"piles": piles, "cachees": cachees, "index":index, "nbr_coup": nbr_coup, "difficulte":difficulte}
 
     #"w" : on ouvre en écriture, l'ancienne sauvegarde est remplacée
     fichier = open(nom_sauvegarde,"w")
@@ -36,5 +36,6 @@ def recharger_partie():
     cachees = sauvegarde["cachees"]
     index = sauvegarde["index"]
     nbr_coup = sauvegarde["nbr_coup"]
+    difficulte = sauvegarde["difficulte"]
 
-    return piles, cachees, index, nbr_coup
+    return piles, cachees, index, nbr_coup, difficulte
