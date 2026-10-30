@@ -8,7 +8,7 @@ from verif_fondations import *
 from verif_carte import *
 
 
-def deplacement( piles, cachees, index, nb_coups ):
+def deplacement( piles, cachees, index, nb_coups , difficulte):
 
 
     move_possible=["c1","c2","c3","c4","c5","c6","c7","fca","fpi","fco","ftr"]
@@ -22,11 +22,11 @@ def deplacement( piles, cachees, index, nb_coups ):
 
 
     if move == "sauvegarde":
-        sauvegarder(piles, cachees, index, nb_coups)
+        sauvegarder(piles, cachees, index, nb_coups, difficulte)
         return False
 
     if move == "p":
-        piocher(piles, cachees, index)
+        piocher(piles, cachees, index, difficulte)
         return False
 
 
