@@ -126,7 +126,7 @@ def afficher_colonnes(piles, cachees):
 
 
 def afficher_aide():
-    print(gris + "  p : piocher   annuler   sauvegarde   ? : règles" + normal)
+    print(gris + "  p : piocher  h : coups possibles  annuler  ? : règles" + normal)
     print(gris + "  à taper :  ♠ = pi    ♥ = co    ♦ = ca    ♣ = tr" + normal)
 
 
@@ -149,6 +149,7 @@ def afficher_regles():
     print("  familles : ♠ = pi   ♥ = co   ♦ = ca   ♣ = tr")
     print()
     print("  p          : piocher (1 à 3 cartes selon le niveau)")
+    print("  h          : voir les coups possibles")
     print("  annuler    : revenir avant le dernier coup")
     print("  sauvegarde : enregistrer la partie pour plus tard")
     print("  ?          : afficher ces règles")

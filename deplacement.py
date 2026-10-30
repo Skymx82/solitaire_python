@@ -8,9 +8,6 @@ from verif_fondations import *
 from verif_carte import *
 from coup_iav1 import afficher_coups
 
-afficher(piles, cachees)
-afficher_coups(piles, cachees, index)
-
 
 def deplacement( piles, cachees, index, nb_coups , difficulte):
 
@@ -23,9 +20,11 @@ def deplacement( piles, cachees, index, nb_coups , difficulte):
 
     move = input("Choisissez la carte à déplacer ainsi que sa direction : ")
 
+    #affiche les coups possibles, puis on revient au plateau (ce n'est pas un coup)
     if move == "h":
         afficher_coups(piles, cachees, index)
         input("Appuyez sur Entrée pour continuer")
+        afficher(piles, cachees)
         return False
 
     if move == "sauvegarde":

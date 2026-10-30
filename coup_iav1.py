@@ -26,28 +26,22 @@ def trouver_coups(piles, cachees, index):
             if destination == depart:
                 continue
 
-            if not verif_carte(carte, destination, cachees, morceau, index, piles):
+            #parler=False : les vérifs testent sans afficher leurs messages de refus
+            if not verif_carte(carte, destination, cachees, morceau, index, piles, parler=False):
                 continue
 
             if destination[0] == "f":
-                bon = verifier_fondation(carte, piles, destination)
+                bon = verifier_fondation(carte, piles, destination, parler=False)
             else:
-                bon = verif_colonne(carte, destination, piles)
+                bon = verif_colonne(carte, destination, piles, parler=False)
 
             if bon:
                 coups.append(carte + "-" + destination)
 
-    # ----- 2. La carte du haut de la pioche (après avoir pioché) -----
-    if len(piles["p"]) > 0:
-        carte = piles["p"][-1]
-        for destination in destinations:
-            if destination[0] == "f":
-                bon = verifier_fondation(carte, piles, destination)
-            else:
-                bon = verif_colonne(carte, destination, piles)
-
-            if bon:
-                coups.append("p puis " + carte + "-" + destination)
+    # ----- 2. Piocher -----
+    #on ne dit pas quelle carte va sortir : le joueur ne doit pas voir les cartes cachées de la pioche
+    if len(piles["p"]) > 0 or len(piles["d"]) > 0:
+        coups.append("p")
 
     return coups
 
@@ -57,7 +51,7 @@ def afficher_coups(piles, cachees, index):
 
     print()
     if len(coups) == 0:
-        print("Aucun coup possible : essayez de piocher (p).")
+        print("Aucun coup possible.")
     else:
         print("Coups possibles :")
         for coup in coups:
