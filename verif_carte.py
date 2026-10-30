@@ -1,7 +1,7 @@
 #le but de vérif carte est d'empecher de bouger une carte caché ou dans la pioche ainsi
 #que déplacer qu'une seule carte à la fois dans les fondations
 
-def verif_carte(carte, destination, cachees, morceau,index,piles):
+def verif_carte(carte, destination, cachees, morceau,index,piles,parler=True):
 
     if index[carte] == "p":
         print("la carte se trouve dans la pioche")

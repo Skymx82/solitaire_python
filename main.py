@@ -7,6 +7,7 @@ from verif_gagnee import *
 from victoire import *
 from menu import menu, choisir_difficulte
 
+
 # ---------------------------------------------------------------------
 # Lancement
 # ---------------------------------------------------------------------
