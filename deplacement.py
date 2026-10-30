@@ -9,7 +9,7 @@ from verif_carte import *
 from coup_iav1 import afficher_coups
 
 
-def deplacement( piles, cachees, index, nb_coups , difficulte):
+def deplacement( piles, cachees, index, nb_coups , difficulte, coup_ordi=""):
 
     move_possible=["c1","c2","c3","c4","c5","c6","c7","fca","fpi","fco","ftr"]
     colonne = ["c1","c2","c3","c4","c5","c6","c7"]
@@ -17,14 +17,17 @@ def deplacement( piles, cachees, index, nb_coups , difficulte):
 
 
     #permet de demander la deplacement
-
-    move = input("Choisissez la carte à déplacer ainsi que sa direction : ")
+    #quand l'ordinateur joue tout seul, c'est main.py qui donne son coup dans coup_ordi
+    if coup_ordi == "":
+        move = input("Choisissez la carte à déplacer ainsi que sa direction : ")
+    else:
+        move = coup_ordi
 
     #affiche les coups possibles, puis on revient au plateau (ce n'est pas un coup)
     if move == "h":
         afficher_coups(piles, cachees, index)
         input("Appuyez sur Entrée pour continuer")
-        afficher(piles, cachees)
+        afficher(piles, cachees, difficulte)
         return False
 
     if move == "sauvegarde":
@@ -40,12 +43,16 @@ def deplacement( piles, cachees, index, nb_coups , difficulte):
     if move == "?":
         afficher_regles()
         input("Appuyez sur Entrée pour revenir au jeu")
-        afficher(piles, cachees)
+        afficher(piles, cachees, difficulte)
         return False
 
     #c'est main.py qui garde la copie de la partie, on le prévient juste
     if move == "annuler":
         return "annuler"
+
+    #l'ordinateur va jouer tout seul : c'est main.py qui lui fait jouer les coups un par un
+    if move == "ia":
+        return "ia"
 
 
 
@@ -84,5 +91,5 @@ def deplacement( piles, cachees, index, nb_coups , difficulte):
         if len(piles[depart]) > 0 and len(piles[depart]) == cachees[depart]:
             cachees[depart] = cachees[depart] - 1
 
-    afficher(piles, cachees)
+    afficher(piles, cachees, difficulte)
     return True

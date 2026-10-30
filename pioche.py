@@ -32,4 +32,4 @@ def piocher(piles, cachees, index, difficulte):       # À AJOUTER : il manque u
             pioche.append(carte)
             index[carte] = "p"
 
-    afficher(piles, cachees)
+    afficher(piles, cachees, difficulte)

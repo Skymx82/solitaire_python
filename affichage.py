@@ -51,8 +51,33 @@ def afficher_titre():
     print(gris + "─" * (largeur * 7) + normal)
 
 
+#la défausse prend 2 cases : on y montre les dernières cartes piochées, 1, 2 ou 3 selon le niveau
+#comme dans le vrai solitaire, seule la dernière peut être jouée : les autres sont en gris
+def afficher_defausse(defausse, difficulte):
+    visibles = defausse[-difficulte:]
+
+    texte = ""
+    longueur = 0
+    for carte in visibles:
+        if carte == visibles[-1]:
+            #la dernière, la seule jouable, en rouge si c'est du coeur ou du carreau
+            if carte[-2:] == "co" or carte[-2:] == "ca":
+                texte = texte + rouge + nom_carte(carte) + normal
+            else:
+                texte = texte + nom_carte(carte)
+        else:
+            texte = texte + gris + nom_carte(carte) + normal
+        #on compte la longueur sans les codes couleur, ils ne prennent pas de place à l'écran
+        longueur = longueur + len(nom_carte(carte))
+
+    #2 espaces devant comme les autres cartes, sauf si c'est trop large (trois 10 de suite)
+    if longueur > 2 * largeur - 2:
+        return " " + texte + " " * (2 * largeur - 1 - longueur)
+    return "  " + texte + " " * (2 * largeur - 2 - longueur)
+
+
 #affiche la pioche, la défausse et les fondations
-def afficher_haut(piles):
+def afficher_haut(piles, difficulte):
     fondation = ["fca", "fpi", "fco", "ftr"]
 
     #la ligne avec les noms
@@ -67,12 +92,10 @@ def afficher_haut(piles):
         cartes = case(vide, gris)
 
     if len(piles["d"]) > 0:
-        cartes = cartes + case_carte(piles["d"][-1])
+        cartes = cartes + afficher_defausse(piles["d"], difficulte)
     else:
-        cartes = cartes + case(vide, gris)
-
-    #une case vide pour que les fondations soient au dessus de c4 à c7
-    cartes = cartes + " " * largeur
+        #la défausse vide, puis une case vide pour que les fondations soient au dessus de c4 à c7
+        cartes = cartes + case(vide, gris) + " " * largeur
 
     for f in fondation:
         if len(piles[f]) > 0:
@@ -126,7 +149,7 @@ def afficher_colonnes(piles, cachees):
 
 
 def afficher_aide():
-    print(gris + "  p : piocher  h : coups possibles  annuler  ? : règles" + normal)
+    print(gris + "  p : piocher  h : coups  ia : auto  annuler  ? : règles" + normal)
     print(gris + "  à taper :  ♠ = pi    ♥ = co    ♦ = ca    ♣ = tr" + normal)
 
 
@@ -150,6 +173,7 @@ def afficher_regles():
     print()
     print("  p          : piocher (1 à 3 cartes selon le niveau)")
     print("  h          : voir les coups possibles")
+    print("  ia         : l'ordinateur joue tout seul")
     print("  annuler    : revenir avant le dernier coup")
     print("  sauvegarde : enregistrer la partie pour plus tard")
     print("  ?          : afficher ces règles")
@@ -157,9 +181,9 @@ def afficher_regles():
 
 
 #affiche tout le plateau
-def afficher(piles, cachees):
+def afficher(piles, cachees, difficulte):
     print(effacer, end="")
     afficher_titre()
-    afficher_haut(piles)
+    afficher_haut(piles, difficulte)
     afficher_colonnes(piles, cachees)
     afficher_aide()
