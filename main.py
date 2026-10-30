@@ -46,12 +46,47 @@ if choix == "4":
 else:
     afficher(piles, cachees)#permet de lancer le premier affichage
 
+    #la partie telle qu'elle était avant le dernier coup, pour pouvoir l'annuler
+    #None veut dire qu'il n'y a rien à annuler
+    copie_piles = None
+
     #tant que toute les fondations ne sont pas rempli
     while verif_gagnee(piles) == False:
 
+        #on copie la partie avant le coup
+        #chaque liste est copiée une par une, sinon la copie partagerait les mêmes cartes
+        avant_piles = {}
+        for i in piles:
+            avant_piles[i] = list(piles[i])
+        avant_cachees = dict(cachees)
+        avant_index = dict(index)
+        avant_nb_coups = nb_coups
 
         #maintenant, on va appeller le premier mouvement
-        if deplacement(piles, cachees, index, nb_coups, difficulte):
+        resultat = deplacement(piles, cachees, index, nb_coups, difficulte)
+
+        #un coup joué ou une pioche ont changé le plateau : on garde la copie d'avant
+        if resultat == True or resultat == "pioche":
+            copie_piles = avant_piles
+            copie_cachees = avant_cachees
+            copie_index = avant_index
+            copie_nb_coups = avant_nb_coups
+
+        #seul un vrai coup compte, pas une pioche
+        if resultat == True:
             nb_coups+=1
+
+        #annuler : on remet la partie comme avant le dernier coup
+        if resultat == "annuler":
+            if copie_piles is None:
+                print("Il n'y a rien à annuler")
+            else:
+                piles = copie_piles
+                cachees = copie_cachees
+                index = copie_index
+                nb_coups = copie_nb_coups
+                #on ne peut annuler qu'une fois, le coup d'encore avant n'est pas gardé
+                copie_piles = None
+                afficher(piles, cachees)
 
     animation_victoire(nb_coups)
