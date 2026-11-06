@@ -85,7 +85,7 @@ def nouvelle_partie():
             piles_jeu["c"+str(nbr_colonne)].append(distrib)
             distrib_par_colonne = distrib_par_colonne + 1
         #toutes les cartes de la colonne sont cachées sauf la dernière
-        cachees_jeu["c"+str(nbr_colonne)] = nbr_colonne - 1
+        cachees_jeu["c"+str(nbr_colonne)] = 0
         nbr_colonne = nbr_colonne + 1
 
     #les cartes qui restent dans le paquet vont dans la pioche

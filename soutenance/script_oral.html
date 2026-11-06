@@ -1,0 +1,427 @@
+<title>Script oral Solitaire</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  /* Une colonne de temps à gauche, le texte à dire à droite. Même tapis vert que le site de préparation. */
+  :root {
+    --bg: #F2F5F1;
+    --surface: #FCFDFB;
+    --ink: #17241D;
+    --muted: #56645B;
+    --line: #D5DDD6;
+    --felt: #1D5C3F;
+    --felt-ink: #F3F7F2;
+    --felt-soft: #E2ECE5;
+    --red: #B3332B;
+    --warn: #8A5A00;
+    --warn-soft: #F6EBD3;
+    --code-bg: #E8EEE9;
+    --font-ui: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+    --font-code: "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F1813; --surface: #17231C; --ink: #E7EFE9; --muted: #A2B3A8; --line: #2B3A31;
+      --felt: #5DB889; --felt-ink: #0F1813; --felt-soft: #1C3226; --red: #F08B81;
+      --warn: #E5B65C; --warn-soft: #3A2F17; --code-bg: #1E2C24; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F1813; --surface: #17231C; --ink: #E7EFE9; --muted: #A2B3A8; --line: #2B3A31;
+    --felt: #5DB889; --felt-ink: #0F1813; --felt-soft: #1C3226; --red: #F08B81;
+    --warn: #E5B65C; --warn-soft: #3A2F17; --code-bg: #1E2C24; color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 16px; line-height: 1.5; }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+  .app { max-width: 860px; margin: 0 auto; padding-block: 24px 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: flex; flex-direction: column; gap: 20px; }
+
+  h1 { margin: 0; font-size: 30px; line-height: 1.15; font-weight: 700; text-wrap: balance; }
+  .sous-titre { margin: 2px 0 0; color: var(--muted); font-size: 15px; }
+  code { font-family: var(--font-code); font-size: 0.86em; background: var(--code-bg); padding: 1px 4px; border-radius: 4px; }
+  a { color: var(--felt); font-weight: 600; }
+
+  .mode-emploi { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 15px; color: var(--muted); max-width: 70ch; }
+  .mode-emploi b { color: var(--ink); }
+
+  .chrono { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .chrono-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+  .temps-gros { font-family: var(--font-code); font-size: 28px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .temps-gros.depasse { color: var(--red); }
+  .chrono-etape { flex: 1 1 200px; min-width: 0; font-size: 14px; color: var(--muted); }
+  button { font: inherit; font-weight: 600; font-size: 14px; border-radius: 9px; padding: 7px 13px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+  button.principal { background: var(--felt); border-color: var(--felt); color: var(--felt-ink); }
+  button:focus-visible { outline: 3px solid var(--felt); outline-offset: 2px; }
+  .ruban { position: relative; display: flex; height: 10px; border-radius: 3px; overflow: hidden; gap: 2px; }
+  .ruban span { display: block; min-width: 0; }
+  .ruban .m { background: var(--felt); }
+  .ruban .j { background: var(--warn); }
+  .curseur { position: absolute; top: 0; bottom: 0; width: 3px; left: 0; background: var(--ink); outline: 1px solid var(--surface); }
+
+  .script { display: flex; flex-direction: column; }
+  .bloc { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 14px; padding: 18px 10px 20px; border-top: 1px solid var(--line); scroll-margin-top: 104px; }
+  .bloc.courant { background: var(--felt-soft); }
+  .temps { font-family: var(--font-code); font-size: 15px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 3px; }
+  .contenu { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+  .tete { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+  .tete h2 { margin: 0; font-size: 18px; line-height: 1.25; font-weight: 700; text-wrap: balance; }
+  .qui { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+  .qui.m { background: var(--felt); color: var(--felt-ink); }
+  .qui.j { background: var(--warn-soft); color: var(--warn); }
+  .duree { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .dit { margin: 0; font-size: 17.5px; line-height: 1.6; max-width: 68ch; }
+  .coupe { text-decoration: underline dotted var(--muted); text-underline-offset: 3px; }
+  .montrer { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 72ch; }
+  .montrer b { color: var(--felt); }
+
+  .etapes { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+  .etapes li { display: grid; grid-template-columns: minmax(0, 250px) minmax(0, 1fr); gap: 12px; align-items: baseline; }
+  .taper { min-width: 0; font-size: 14px; color: var(--muted); }
+  .etapes code { font-size: 13.5px; font-weight: 600; overflow-wrap: anywhere; }
+  .etapes .dit code { font-weight: 400; font-size: 0.86em; }
+
+  .questions { display: flex; flex-direction: column; gap: 20px; padding-top: 10px; }
+  .questions > h2 { margin: 0; font-size: 24px; line-height: 1.2; text-wrap: balance; }
+  .questions h3 { margin: 0 0 6px; font-size: 17px; }
+  .questions p { margin: 0; max-width: 72ch; }
+  .note { font-size: 14px; color: var(--muted); }
+  ol.methode, ul.avant { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 5px; max-width: 74ch; }
+  .tableau { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12.5px; color: var(--felt); font-weight: 700; }
+  td.lignes { font-family: var(--font-code); font-size: 13px; font-variant-numeric: tabular-nums; }
+  tr.niveau td { font-size: 12px; font-weight: 700; color: var(--muted); padding-top: 12px; border-bottom-color: var(--ink); }
+
+  @media (max-width: 560px) {
+    .bloc { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+    .dit { font-size: 17px; }
+    .etapes li { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+    h1 { font-size: 26px; }
+  }
+
+  @page { size: A4; margin: 11mm 13mm 12mm; }
+  @media print {
+    html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff; font-size: 10.5pt; }
+    body::before, .chrono { display: none; }
+    .app { padding: 0; max-width: none; gap: 8pt; }
+    h1 { font-size: 19pt; }
+    .sous-titre, .mode-emploi { font-size: 9pt; }
+    .bloc { padding: 7pt 2pt 8pt; grid-template-columns: 34pt minmax(0, 1fr); gap: 8pt; break-inside: avoid; }
+    .contenu { gap: 4pt; }
+    .tete h2 { font-size: 11.5pt; }
+    .temps { font-size: 9pt; padding-top: 1pt; }
+    .dit { font-size: 11pt; line-height: 1.42; max-width: none; }
+    .montrer { font-size: 8pt; max-width: none; }
+    .etapes { gap: 4pt; }
+    .etapes li { grid-template-columns: 158pt minmax(0, 1fr); gap: 8pt; }
+    .taper { font-size: 8.5pt; }
+    .etapes code { font-size: 8.5pt; }
+    .etapes .dit code { font-size: 9pt; }
+    .questions { break-before: page; gap: 9pt; padding-top: 0; }
+    .questions > h2 { font-size: 15pt; }
+    .questions h3 { font-size: 10.5pt; margin-bottom: 2pt; }
+    .questions p, ol.methode, ul.avant { font-size: 9.5pt; max-width: none; }
+    table { font-size: 8.8pt; }
+    th, td { padding: 2pt 5pt; }
+    th { font-size: 8pt; }
+    td.lignes { font-size: 8pt; }
+    tr.niveau td { font-size: 7.5pt; padding-top: 4pt; }
+    tr, ol.methode li, ul.avant li { break-inside: avoid; }
+    .note { font-size: 8.5pt; }
+    a { color: inherit; font-weight: 500; }
+  }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<div class="app">
+  <header>
+    <h1>Script oral</h1>
+    <p class="sous-titre">Le Solitaire · Mattias Mathevon et Jules Damour · 10 minutes sur le dossier, puis 10 minutes de questions</p>
+  </header>
+
+  <ul class="mode-emploi">
+    <li><b>À deux :</b> Mattias parle 5 min 05, Jules 4 min 55. Le texte dit toujours « on » : le passage de l'un à l'autre se fait sans annonce.</li>
+    <li><b>Seul :</b> lis tout, et commence par « Je suis Mattias Mathevon, j'ai fait ce projet en binôme avec Jules Damour. »</li>
+    <li><b>En retard ?</b> Saute les passages <span class="coupe">soulignés en pointillés</span> : ils font gagner environ 30 secondes.</li>
+  </ul>
+
+  <div class="chrono" aria-label="Chrono de répétition">
+    <div class="chrono-ligne">
+      <span class="temps-gros" id="temps" role="timer">00:00</span>
+      <button class="principal" id="lancer" type="button">Lancer la répétition</button>
+      <button id="zero" type="button">Remettre à zéro</button>
+      <span class="chrono-etape" id="etape">Objectif : finir à 10:00</span>
+    </div>
+    <div class="ruban" aria-hidden="true">
+      <span class="m" style="flex: 25"></span>
+      <span class="m" style="flex: 150"></span>
+      <span class="j" style="flex: 85"></span>
+      <span class="j" style="flex: 80"></span>
+      <span class="m" style="flex: 70"></span>
+      <span class="j" style="flex: 40"></span>
+      <span class="m" style="flex: 40"></span>
+      <span class="j" style="flex: 90"></span>
+      <span class="m" style="flex: 20"></span>
+      <i class="curseur" id="curseur"></i>
+    </div>
+  </div>
+
+  <main class="script">
+
+    <section class="bloc" data-debut="0" data-fin="25" data-nom="Ouverture, Mattias">
+      <div class="temps">00:00</div>
+      <div class="contenu">
+        <div class="tete"><h2>Ouverture</h2><span class="qui m">Mattias</span><span class="duree">25 s</span></div>
+        <p class="dit">Bonjour. On est Mattias Mathevon et Jules Damour, et on va vous présenter notre solitaire en mode texte, écrit en Python. On suit notre dossier de deux pages dans l'ordre : ses cinq rubriques, puis une démonstration. Le sujet interdit les classes, donc tout le jeu tient dans des textes, des listes, des dictionnaires et des tuples.</p>
+        <p class="montrer"><b>Geste</b> : donner le dossier papier aux profs avant de commencer.</p>
+      </div>
+    </section>
+
+    <section class="bloc" data-debut="25" data-fin="175" data-nom="Rubrique 1, Mattias">
+      <div class="temps">00:25</div>
+      <div class="contenu">
+        <div class="tete"><h2>Rubrique 1 : les structures de données</h2><span class="qui m">Mattias</span><span class="duree">2 min 30</span></div>
+        <p class="dit">Une carte, c'est un simple texte : sa valeur, puis sa famille en deux lettres. <code>"5ca"</code>, c'est le 5 de carreau. Pour la lire, on coupe par la fin : <code>carte[:-2]</code> donne la valeur et <code>carte[-2:]</code> donne la famille. On coupe par la fin parce que la famille fait toujours deux lettres, alors que la valeur peut en faire deux, comme pour le 10.</p>
+        <p class="dit">Toutes les cartes sont rangées dans un seul dictionnaire, <code>piles</code>, qui contient 13 listes : la pioche <code>"p"</code>, la défausse <code>"d"</code>, les colonnes <code>"c1"</code> à <code>"c7"</code> et les quatre fondations. La règle est la même partout : la dernière carte de la liste est celle du dessus. On la lit avec <code>[-1]</code>, on la retire avec <code>pop</code>, on en pose une avec <code>append</code>. <span class="coupe">Pioche, défausse, colonnes et fondations ont donc la même structure, et le code reste simple.</span></p>
+        <p class="dit">Il reste deux dictionnaires. <code>cachees</code> donne, pour chaque colonne, le nombre de cartes face cachée. Elles sont toujours en bas, donc un seul nombre suffit : une carte est cachée si sa position est plus petite que ce nombre. <code>index</code> donne, pour chaque carte, le nom de sa pile. Quand le joueur tape <code>5ca-c4</code>, on trouve le départ tout de suite, sans chercher dans les 13 piles. En contrepartie, il faut le mettre à jour à chaque déplacement et à chaque pioche.</p>
+        <p class="dit">Voici ce coup pas à pas. <code>verif_coup</code> renvoie le tuple <code>("5ca", "c4")</code>. <code>index</code> dit que la carte est en c6, et sa position est 5. Le morceau à déplacer est <code>piles["c6"][5:]</code> : la carte et tout ce qui est posé dessus. Après les vérifications, <code>del</code> retire le morceau, <code>extend</code> le pose sur c4 et <code>index</code> passe à c4. Il ne reste que des cartes cachées en c6 : <code>cachees["c6"]</code> passe de 5 à 4, et le 3 de cœur se retourne.</p>
+        <p class="montrer"><b>Montrer</b> : dossier page 1, la liste à gauche et le plateau à droite, puis le paragraphe « Un coup pas à pas ». <b>Code</b> : <code>piles</code> ligne 23, <code>cachees</code> 55, <code>index</code> 63, le déplacement 824.</p>
+      </div>
+    </section>
+
+    <section class="bloc" data-debut="175" data-fin="260" data-nom="Rubrique 2, Jules">
+      <div class="temps">02:55</div>
+      <div class="contenu">
+        <div class="tete"><h2>Rubrique 2 : les commandes et les menus</h2><span class="qui j">Jules</span><span class="duree">1 min 25</span></div>
+        <p class="dit">Au lancement, le menu propose cinq choix : nouvelle partie, reprendre la sauvegarde, choisir le niveau, quitter, ou la partie de démonstration, qui a toujours la même donne. <span class="coupe">Il redemande tant que la réponse n'est pas entre 1 et 5.</span></p>
+        <p class="dit">Pendant la partie, tout se fait en une seule saisie. Pour déplacer, on tape toujours carte, tiret, pile, même pour plusieurs cartes : on donne la première du groupe, les autres suivent. À côté, il y a <code>p</code> pour piocher, <code>h</code> pour voir les coups, <code>ia</code> pour que l'ordinateur joue, <code>annuler</code>, <code>sauvegarde</code> et le point d'interrogation pour les règles.</p>
+        <p class="dit">Toutes les saisies sont vérifiées, dans l'ordre du deuxième tableau. <code>verif_coup</code> contrôle la forme : un seul tiret, une carte et une pile qui existent. <code>verif_carte</code> regarde si la carte a le droit de bouger : ni dans la pioche, ni face cachée. Ensuite, selon l'arrivée, <code>verif_colonne</code> contrôle la couleur différente et la valeur juste en dessous, et <code>verifier_fondation</code> contrôle la famille et la valeur juste au dessus. Dès qu'une vérification échoue, le jeu dit pourquoi, rien ne bouge et le coup n'est pas compté.</p>
+        <p class="montrer"><b>Montrer</b> : dossier page 1, les deux tableaux. <b>Code</b> : <code>menu</code> ligne 312, la saisie 764, <code>verif_coup</code> 403, <code>verif_carte</code> 437, <code>verif_colonne</code> 477, <code>verifier_fondation</code> 541.</p>
+      </div>
+    </section>
+
+    <section class="bloc" data-debut="260" data-fin="340" data-nom="Rubrique 3, trouver et classer, Jules">
+      <div class="temps">04:20</div>
+      <div class="contenu">
+        <div class="tete"><h2>Rubrique 3 : trouver et classer les coups</h2><span class="qui j">Jules</span><span class="duree">1 min 20</span></div>
+        <p class="dit">Page 2 : comment l'ordinateur propose les coups. <code>trouver_coups</code> ne devine rien. Elle essaie chaque carte, sauf celles de la pioche, sur chacune des 11 piles d'arrivée<span class="coupe">, soit 572 essais au maximum</span>. Elle garde les coups que le jeu accepterait, en appelant les mêmes fonctions de vérification que pour le joueur, avec <code>parler=False</code> pour ne pas afficher les messages de refus. Ce choix a deux avantages : un coup proposé est forcément accepté, et si on corrige une règle, l'ordinateur suit tout seul.</p>
+        <p class="dit">Ensuite, on classe. Chaque coup va dans une liste selon son type, puis on colle les listes avec un plus, dans l'ordre du tableau. D'abord une carte qui monte sur sa fondation, puis un coup qui retourne une carte cachée, une carte de la défausse vers une colonne, une carte qui en libère une autre pour sa fondation, une colonne qu'on vide pour un roi qui attend, et piocher. Tout à la fin, les autres changements de colonne et les cartes qui redescendent d'une fondation.</p>
+        <p class="montrer"><b>Montrer</b> : dossier page 2, le tableau des 8 rangs, rang par rang. <b>Code</b> : <code>trouver_coups</code> ligne 647, le rangement 704, les listes collées 723.</p>
+      </div>
+    </section>
+
+    <section class="bloc" data-debut="340" data-fin="410" data-nom="Rubrique 3, jouer tout seul, Mattias">
+      <div class="temps">05:40</div>
+      <div class="contenu">
+        <div class="tete"><h2>Rubrique 3 : l'ordinateur joue tout seul</h2><span class="qui m">Mattias</span><span class="duree">1 min 10</span></div>
+        <p class="dit">Pour jouer tout seul, c'est la commande <code>ia</code>. La boucle du jeu met <code>auto</code> à True. À chaque tour, au lieu de lire le clavier, elle prend le premier coup de la liste et le joue avec la même fonction <code>deplacement</code> que le joueur.</p>
+        <p class="dit">Il y a deux protections. Les rangs 7 et 8 ne sont jamais joués, sinon l'ordinateur pourrait déplacer un 7 noir d'un 8 rouge à l'autre sans fin. Et <code>nb_tours</code> compte les fois où il retourne la défausse sans rien jouer : à la deuxième, il a vu toute la pioche, donc il s'arrête et rend la main.</p>
+        <p class="dit">Quand plus aucune carte n'est cachée et que la pioche et la défausse sont vides, la partie est forcément gagnée, et l'ordinateur range les cartes tout seul. <span class="coupe">Il gagne la partie de démonstration aux trois niveaux.</span> Sur 500 parties au hasard par niveau, il en gagne 41 % en facile, 21 % en moyen et 11 % en difficile.</p>
+        <p class="montrer"><b>Montrer</b> : dossier page 2, les deux protections et l'encadré Résultats. <b>Code</b> : <code>auto</code> ligne 945, <code>nb_tours</code> 951 à 956, la fin automatique 938, <code>tout_est_retourne</code> 592.</p>
+      </div>
+    </section>
+
+    <section class="bloc" data-debut="410" data-fin="450" data-nom="Rubrique 4, Jules">
+      <div class="temps">06:50</div>
+      <div class="contenu">
+        <div class="tete"><h2>Rubrique 4 : les points forts</h2><span class="qui j">Jules</span><span class="duree">40 s</span></div>
+        <p class="dit">Nos points forts. L'ordinateur sait jouer, et il rend la main au lieu de tourner en rond. Un coup se fait toujours en une saisie, et chaque refus est expliqué. On peut annuler le dernier coup, même une pioche ou un coup de l'ordinateur, et sauvegarder pour reprendre au même niveau. <span class="coupe">Le plateau tient en 18 lignes sur 56 caractères.</span> Et on a une partie gagnante rejouable d'un coup, en 95 coups : on l'a relancée après chaque modification pour vérifier qu'on n'avait rien cassé.</p>
+        <p class="montrer"><b>Code</b> : la copie pour annuler ligne 929, <code>annuler</code> 991, <code>sauvegarder</code> 365, <code>recharger_partie</code> 384.</p>
+      </div>
+    </section>
+
+    <section class="bloc" data-debut="450" data-fin="490" data-nom="Rubrique 5, Mattias">
+      <div class="temps">07:30</div>
+      <div class="contenu">
+        <div class="tete"><h2>Rubrique 5 : les niveaux</h2><span class="qui m">Mattias</span><span class="duree">40 s</span></div>
+        <p class="dit">Dernière rubrique, les niveaux. Le niveau se choisit au menu. C'est un simple entier, <code>difficulte</code>, égal au nombre de cartes tirées à chaque pioche : 1 en facile, 2 en moyen, 3 en difficile. La défausse s'affiche en éventail : on voit les cartes de la dernière pioche, mais seule la dernière est jouable, les autres sont en gris. C'est ce qui rend le niveau difficile plus dur : si on ne joue rien, ce sont toujours les mêmes 8 cartes sur 24 qui arrivent sur le dessus.</p>
+        <p class="montrer"><b>Code</b> : <code>choisir_difficulte</code> ligne 337, la boucle de <code>piocher</code> 619, <code>afficher_defausse</code> 168.</p>
+      </div>
+    </section>
+
+    <section class="bloc" data-debut="490" data-fin="580" data-nom="Démonstration, Mattias tape, Jules commente">
+      <div class="temps">08:10</div>
+      <div class="contenu">
+        <div class="tete"><h2>Démonstration</h2><span class="qui m">Mattias tape</span><span class="qui j">Jules commente</span><span class="duree">1 min 30</span></div>
+        <ol class="etapes">
+          <li><span class="taper"><code>python3 Solitaire_Mathevon_Damour.py</code>, puis <code>5</code></span><p class="dit">Voici la partie de démonstration : les cartes cachées en gris, les cœurs et les carreaux en rouge.</p></li>
+          <li><span class="taper"><code>6tr-c2</code></span><p class="dit">On essaie de poser le 6 de trèfle sur le 8 de trèfle. Le jeu refuse, dit pourquoi, et rien ne bouge.</p></li>
+          <li><span class="taper"><code>h</code>, puis Entrée</span><p class="dit"><code>h</code> propose d'abord <code>5ca-c4</code>, puis <code>p</code> : c'est notre classement.</p></li>
+          <li><span class="taper"><code>5ca-c4</code></span><p class="dit">On le joue : le 5 de carreau part sur le 6 de trèfle, et le 3 de cœur se retourne.</p></li>
+          <li><span class="taper"><code>annuler</code></span><p class="dit"><span class="coupe">Annuler remet la partie comme avant le coup.</span></p></li>
+          <li><span class="taper"><code>ia</code>, puis 30 s de silence</span><p class="dit">Maintenant, l'ordinateur joue tout seul, avec les mêmes règles que le joueur. [À la fin :] Il gagne en 91 coups.</p></li>
+        </ol>
+        <p class="montrer"><b>Vérifié</b> sur le fichier rendu : cet enchaînement finit par « Partie gagnée en 91 coups ! », avec ou sans <code>annuler</code>. <code>ia</code> met 27 s, plus 3 s d'animation. Le jeu s'arrête après la victoire : garder <code>ia</code> pour la fin.</p>
+      </div>
+    </section>
+
+    <section class="bloc" data-debut="580" data-fin="600" data-nom="Clôture, Mattias">
+      <div class="temps">09:40</div>
+      <div class="contenu">
+        <div class="tete"><h2>Clôture</h2><span class="qui m">Mattias</span><span class="duree">20 s</span></div>
+        <p class="dit">Pour résumer : toutes les piles ont la même structure, et chaque règle est écrite à un seul endroit, partagé par le joueur et l'ordinateur. Le code rendu tient dans un seul fichier, et on a travaillé à deux avec git. On est prêts pour vos questions.</p>
+      </div>
+    </section>
+  </main>
+
+  <section class="questions">
+    <h2>Les 10 minutes de questions</h2>
+
+    <div>
+      <h3>Devant une demande de modification</h3>
+      <ol class="methode">
+        <li>Reformule la demande, et fais-la préciser si elle est floue.</li>
+        <li>Dis où tu vas modifier et pourquoi, avant de toucher au code.</li>
+        <li>Fais le plus petit changement, dans <code>Solitaire_Mathevon_Damour.py</code>.</li>
+        <li>Relance, teste le cas demandé, puis un coup normal.</li>
+        <li>Pense aux effets de bord : <code>h</code> et <code>ia</code>, l'écran des règles, la partie de démonstration, la sauvegarde, <code>annuler</code>.</li>
+        <li>Si ça plante, lis la dernière ligne de l'erreur et son numéro de ligne, puis <code>Cmd+L</code> pour y aller.</li>
+      </ol>
+    </div>
+
+    <div>
+      <h3>Où aller dans le fichier unique</h3>
+      <p class="note">Les <a href="https://claude.ai/artifact/Aovw1Rf4nyWqddQVNxRemo">défis du site</a> citent encore les 14 anciens fichiers. Le code à remplacer se trouve bien dans le fichier unique, sauf une ligne d'import du défi sur la pioche, qui ne sert plus. Les numéros valent tant que le fichier n'a pas changé de nombre de lignes.</p>
+      <div class="tableau">
+        <table>
+          <tr><th>Le prof demande</th><th>Lignes</th></tr>
+          <tr class="niveau"><td colspan="2">Défis faciles</td></tr>
+          <tr><td>Toutes les cartes des colonnes visibles au début</td><td class="lignes">93, et 55 pour la démo</td></tr>
+          <tr><td>Majuscules et espaces acceptés dans la saisie</td><td class="lignes">après 766</td></tr>
+          <tr><td>Dos des cartes en <code>[##]</code></td><td class="lignes">125</td></tr>
+          <tr><td>Cœurs et carreaux en jaune</td><td class="lignes">114</td></tr>
+          <tr><td>Une pioche compte comme un coup</td><td class="lignes">986 à 988</td></tr>
+          <tr><td>Figures en majuscules : <code>[D♥]</code></td><td class="lignes">142</td></tr>
+          <tr><td><code>h</code> limité aux 3 meilleurs coups</td><td class="lignes">739 à 748</td></tr>
+          <tr class="niveau"><td colspan="2">Défis moyens</td></tr>
+          <tr><td>Compteur de coups sous le plateau</td><td class="lignes">juste avant 963</td></tr>
+          <tr><td>Une carte ne redescend plus d'une fondation</td><td class="lignes">459 à 463</td></tr>
+          <tr><td>N'importe quelle carte sur une colonne vide</td><td class="lignes">483 à 490, règles 279</td></tr>
+          <tr><td>Même couleur au lieu de couleur alternée</td><td class="lignes">507 à 515, règles 277</td></tr>
+          <tr><td>Commande quitter</td><td class="lignes">796, 970, 1003, règles 290</td></tr>
+          <tr><td>Annuler plusieurs coups de suite</td><td class="lignes">917, 981, 992, règles 289</td></tr>
+          <tr><td>Niveau expert à 4 cartes</td><td class="lignes">308, 338 à 350, 169, règles 286</td></tr>
+          <tr><td>Score : +10 par fondation, -2 par pioche</td><td class="lignes">921, 963</td></tr>
+          <tr class="niveau"><td colspan="2">Défis vicieux</td></tr>
+          <tr><td>Fondations du roi jusqu'à l'as</td><td class="lignes">551, 565, 936, règles 280</td></tr>
+          <tr><td>Pioche retournée 2 fois au plus en difficile</td><td class="lignes">613, 628</td></tr>
+          <tr><td>8 colonnes au lieu de 7</td><td class="lignes">Cmd+F sur c7, puis sur 7</td></tr>
+          <tr><td>Proposer de rejouer après la victoire</td><td class="lignes">tout le lancement, 879 à 1003</td></tr>
+          <tr><td>Détecter une partie perdue</td><td class="lignes">934, 1003</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <h3>Les pièges propres au fichier unique</h3>
+      <p class="note">Ils viennent de la fusion du 4 novembre et ne sont pas sur le site. Un prof qui lit le fichier d'un bloc peut les voir.</p>
+      <div class="tableau">
+        <table>
+          <tr><th>Question possible</th><th>Lignes</th><th>Réponse</th></tr>
+          <tr><td><code>rouge</code> est défini deux fois, pourquoi ça ne casse rien ?</td><td class="lignes">114, 480</td><td>La ligne 480 crée une variable locale à <code>verif_colonne</code>. Elle masque le code couleur dans cette fonction seulement ; l'affichage lit toujours la globale.</td></tr>
+          <tr><td><code>index</code> : dictionnaire ou méthode ?</td><td class="lignes">63, 445</td><td><code>index[carte]</code> lit notre dictionnaire et donne la pile. <code>piles[depart].index(carte)</code> est la méthode des listes et donne la position.</td></tr>
+          <tr><td>Pourquoi <code>valeur</code> et <code>ordre</code>, deux fois la même liste ?</td><td class="lignes">481, 538</td><td>Ça vient de deux fichiers fusionnés. Ça marche, et on pourrait n'en garder qu'une. Le dire franchement.</td></tr>
+          <tr><td>À quoi sert <code>move_possible</code> dans <code>deplacement</code> ?</td><td class="lignes">756</td><td>À rien : la vraie vérification est dans <code>verif_coup</code>, ligne 404. On peut supprimer la ligne 756.</td></tr>
+          <tr><td>Pourquoi <code>piles = copie_piles</code> marche-t-il ici ?</td><td class="lignes">995</td><td>Cette ligne est au niveau du fichier, donc elle remplace la variable du jeu. Dans une fonction, elle ne changerait que la variable locale.</td></tr>
+          <tr><td>Pourquoi pas de <code>if __name__ == "__main__"</code> ?</td><td class="lignes">879</td><td>Le fichier est un jeu à lancer directement, il n'est importé nulle part. Le lancement est écrit au niveau du fichier.</td></tr>
+          <tr><td>Ce commentaire sur <code>[-2:]</code> est-il juste ?</td><td class="lignes">534</td><td>Non : il dit « avant-avant-dernière lettre ». <code>[-2:]</code> part de l'avant-dernière lettre, donc donne les 2 dernières.</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <h3>Avant d'entrer</h3>
+      <ul class="avant">
+        <li>Dossier papier imprimé : il se donne en début de soutenance.</li>
+        <li>Si une modification tourne mal : <code>Cmd+Z</code>, ou <code>git restore Solitaire_Mathevon_Damour.py</code> pour revenir au dernier commit.</li>
+        <li>Si Jules projette depuis son ordi : le fichier unique est sur la branche <code>mattias</code>, donc <code>git fetch origin</code> puis <code>git switch mattias</code>.</li>
+        <li>Les anciens fichiers (<code>main.py</code>, <code>deplacement.py</code>…) sont encore dans le projet. Modifie et lance seulement <code>Solitaire_Mathevon_Damour.py</code>, et vérifie ce que relance <code>Ctrl+R</code>.</li>
+        <li>Terminal agrandi, police lisible à la projection, au moins 20 lignes sur 60 colonnes. Rejoue la démo une fois.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var TOTAL = 600;
+  var blocs = Array.prototype.slice.call(document.querySelectorAll(".bloc[data-debut]"));
+  var temps = document.getElementById("temps");
+  var lancer = document.getElementById("lancer");
+  var zero = document.getElementById("zero");
+  var etape = document.getElementById("etape");
+  var curseur = document.getElementById("curseur");
+  var cumul = 0, depart = 0, minuterie = null, courant = null, verrou = null;
+  var bouger = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function format(s) {
+    var m = Math.floor(s / 60), r = Math.floor(s % 60);
+    return String(m).padStart(2, "0") + ":" + String(r).padStart(2, "0");
+  }
+  function ecoule() { return minuterie === null ? cumul : cumul + (Date.now() - depart) / 1000; }
+
+  function blocA(t) {
+    for (var i = 0; i < blocs.length; i++) {
+      if (t >= Number(blocs[i].dataset.debut) && t < Number(blocs[i].dataset.fin)) return blocs[i];
+    }
+    return null;
+  }
+
+  function maj(suivre) {
+    var t = ecoule();
+    temps.textContent = format(t);
+    temps.classList.toggle("depasse", t >= TOTAL);
+    curseur.style.left = "calc(" + Math.min(t / TOTAL * 100, 100) + "% - 2px)";
+    var b = blocA(t);
+    if (b !== courant) {
+      if (courant) courant.classList.remove("courant");
+      if (b) b.classList.add("courant");
+      courant = b;
+      if (b && suivre) b.scrollIntoView({ block: "start", behavior: bouger ? "smooth" : "auto" });
+    }
+    if (b) etape.textContent = b.dataset.nom + ", jusqu'à " + format(Number(b.dataset.fin));
+    else if (t >= TOTAL) etape.textContent = "Temps écoulé : 10 minutes";
+    else etape.textContent = "Objectif : finir à 10:00";
+  }
+
+  function garderEcran() {
+    if (!navigator.wakeLock) return;
+    navigator.wakeLock.request("screen").then(function (v) { verrou = v; }).catch(function () {});
+  }
+  function libererEcran() {
+    if (verrou) { verrou.release().catch(function () {}); verrou = null; }
+  }
+
+  lancer.addEventListener("click", function () {
+    if (minuterie === null) {
+      depart = Date.now();
+      minuterie = setInterval(function () { maj(true); }, 250);
+      lancer.textContent = "Pause";
+      garderEcran();
+      maj(true);
+    } else {
+      cumul = ecoule();
+      clearInterval(minuterie);
+      minuterie = null;
+      lancer.textContent = "Reprendre";
+      libererEcran();
+    }
+  });
+  zero.addEventListener("click", function () {
+    if (minuterie !== null) { clearInterval(minuterie); minuterie = null; }
+    cumul = 0;
+    lancer.textContent = "Lancer la répétition";
+    libererEcran();
+    maj(false);
+    if (courant) { courant.classList.remove("courant"); courant = null; }
+  });
+  maj(false);
+  if (courant) { courant.classList.remove("courant"); courant = null; }
+})();
+</script>

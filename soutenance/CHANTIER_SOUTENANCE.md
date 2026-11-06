@@ -7,6 +7,8 @@
 
 Chacun passe **seul**, avec son ordinateur. On **projette notre code**, les profs posent des questions dessus, puis demandent des **modifications en direct** (exemple donné : « au début du jeu, toutes les cartes doivent être retournées »). Il faut savoir modifier n'importe quelle partie du code, y compris celle écrite par l'autre. Les profs chercheront à nous mettre en difficulté. Le diaporama et le script de présentation ne servent donc plus.
 
+**Mise à jour du 06/11/2026 (Mattias), ce format remplace le précédent** : passage de 20 minutes. 10 minutes de présentation du code avec le dossier de 2 pages comme support, puis 10 minutes de questions et de défis de code. Le script de présentation sert donc de nouveau : `script_oral.html`. Reste à confirmer sur place : passage à deux ou chacun seul (le script marche dans les deux cas).
+
 ## État au 30/10/2026
 
 | Étape | Statut |
@@ -21,7 +23,8 @@ Chacun passe **seul**, avec son ordinateur. On **projette notre code**, les prof
 | Réponse du prof | reçue : un seul fichier `.py` à rendre |
 | Fusion en un seul fichier : `Solitaire_Mathevon_Damour.py` | fait le 04/11, même sortie que `main.py` |
 | Nettoyage avant le gel du code | à faire |
-| Diaporama et script de présentation | abandonnés : la soutenance se fait sur le code projeté (le diaporama reste en ligne, inutile) |
+| Diaporama | abandonné (il reste en ligne, inutile) |
+| Script oral de 10 minutes, sur le dossier de 2 pages | fait le 06/11 : https://claude.ai/artifact/4svRSRbQ4E7M7cVUXGLhzp (à partager avec Jules) et `Solitaire_Script_oral.pdf` |
 | Site d'entraînement : 20 défis de modification (corrections testées), 95 questions, oral blanc, présentation du code, plan | fait : https://claude.ai/artifact/Aovw1Rf4nyWqddQVNxRemo |
 | Partage du site avec Jules | à faire (menu Partager de la page) |
 | Entraînement : défis de code et questions | en cours, suivre l'onglet Plan du site |
@@ -40,6 +43,8 @@ Chacun passe **seul**, avec son ordinateur. On **projette notre code**, les prof
 | `dossier_2pages.html` | la source du dossier court (2 pages), même méthode d'impression que `dossier.html` |
 | `Solitaire_Mathevon_Damour_2pages.pdf` | le dossier court, au cas où le prof veut bien 2 pages |
 | `prepa_soutenance.html` | la source du site d'entraînement (republier ce fichier garde le même lien) |
+| `script_oral.html` | la source du script oral : texte à dire, temps, démo, lignes à modifier dans le fichier unique |
+| `Solitaire_Script_oral.pdf` | le script oral à imprimer pour soi (5 pages), à ne pas déposer sur Moodle |
 
 Le diaporama n'a pas de fichier local : il se modifie dans sa page (ou en demandant à Claude, avec son lien).
 
@@ -125,3 +130,14 @@ Les captures d'écran sont figées dans `dossier.html` : si l'affichage du jeu c
 - Tests dans une copie : `partie_gagnante.txt` donne exactement la même sortie qu'avec `main.py` (95 coups) ; `ia` sur la démo, même sortie aux 3 niveaux ; sauvegarde puis reprise OK.
 - Attention : si on modifie le code maintenant, le faire dans `Solitaire_Mathevon_Damour.py` (c'est lui qui est rendu et projeté). Les fautes dans les messages ne sont pas encore corrigées.
 - Le prof aurait parlé d'un dossier de 2 pages (pas sûr). Fait quand même : `dossier_2pages.html` et `Solitaire_Mathevon_Damour_2pages.pdf`, les 5 rubriques du sujet en 2 pages A4, avec la commande du fichier unique. Le grand dossier reste celui qu'on compte utiliser.
+
+### 06/11/2026
+- Nouveau format annoncé par Mattias : 10 minutes de présentation sur le dossier de 2 pages, puis 10 minutes de questions et de défis. C'est donc le dossier de 2 pages qui sert de support.
+- Script oral écrit et publié : les 5 rubriques dans l'ordre du dossier, puis une démo, réparti entre Mattias et Jules et lisible seul. 1 210 mots, soit 9 min 20 à 130 mots par minute, plus les 30 s d'`ia` et la frappe. Pas encore chronométré à voix haute.
+- Vérifié sur `Solitaire_Mathevon_Damour.py`, dans une copie : partie gagnante en 95 coups ; `ia` en 91, 96 et 89 coups selon le niveau ; plateau de 18 × 56 ; enchaînement exact de la démo en 91 coups, avec ou sans `annuler` ; `ia` dure 27 s, plus 3 s d'animation. Les 41 %, 21 % et 11 % n'ont pas été recalculés (chiffres du 30/10).
+- Défis du site : le code à remplacer a été retrouvé dans le fichier unique, sauf un import de `pioche.py` devenu inutile. Contrôle de texte seulement, les corrections n'ont pas été rejouées sur le fichier unique.
+- Commit `0e9dab2` de Mattias (13 h 39) : le fichier unique est suivi par git, sur `origin/mattias` seulement, pas sur `main`.
+- Restent dans le fichier rendu, signalés à Mattias : le commentaire faux sur `[-2:]` (ligne 534), `move_possible` inutile (ligne 756), les fautes des messages (lignes 408, 525 et 567).
+- Dépôt Moodle (avant 14 h) et impression du dossier : rappelés à 13 h 39, non confirmés ici.
+- Demande du prof : toutes les cartes rouges des colonnes doivent être affichées. Fait dans `afficher_colonnes` de `Solitaire_Mathevon_Damour.py` (ligne 255), puis annulé à la demande de Mattias : le fichier est revenu à son état d'avant.
+- Nouvelle demande de Mattias : toutes les cartes visibles dès le début. Fait dans `Solitaire_Mathevon_Damour.py` : `cachees` à 0 pour la démo (ligne 54) et dans `nouvelle_partie` (ligne 92). Annulé à la demande de Mattias, qui a fait le changement lui-même dans `jeu_depart.py`.

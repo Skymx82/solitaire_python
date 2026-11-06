@@ -4,10 +4,10 @@ def verif_gagnee(piles):
     nbr_fondation_fini = 0
 
     for f in fondation:
-        if len(piles[f]) == 13:
+        if len(piles[f]) == 1:
             nbr_fondation_fini += 1
 
-    if nbr_fondation_fini == 4:
+    if nbr_fondation_fini == 1:
         return True
     else:
         return False
