@@ -149,6 +149,33 @@
   .tache.fait span { text-decoration: line-through; color: var(--muted); }
   .note { font-size: 13px; color: var(--muted); }
 
+  /* défis de code */
+  .demande { margin: 0; font-size: 20px; line-height: 1.4; font-weight: 600; padding: 14px 16px; border-left: 4px solid var(--felt); background: var(--felt-soft); border-radius: 0 12px 12px 0; text-wrap: balance; }
+  .demande .prof { display: block; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--felt); margin-bottom: 4px; }
+  .niveau { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+  .niveau.facile { background: var(--felt-soft); color: var(--felt); }
+  .niveau.moyen { background: var(--warn-soft); color: var(--warn); }
+  .niveau.vicieux { background: var(--red-soft); color: var(--red); }
+  .indice { background: var(--bg); border: 1px dashed var(--line); border-radius: 10px; padding: 10px 12px; margin: 0; }
+  .indice b { color: var(--felt); }
+  .edit { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .edit .fichier-titre { font-family: var(--font-code); font-size: 13px; font-weight: 600; }
+  pre.avant { background: var(--red-soft); }
+  pre.apres { background: var(--felt-soft); }
+  .etiq-diff { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .ligne-defi { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .ligne-defi .txt { flex: 1 1 300px; min-width: 0; }
+  .ligne-defi .temps { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .resultat { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--code-bg); color: var(--muted); }
+  .resultat.seul { background: var(--felt-soft); color: var(--felt); }
+  .resultat.indices { background: var(--warn-soft); color: var(--warn); }
+  .resultat.rate { background: var(--red-soft); color: var(--red); }
+  ol.methode { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; }
+  .piege ul { margin: 6px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+  table.carte-code { border-collapse: collapse; width: 100%; font-size: 14px; }
+  table.carte-code th, table.carte-code td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .ancres { display: flex; flex-wrap: wrap; gap: 6px; }
+
   @media (max-width: 560px) {
     .piles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .question { font-size: 18px; }
@@ -177,17 +204,19 @@
   </div>
 
   <nav class="onglets" aria-label="Sections">
-    <a href="#seance" id="o-seance">Séance du jour</a>
+    <a href="#defis" id="o-defis">Défis de code</a>
+    <a href="#seance" id="o-seance">Questions</a>
     <a href="#oral" id="o-oral">Oral blanc</a>
-    <a href="#script" id="o-script">Script</a>
+    <a href="#code" id="o-code">Le code</a>
     <a href="#plan" id="o-plan">Plan jusqu’au 6/11</a>
     <a href="#fiches" id="o-fiches">Fiches</a>
   </nav>
 
   <main>
-    <section class="vue" id="v-seance"></section>
+    <section class="vue" id="v-defis"></section>
+    <section class="vue" id="v-seance" hidden></section>
     <section class="vue" id="v-oral" hidden></section>
-    <section class="vue" id="v-script" hidden></section>
+    <section class="vue" id="v-code" hidden></section>
     <section class="vue" id="v-plan" hidden></section>
     <section class="vue" id="v-fiches" hidden></section>
   </main>
@@ -484,82 +513,727 @@ resultat = deplacement(piles, cachees, index, nb_coups, difficulte, coup_ordi)`,
     { id: "y11", t: "python", f: "menu.py", p: 2, q: "Que fait `while choix not in choix_possibles` dans le menu ?",
       r: "Tant que le texte tapé n’est pas dans la liste `[\"1\", \"2\", \"3\", \"4\", \"5\"]`, on redemande : c’est la vérification des saisies du menu. On compare des textes, car `input()` renvoie toujours un texte." },
     { id: "y12", t: "python", f: "verif_coup.py", p: 1, q: "Que fait `move.split(\"-\")` sur `\"5ca-c4\"` ?",
-      r: "Il coupe le texte à chaque tiret et renvoie `[\"5ca\", \"c4\"]`. Comme on a vérifié qu’il y a exactement un tiret, on peut écrire `carte, destination = move.split(\"-\")`." }
+      r: "Il coupe le texte à chaque tiret et renvoie `[\"5ca\", \"c4\"]`. Comme on a vérifié qu’il y a exactement un tiret, on peut écrire `carte, destination = move.split(\"-\")`." },
+    { id: "x1", t: "sauvegarde", f: "sauvegarder.py", p: 2, q: "Que se passe-t-il si quelqu’un casse `sauvegarde.json` à la main, puis choisit « reprendre » ?",
+      r: "`json.load` lève une erreur (JSONDecodeError) et le programme plante. Pour être solide, il faudrait entourer le chargement d’un `try` / `except`, et afficher « Sauvegarde illisible » au lieu de planter.",
+      pg: "Ne dis pas que ça marche : avoue la limite, et donne la correction." },
+    { id: "x2", t: "affichage", f: "affichage.py", p: 1, q: "Dans `afficher_colonnes`, pourquoi `hauteur` commence-t-elle à 1 et pas à 0 ?",
+      r: "Pour qu’il y ait toujours au moins une ligne : si toutes les colonnes étaient vides, la ligne 0 afficherait quand même les cases vides `[  ]`." },
+    { id: "x3", t: "affichage", f: "affichage.py", p: 1, q: "Pourquoi `case_carte` colle-t-elle la carte à gauche avec `ljust`, au lieu de la centrer ?",
+      r: "Parce que `[10♥]` a un caractère de plus que les autres cartes : centrées, les cartes à 10 seraient décalées. Collées à gauche, avec deux espaces devant, toutes commencent au même endroit." },
+    { id: "x4", t: "coups", f: "verif_coup.py", p: 1, q: "Que se passe-t-il si on tape `-` tout seul, ou `5ca-` ?",
+      r: "`split(\"-\")` donne un texte vide d’un côté : `verif_coup` affiche « Ce mouvement n’existe pas, exemple : 5ca-c4 » et refuse." },
+    { id: "x5", t: "coups", f: "verif_coup.py", p: 2, q: "Pourquoi `index[carte]` ne plante-t-il jamais avec une carte inventée, comme `xyz` ?",
+      r: "Parce que `verif_coup` vérifie d’abord que la carte est dans `paquet` : une carte inconnue est refusée avant qu’on lise `index`." },
+    { id: "x6", t: "donnees", f: "jeu_depart.py", p: 1, q: "Qu’est-ce qui casserait si le paquet contenait deux fois la même carte ?",
+      r: "`index` ne peut garder qu’une pile par carte, puisqu’une clé de dictionnaire est unique, et `.index()` trouverait toujours la première des deux. Le jeu suppose que chaque carte est unique, comme dans un vrai jeu de 52 cartes." },
+    { id: "x7", t: "sujet", f: "plusieurs fichiers", p: 2, q: "Où faudrait-il toucher pour passer à 8 colonnes, et pourquoi est-ce piégeux ?",
+      r: "La liste des colonnes est recopiée dans six fichiers : jeu_depart, affichage, deplacement, verif_coup, coup_iav1 et verif_gagnee. Il faut tous les trouver (Cmd+Maj+F sur \"c7\"), sans oublier la partie de démonstration. Une seule liste partagée, importée partout, aurait évité le piège." },
+    { id: "x8", t: "affichage", f: "affichage.py", p: 2, q: "Votre jeu reste-t-il sous 20 × 60 caractères pendant toute la partie ?",
+      r: "Au démarrage, oui : 18 lignes sur 56. Mais une colonne peut grandir jusqu’à 19 cartes (6 cachées, puis un roi jusqu’à l’as), donc le plateau peut dépasser 20 lignes en cours de partie. La grille parle bien du démarrage." }
   ];
   var PARID = {};
   Q.forEach(function (q) { PARID[q.id] = q; });
 
-  /* ---------- le script de la soutenance (le même que les notes du diaporama) ---------- */
-  var SCRIPT = [
-    { n: 1, titre: "Le Solitaire", qui: "Mattias", s: 30, court: true,
-      txt: "Bonjour. Nous sommes Mattias Mathevon et Jules Damour, et nous allons vous présenter notre Solitaire en mode texte, écrit en Python.\nLe plan : on vous montre d’abord comment le jeu est construit, puis on fait deux démonstrations. Une partie jouée à la main, puis l’ordinateur qui joue tout seul. Le dossier papier reprend tout, avec les détails.\nÀ droite, c’est le vrai plateau au démarrage : 18 lignes sur 56 caractères." },
-    { n: 2, titre: "Les 23 lignes de la grille sont faites", qui: "Jules", s: 45, court: true,
-      txt: "Voici ce que nous avons réalisé, rangé comme dans votre grille.\nAffichage : les cartes avec leur valeur et leur couleur, les cartes retournées, le nombre de cartes de la pioche et de la défausse, les colonnes à la verticale, et un plateau qui tient en 18 lignes sur 56 caractères au démarrage.\nDéplacements : les cinq types, et plusieurs cartes d’un coup.\nJouabilité : une seule saisie par commande, toutes les saisies vérifiées, trois niveaux, la sauvegarde et la reprise, une aide, la victoire détectée et l’annulation.\nEt pour l’IA : l’ordinateur propose les coups, les classe, et sait jouer tout seul.\nToutes les lignes sont faites, et on va vous les montrer en direct." },
-    { n: 3, titre: "Les données : listes et dictionnaires", qui: "Mattias", s: 90, court: true,
-      txt: "Le sujet interdit les classes : tout repose donc sur des listes, des dictionnaires et des tuples.\nUne carte, c’est un texte : la valeur, puis la famille en deux lettres. 7tr, c’est le 7 de trèfle. Comme la famille fait toujours deux lettres, carte[:-2] donne la valeur et carte[-2:] la famille, même pour le 10.\nLes 13 piles sont dans un seul dictionnaire, piles : la pioche p, la défausse d, les colonnes c1 à c7, et une fondation par famille. Chaque pile est une liste, avec une règle pour toutes : la dernière carte de la liste est la carte du dessus. On la lit avec [-1], on l’enlève avec pop, on en pose une avec append.\nÀ côté, deux dictionnaires. cachees donne le nombre de cartes face cachée dans chaque colonne : elles sont toujours en dessous, donc un nombre suffit. Et index dit, pour chaque carte, dans quelle pile elle est : quand le joueur tape une carte, on sait tout de suite où la chercher." },
-    { n: 4, titre: "Un coup en cinq étapes : 5ca-c4", qui: "Mattias", s: 60, court: false,
-      txt: "Voici ce qui se passe pour un coup : 5ca-c4, le 5 de carreau sur le 6 de trèfle.\nUn : verif_coup coupe la saisie au tiret et renvoie le tuple carte, destination.\nDeux : index donne la pile de départ, c6, et la méthode index de la liste donne la position, 5.\nTrois : le morceau, c’est la carte et tout ce qui est posé dessus, piles[\"c6\"][5:]. C’est grâce à ça qu’on déplace plusieurs cartes d’un coup.\nQuatre : les vérifications. Jules va vous les détailler juste après.\nCinq : del retire le morceau de c6, extend le pose sur c4, et chaque carte déplacée change de pile dans index. Comme c6 n’a plus que des cartes cachées, cachees[\"c6\"] passe de 5 à 4 : le 3 de cœur se retourne. C’est le plateau de droite." },
-    { n: 5, titre: "Une saisie par commande, toutes vérifiées", qui: "Jules", s: 60, court: true,
-      txt: "Toutes les commandes se tapent en une seule saisie : carte-pile pour déplacer, p pour piocher, h pour les coups possibles, ia pour faire jouer l’ordinateur, annuler, sauvegarde, et le point d’interrogation pour les règles.\nChaque déplacement passe par des vérifications, dans cet ordre. D’abord verif_coup, la forme de la saisie : un seul tiret, une carte et une pile qui existent. Puis verif_carte : la carte a le droit de bouger. Elle n’est pas dans la pioche, pas cachée, et c’est celle du dessus si elle est sur la défausse ou sur une fondation. Enfin les règles de l’arrivée : verif_colonne pour une colonne, une couleur différente et une valeur juste en dessous, ou verifier_fondation pour une fondation, la même famille et une valeur juste au dessus.\nAu premier refus, le jeu dit pourquoi, et rien ne bouge. On vous le montre tout de suite." },
-    { n: 6, titre: "Démo : on joue une partie", qui: "Mattias au clavier, Jules commente", s: 210, court: true,
-      txt: "Avant de commencer : un terminal ouvert dans le dossier du projet, en grand, et un 2e onglet prêt.\n1. python3 main.py. « Voici le menu. Si je tape 7, il refuse : toutes les saisies sont vérifiées. » Taper 5 : « la partie de démonstration, toujours la même donne. »\n2. Montrer le plateau : « la pioche, 24 cartes face cachée, la défausse, les quatre fondations avec leur compteur sur 13, et les sept colonnes. Les cartes cachées sont en [░░], les cœurs et les carreaux en rouge. En bas, le rappel des commandes. »\n3. h : « l’ordinateur propose 5ca-c4, puis piocher. On y revient tout à l’heure. » Entrée.\n4. 6tr-c2 : « le 6 de trèfle sur le 8 de trèfle : refusé, même couleur. » Puis dpi-c1 : « une carte cachée : refusé aussi. Rien n’a bougé, aucun coup n’est compté. »\n5. 5ca-c4 : « le 5 de carreau va sur le 6 de trèfle, et en c6 le 3 de cœur se retourne. »\n6. annuler : « on revient avant le coup, le 3 de cœur est de nouveau caché. » Rejouer 5ca-c4.\n7. p : « on pioche le 7 de cœur. » Puis 7co-c2 : « il va de la défausse sur le 8 de trèfle. »\n8. 6tr-c2 : « le coup refusé tout à l’heure marche maintenant. Le 6 de trèfle part avec le 5 de carreau posé dessus, deux cartes d’un coup, et le 4 de carreau se retourne en c4. »\n9. ? : « l’écran des règles, avec toutes les commandes. » Entrée.\n10. sauvegarde : « la partie est enregistrée en JSON. » Dans le 2e onglet : python3 main.py, puis 2 : « elle reprend exactement au même coup. »" },
-    { n: 7, titre: "L’ordinateur essaie tout, puis classe", qui: "Jules", s: 75, court: true,
-      txt: "Quand on tape h, l’ordinateur ne devine rien. Il essaie chaque carte sur chacune des 11 piles d’arrivée : au plus 52 fois 11, donc 572 essais, c’est instantané.\nPour chaque essai, il appelle nos fonctions de vérification, celles du joueur, avec le paramètre parler à False pour qu’elles n’affichent pas leurs messages. Du coup, un coup proposé est forcément accepté par le jeu : c’est le même code qui décide. On l’a testé sur plus de 4 000 coups.\nEnsuite, il range chaque coup dans une liste selon son type, et il colle les listes dans l’ordre avec un plus : d’abord ce qui monte sur une fondation, puis ce qui retourne une carte cachée, et ainsi de suite, jusqu’à redescendre une carte d’une fondation, en dernier.\nÀ droite, un exemple au milieu d’une partie : 6tr-ftr monte le 6 de trèfle, rang 1. 6co-c3 retourne une carte, rang 2. Et 6ca-c3, qui ferait redescendre le 6 de carreau, arrive en dernier." },
-    { n: 8, titre: "L’ordinateur joue tout seul, sans boucler", qui: "Mattias", s: 75, court: true,
-      txt: "Avec ia, l’ordinateur joue tout seul. À chaque tour, main.py demande la liste des coups, mais seulement les coups utiles : la liste s’arrête après p. Il prend le premier et le joue avec la même fonction deplacement que le joueur : on lui passe le coup en paramètre, au lieu de le lire avec input.\nIl ne peut pas tourner en rond. Il ne joue jamais les rangs 7 et 8, ceux qui feraient des allers-retours : chaque coup fait monter une carte, en retourne une, vide la pioche, ou prépare un de ces coups. Et s’il doit retourner la défausse une deuxième fois sans avoir rien joué, c’est qu’il a vu toutes les cartes : il s’arrête et rend la main au joueur.\nEnfin, comme dans le vrai solitaire, quand toutes les cartes sont retournées et que la pioche est finie, la partie est gagnée : il range tout seul les cartes dans les fondations. C’est forcément gagné : la plus petite carte qui reste est toujours sur le dessus d’une colonne, et elle peut monter.\nRésultat : il gagne notre partie de démonstration aux trois niveaux, et sur 500 parties au hasard, 41 % en facile, 21 % en moyen et 11 % en difficile." },
-    { n: 9, titre: "Démo : l’ordinateur et les niveaux", qui: "Jules au clavier", s: 120, court: true,
-      txt: "1. Nouvel onglet : python3 main.py, 5, puis ia. « L’ordinateur joue toute la partie de démonstration. Sous le plateau, on voit chaque coup qu’il joue. Il pioche seulement quand il n’a rien de mieux. » Le laisser jouer, environ 25 secondes. « Victoire en 91 coups. »\n2. Nouvel onglet : python3 main.py, 3, 3 : « on passe en difficile, et le menu affiche le niveau. » Puis 5 et p : « en difficile, on tire 3 cartes. La défausse les montre en éventail, comme dans le vrai solitaire : le 7 de cœur et le 5 de trèfle en gris, l’as de carreau en couleur, c’est le seul jouable. »\n3. 7co-c2 : « si on essaie de jouer le 7 de cœur : refusé, il est en dessous. » Puis aca-fca : « l’as de carreau, lui, monte sur sa fondation. »\n4. Si on a le temps : python3 main.py < partie_gagnante.txt. « Ce fichier contient les saisies d’une partie gagnée. Vers la fin, toutes les cartes sont retournées et la pioche est vide : la fin automatique range les dernières cartes, et la partie est gagnée en 95 coups. »" },
-    { n: 10, titre: "Ce qui fait la force de notre jeu", qui: "Jules", s: 45, court: false,
-      txt: "Pour finir, nos points forts. Une seule saisie par coup, même pour plusieurs cartes. Chaque refus est expliqué. On peut annuler, même une pioche, et sauvegarder pour reprendre au même coup. L’ordinateur est fiable, parce qu’il utilise les mêmes vérifications que le joueur, et il gagne notre partie de démonstration. Le plateau est compact, avec la défausse en éventail comme dans le vrai jeu.\nCôté organisation : un fichier par grande fonction, et git, avec une branche chacun et des pull requests. Ça nous a permis d’avancer en même temps sans nous gêner.\nOn n’utilise que quatre modules fournis avec Python : random, json, os et time." },
-    { n: 11, titre: "Merci, place à vos questions", qui: "Mattias et Jules", s: 15, court: true,
-      txt: "Merci de votre attention. Nous sommes prêts pour vos questions.\nPendant les questions : garder le jeu ouvert dans un onglet du terminal, et le code ouvert dans PyCharm, pour montrer une ligne ou rejouer un coup si on vous le demande." }
+  /* ---------- les défis de code (corrections testées sur notre code) ---------- */
+  var DEFIS = [
+ {
+  "id": "m1",
+  "niveau": "facile",
+  "minutes": 3,
+  "demande": "Au début du jeu, toutes les cartes des colonnes doivent être retournées, face visible.",
+  "ou": "La distribution : `nouvelle_partie()` dans jeu_depart.py. Et la partie de démonstration est définie dans le même fichier.",
+  "quoi": "Ce qui dit qu’une carte est cachée, c’est `cachees`. Combien de cartes cachées faut-il maintenant dans chaque colonne ?",
+  "edits": [
+   {
+    "fichier": "jeu_depart.py",
+    "avant": "        #toutes les cartes de la colonne sont cachées sauf la dernière\n        cachees_jeu[\"c\"+str(nbr_colonne)] = nbr_colonne - 1",
+    "apres": "        #toutes les cartes sont visibles dès le début : aucune carte cachée\n        cachees_jeu[\"c\"+str(nbr_colonne)] = 0"
+   },
+   {
+    "fichier": "jeu_depart.py",
+    "avant": "cachees = {\"c1\": 0, \"c2\": 1, \"c3\": 2, \"c4\": 3, \"c5\": 4, \"c6\": 5, \"c7\": 6}",
+    "apres": "cachees = {\"c1\": 0, \"c2\": 0, \"c3\": 0, \"c4\": 0, \"c5\": 0, \"c6\": 0, \"c7\": 0}"
+   }
+  ],
+  "explication": "Une carte est cachée si sa position est plus petite que `cachees[colonne]`. Avec 0 partout, plus aucune carte n’est cachée. Rien d’autre à changer : l’affichage et les vérifications lisent déjà `cachees`.",
+  "test": "`python3 main.py`, puis 1 : toutes les cartes des colonnes sont visibles, seule la pioche reste en [░░]. Pareil avec 5.",
+  "pieges": [
+   "La partie de démonstration a son propre `cachees`, en haut de jeu_depart.py : le prof peut tester avec le choix 5.",
+   "La pioche reste face cachée : la consigne parle des colonnes. Si le prof parle aussi de la pioche, demande-lui ce qu’il veut voir.",
+   "h et l’ordinateur en profitent tout seuls : ils lisent `cachees` eux aussi."
+  ]
+ },
+ {
+  "id": "m2",
+  "niveau": "facile",
+  "minutes": 3,
+  "demande": "Le joueur doit pouvoir taper ses coups en majuscules, par exemple 5CA-C4, et avec des espaces en trop autour.",
+  "ou": "Là où la saisie est lue : `deplacement()` dans deplacement.py, juste après le `input()`.",
+  "quoi": "Transforme le texte tapé avant tous les tests. Quelles méthodes des textes enlèvent les espaces au bord, et passent en minuscules ?",
+  "edits": [
+   {
+    "fichier": "deplacement.py",
+    "avant": "    else:\n        move = coup_ordi\n",
+    "apres": "    else:\n        move = coup_ordi\n\n    #on accepte les majuscules et les espaces autour : \" 5CA-C4 \" devient \"5ca-c4\"\n    move = move.strip().lower()\n"
+   }
+  ],
+  "explication": "`strip()` enlève les espaces au début et à la fin, `lower()` passe tout en minuscules. En le faisant juste après la lecture, toutes les commandes en profitent, h, p et ? compris.",
+  "test": "`python3 main.py`, 5, puis tape 5CA-C4 : le coup est joué et le 3♥ se retourne. Tape aussi H : les coups possibles s’affichent.",
+  "pieges": [
+   "Si la ligne est mise après les tests de h, p ou ?, ces commandes ne marcheront pas en majuscules.",
+   "`strip()` n’enlève pas les espaces du milieu : « 5ca - c4 » reste refusé. Pour l’accepter : `move = move.replace(\" \", \"\")`.",
+   "Le prof peut demander pourquoi c’est sans danger : les cartes et les piles sont toutes écrites en minuscules dans le code."
+  ]
+ },
+ {
+  "id": "m3",
+  "niveau": "facile",
+  "minutes": 2,
+  "demande": "Les cartes face cachée doivent s’afficher [##] au lieu de [░░].",
+  "ou": "Tout l’affichage est dans affichage.py, et le dos des cartes est une variable en haut du fichier.",
+  "quoi": "Cherche la variable qui contient le dos d’une carte.",
+  "edits": [
+   {
+    "fichier": "affichage.py",
+    "avant": "dos = \"[░░]\"",
+    "apres": "dos = \"[##]\""
+   }
+  ],
+  "explication": "`dos` sert partout où l’on dessine une carte cachée : la pioche et les colonnes. Le changer à un seul endroit suffit.",
+  "test": "`python3 main.py`, puis 5 : les cartes cachées et la pioche s’affichent [##].",
+  "pieges": [
+   "Garde 4 caractères : chaque case fait 8 caractères et le texte y est centré, un dos d’une autre longueur décale les colonnes."
+  ]
+ },
+ {
+  "id": "m4",
+  "niveau": "facile",
+  "minutes": 2,
+  "demande": "Les cœurs et les carreaux doivent s’afficher en jaune au lieu de rouge.",
+  "ou": "En haut de affichage.py, avec les codes couleur du terminal.",
+  "quoi": "Le rouge est le code ANSI 31. Le jaune est le 33.",
+  "edits": [
+   {
+    "fichier": "affichage.py",
+    "avant": "rouge = \"\\033[31m\"",
+    "apres": "rouge = \"\\033[33m\""
+   }
+  ],
+  "explication": "Toutes les cartes rouges passent par la variable `rouge`, dans `case_carte` et dans `afficher_defausse`. Changer son code suffit.",
+  "test": "`python3 main.py`, puis 5 : le 3♦ et le 5♦ sont en jaune.",
+  "pieges": [
+   "La variable s’appelle encore `rouge` : pour la renommer partout d’un coup, Maj+F6 dans PyCharm.",
+   "Les autres codes : 32 vert, 34 bleu, 35 violet, 36 cyan, 90 gris."
+  ]
+ },
+ {
+  "id": "m5",
+  "niveau": "facile",
+  "minutes": 2,
+  "demande": "Une pioche doit compter comme un coup.",
+  "ou": "Le compteur `nb_coups` est dans main.py, dans la boucle du jeu.",
+  "quoi": "Aujourd’hui, seul `resultat == True` ajoute 1. Que renvoie `deplacement` pour une pioche ?",
+  "edits": [
+   {
+    "fichier": "main.py",
+    "avant": "        #seul un vrai coup compte, pas une pioche\n        if resultat == True:\n            nb_coups+=1\n",
+    "apres": "        #une pioche compte aussi comme un coup\n        if resultat == True or resultat == \"pioche\":\n            nb_coups+=1\n"
+   }
+  ],
+  "explication": "`deplacement` renvoie `\"pioche\"` pour p. Il suffit d’accepter aussi cette valeur dans le test qui fait `nb_coups+=1`.",
+  "test": "`python3 main.py < partie_gagnante.txt` : la victoire affiche plus de 95 coups, puisque les pioches comptent maintenant.",
+  "pieges": [
+   "`annuler` reste juste : la copie gardée contient le nombre de coups d’avant.",
+   "Les pioches de l’ordinateur comptent aussi, puisqu’il passe par la même boucle."
+  ]
+ },
+ {
+  "id": "m20",
+  "niveau": "facile",
+  "minutes": 2,
+  "demande": "Les figures doivent s’afficher en majuscules : [D♥] au lieu de [d♥], [R♠] au lieu de [r♠].",
+  "ou": "Le texte d’une carte à l’écran : `nom_carte()` dans affichage.py.",
+  "quoi": "Quelle méthode des textes passe en majuscules ? Et à quel moment l’appliquer, pour ne pas casser le remplacement des familles ?",
+  "edits": [
+   {
+    "fichier": "affichage.py",
+    "avant": "    return \"[\" + carte + \"]\"",
+    "apres": "    #les figures en majuscules : [D♥] au lieu de [d♥]\n    return \"[\" + carte.upper() + \"]\""
+   }
+  ],
+  "explication": "On remplace d’abord les deux lettres de la famille par le symbole, puis on passe le reste en majuscules avec `upper()`. Les symboles et les chiffres ne changent pas.",
+  "test": "`python3 -c \"from affichage import nom_carte; print(nom_carte('dco'))\"` affiche [D♥].",
+  "pieges": [
+   "Si `upper()` est fait avant les `replace`, « co » devient « CO » et les familles ne sont plus remplacées.",
+   "La saisie reste en minuscules : on ne change que l’affichage. Le prof peut enchaîner avec le défi des majuscules à la saisie."
+  ]
+ },
+ {
+  "id": "m7",
+  "niveau": "facile",
+  "minutes": 3,
+  "demande": "La commande h ne doit afficher que les 3 meilleurs coups.",
+  "ou": "L’affichage des coups : `afficher_coups()` dans coup_iav1.py.",
+  "quoi": "La liste est déjà rangée du plus utile au moins utile. Comment garder seulement les 3 premiers éléments d’une liste ?",
+  "edits": [
+   {
+    "fichier": "coup_iav1.py",
+    "avant": "def afficher_coups(piles, cachees, index):\n    coups = trouver_coups(piles, cachees, index)\n",
+    "apres": "def afficher_coups(piles, cachees, index):\n    #on ne montre que les 3 meilleurs : la liste est déjà rangée du plus utile au moins utile\n    coups = trouver_coups(piles, cachees, index)[:3]\n"
+   }
+  ],
+  "explication": "La tranche `[:3]` garde les 3 premiers. On coupe dans `afficher_coups` et pas dans `trouver_coups`, parce que l’ordinateur se sert de la liste complète.",
+  "test": "`python3 main.py`, 1, puis h plusieurs fois au fil de la partie : jamais plus de 3 coups affichés.",
+  "pieges": [
+   "Ne touche pas à `trouver_coups` : l’ordinateur choisit son coup dans la liste complète.",
+   "`[:3]` marche même s’il y a moins de 3 coups : la tranche renvoie ce qu’il y a.",
+   "Variante : « affiche le nombre de coups possibles » : `print(len(coups), \"coups possibles\")`."
+  ]
+ },
+ {
+  "id": "m8",
+  "niveau": "moyen",
+  "minutes": 4,
+  "demande": "Le nombre de coups joués doit s’afficher sous le plateau, pendant toute la partie.",
+  "ou": "Le compteur vit dans main.py. Regarde où le plateau est affiché, et où la question est posée.",
+  "quoi": "Le plateau est effacé et redessiné à chaque coup. La ligne doit donc s’écrire après le plateau, juste avant la question.",
+  "edits": [
+   {
+    "fichier": "main.py",
+    "avant": "        #maintenant, on va appeller le premier mouvement\n",
+    "apres": "        #on affiche le nombre de coups sous le plateau, juste avant la question\n        print(\"Coups joués : \" + str(nb_coups))\n\n        #maintenant, on va appeller le premier mouvement\n"
+   }
+  ],
+  "explication": "Dans la boucle de main.py, juste avant l’appel à `deplacement`, le plateau du coup précédent est déjà affiché : un `print` à cet endroit tombe sous le plateau, au-dessus de la question.",
+  "test": "`python3 main.py`, 5 : « Coups joués : 0 ». Joue 5ca-c4 : « Coups joués : 1 ».",
+  "pieges": [
+   "`str()` est obligatoire : on ne peut pas coller un texte et un nombre avec +.",
+   "Mettre le `print` dans `afficher` obligerait à ajouter `nb_coups` en paramètre partout où `afficher` est appelée.",
+   "L’écran de départ passe à 19 lignes : toujours sous la limite de 20."
+  ]
+ },
+ {
+  "id": "m9",
+  "niveau": "moyen",
+  "minutes": 4,
+  "demande": "Une carte posée sur une fondation ne doit plus pouvoir en redescendre.",
+  "ou": "Ce qui décide si une carte a le droit de bouger : `verif_carte()` dans verif_carte.py.",
+  "quoi": "Comment sait-on qu’une carte part d’une fondation ? Regarde la première lettre de `depart`.",
+  "edits": [
+   {
+    "fichier": "verif_carte.py",
+    "avant": "    #dans une fondation aussi, seule la carte du dessus peut bouger\n    if depart[0] == \"f\" and piles[depart][-1] != carte :\n        if parler:\n            print(\"la carte se trouve en dessous dans la fondation\")\n        return False\n",
+    "apres": "    #une carte posée sur une fondation ne peut plus en redescendre\n    if depart[0] == \"f\":\n        if parler:\n            print(\"Une carte posée sur une fondation ne peut plus bouger\")\n        return False\n"
+   }
+  ],
+  "explication": "Si `depart[0] == \"f\"`, on refuse. Ce test remplace celui qui vérifiait que la carte était sur le dessus de la fondation : il ne sert plus à rien.",
+  "test": "`python3 main.py`, 5, p trois fois, aca-fca, puis aca-c1 : « Une carte posée sur une fondation ne peut plus bouger ».",
+  "pieges": [
+   "h et l’ordinateur suivent tout seuls : ils appellent `verif_carte`.",
+   "On perd la ligne « Fondation vers Colonne » de la grille : assume que c’est ce que le prof a demandé.",
+   "Garde le `if parler:` autour du message, sinon h afficherait des refus."
+  ]
+ },
+ {
+  "id": "m10",
+  "niveau": "moyen",
+  "minutes": 4,
+  "demande": "N’importe quelle carte doit pouvoir aller sur une colonne vide, pas seulement un roi.",
+  "ou": "Les règles d’arrivée sur une colonne : `verif_colonne()` dans verif_colonne.py, tout au début.",
+  "quoi": "Quand la colonne est vide, que faut-il renvoyer, quelle que soit la carte ?",
+  "edits": [
+   {
+    "fichier": "verif_colonne.py",
+    "avant": "    # si la colonne est vide, seul un roi peut y aller\n    if len(piles[destination]) == 0:\n        if carte[:-2] == \"r\":\n            return True\n        else:\n            if parler:\n                print(\"Seul un roi peut aller sur une colonne vide\")\n            return False\n",
+    "apres": "    # si la colonne est vide, n'importe quelle carte peut y aller\n    if len(piles[destination]) == 0:\n        return True\n"
+   },
+   {
+    "fichier": "affichage.py",
+    "avant": "    print(\"  - sur une colonne vide : seulement un roi\")",
+    "apres": "    print(\"  - sur une colonne vide : n'importe quelle carte\")"
+   }
+  ],
+  "explication": "Si la colonne est vide, on renvoie True tout de suite. Les règles de couleur et de valeur ne concernent que les colonnes qui ont déjà une carte.",
+  "test": "`python3 -c \"from verif_colonne import verif_colonne; print(verif_colonne('5ca', 'c1', {'c1': []}))\"` affiche True. Vérifie aussi l’écran des règles avec ?.",
+  "pieges": [
+   "Mets à jour l’écran des règles (affichage.py) : « sur une colonne vide : seulement un roi ».",
+   "Le rang 5 de l’ordinateur (vider une colonne pour un roi) devient moins utile, mais rien ne casse.",
+   "Le prof peut demander à quoi servait la règle du roi : à rendre les colonnes vides précieuses."
+  ]
+ },
+ {
+  "id": "m18",
+  "niveau": "moyen",
+  "minutes": 4,
+  "demande": "Dans les colonnes, on doit maintenant poser une carte de la même couleur, et non plus de couleur alternée.",
+  "ou": "La règle des couleurs : `verif_colonne()` dans verif_colonne.py, le bloc « ici on vérifie si la couleur est différente ».",
+  "quoi": "Il y a deux booléens, `carte_rouge` et `carte_destination_rouge`. Dans quel cas faut-il refuser, maintenant ?",
+  "edits": [
+   {
+    "fichier": "verif_colonne.py",
+    "avant": "    #ici on vérifie si la couleur est différente\n    if carte_rouge==True and carte_destination_rouge==True:\n        if parler:\n            print(\"carte de la même couleur\")\n        return False\n    elif carte_rouge==False and carte_destination_rouge==False:\n        if parler:\n            print(\"carte de la même couleur\")\n        return False\n",
+    "apres": "    #maintenant la carte doit être de la même couleur que celle du dessous\n    if carte_rouge != carte_destination_rouge:\n        if parler:\n            print(\"carte de couleur différente\")\n        return False\n"
+   },
+   {
+    "fichier": "affichage.py",
+    "avant": "    print(\"  - sur une colonne : couleur alternée, et une valeur\")\n    print(\"    juste en dessous (5♦ sur 6♣)\")",
+    "apres": "    print(\"  - sur une colonne : même couleur, et une valeur\")\n    print(\"    juste en dessous (5♦ sur 6♥)\")"
+   }
+  ],
+  "explication": "On refuse quand les deux couleurs sont différentes : `carte_rouge != carte_destination_rouge`. Une seule condition remplace les deux `if`.",
+  "test": "`python3 -c \"from verif_colonne import verif_colonne; print(verif_colonne('5ca', 'c4', {'c4': ['6co']}))\"` affiche True (5♦ sur 6♥). Avec ['6tr'], False.",
+  "pieges": [
+   "Change le message : « carte de couleur différente ».",
+   "Mets à jour l’écran des règles : « couleur alternée » et l’exemple 5♦ sur 6♣.",
+   "h et l’ordinateur suivent tout seuls."
+  ]
+ },
+ {
+  "id": "m13",
+  "niveau": "moyen",
+  "minutes": 5,
+  "demande": "Ajoute une commande quitter, pour arrêter la partie en cours.",
+  "ou": "Une nouvelle commande se reconnaît dans deplacement.py (comme annuler ou ia), et c’est main.py qui agit.",
+  "quoi": "`deplacement` peut renvoyer une nouvelle valeur. Dans main.py, comment sortir d’une boucle `while` ? Et que se passe-t-il juste après la boucle ?",
+  "edits": [
+   {
+    "fichier": "deplacement.py",
+    "avant": "    if move == \"ia\":\n        return \"ia\"\n",
+    "apres": "    if move == \"ia\":\n        return \"ia\"\n\n    #le joueur arrête la partie : main.py sort de la boucle\n    if move == \"quitter\":\n        return \"quitter\"\n"
+   },
+   {
+    "fichier": "main.py",
+    "avant": "        #l'ordinateur prend la main\n        if resultat == \"ia\":\n",
+    "apres": "        #le joueur veut arrêter : on sort de la boucle du jeu\n        if resultat == \"quitter\":\n            break\n\n        #l'ordinateur prend la main\n        if resultat == \"ia\":\n"
+   },
+   {
+    "fichier": "main.py",
+    "avant": "    animation_victoire(nb_coups)",
+    "apres": "    #on ne fête la victoire que si la partie est vraiment gagnée\n    if verif_gagnee(piles):\n        animation_victoire(nb_coups)\n    else:\n        print(\"À bientôt !\")"
+   },
+   {
+    "fichier": "affichage.py",
+    "avant": "    print(\"  sauvegarde : enregistrer la partie pour plus tard\")\n",
+    "apres": "    print(\"  sauvegarde : enregistrer la partie pour plus tard\")\n    print(\"  quitter    : arrêter la partie (pensez à sauvegarder)\")\n"
+   }
+  ],
+  "explication": "`deplacement` renvoie `\"quitter\"` et main.py fait `break`. Mais juste après la boucle, main.py lance l’animation de victoire : il faut la lancer seulement si la partie est vraiment gagnée.",
+  "test": "`python3 main.py`, 5, puis quitter : « À bientôt ! », sans animation. La partie gagnante finit toujours en 95 coups.",
+  "pieges": [
+   "Sans changer la fin de main.py, quitter afficherait VICTOIRE : c’est le piège de cette question.",
+   "`break` ne sort que de la boucle la plus proche.",
+   "Ajoute la commande dans l’écran des règles : la ligne d’aide sous le plateau est déjà pleine (56 caractères)."
+  ]
+ },
+ {
+  "id": "m14",
+  "niveau": "moyen",
+  "minutes": 6,
+  "demande": "On doit pouvoir annuler plusieurs coups de suite, et pas seulement le dernier.",
+  "ou": "Tout est dans main.py : la copie gardée, et le bloc `annuler`.",
+  "quoi": "Une seule copie ne suffit plus. Quelle structure garde plusieurs copies, et rend la plus récente en premier ?",
+  "edits": [
+   {
+    "fichier": "main.py",
+    "avant": "    #la partie telle qu'elle était avant le dernier coup, pour pouvoir l'annuler\n    #None veut dire qu'il n'y a rien à annuler\n    copie_piles = None\n",
+    "apres": "    #toutes les parties d'avant, la plus récente à la fin : on peut annuler plusieurs coups\n    copies = []\n"
+   },
+   {
+    "fichier": "main.py",
+    "avant": "            copie_piles = avant_piles\n            copie_cachees = avant_cachees\n            copie_index = avant_index\n            copie_nb_coups = avant_nb_coups\n",
+    "apres": "            copies.append((avant_piles, avant_cachees, avant_index, avant_nb_coups))\n"
+   },
+   {
+    "fichier": "main.py",
+    "avant": "            if copie_piles is None:\n                print(\"Il n'y a rien à annuler\")\n            else:\n                piles = copie_piles\n                cachees = copie_cachees\n                index = copie_index\n                nb_coups = copie_nb_coups\n                #on ne peut annuler qu'une fois, le coup d'encore avant n'est pas gardé\n                copie_piles = None\n                afficher(piles, cachees, difficulte)\n",
+    "apres": "            if len(copies) == 0:\n                print(\"Il n'y a rien à annuler\")\n            else:\n                #pop enlève et renvoie la dernière copie, comme une pile de cartes\n                piles, cachees, index, nb_coups = copies.pop()\n                afficher(piles, cachees, difficulte)\n"
+   },
+   {
+    "fichier": "affichage.py",
+    "avant": "    print(\"  annuler    : revenir avant le dernier coup\")",
+    "apres": "    print(\"  annuler    : revenir en arrière, coup par coup\")"
+   }
+  ],
+  "explication": "Une liste `copies` : à chaque vrai coup ou pioche, on y ajoute la copie d’avant (`append`), et `annuler` reprend la dernière (`pop`). C’est une pile, comme la pioche. Chaque copie est un tuple de 4 valeurs, qu’on déballe en une ligne.",
+  "test": "`python3 main.py`, 5, 5ca-c4, p, puis annuler deux fois : retour au départ. Un troisième annuler : « Il n’y a rien à annuler ».",
+  "pieges": [
+   "`copie_piles` disparaît : il faut remplacer les trois endroits qui l’utilisent.",
+   "La mémoire grandit à chaque coup, mais quelques centaines de petites listes, ce n’est rien.",
+   "Change le texte de l’écran des règles : « revenir avant le dernier coup »."
+  ]
+ },
+ {
+  "id": "m6",
+  "niveau": "moyen",
+  "minutes": 6,
+  "demande": "Ajoute un quatrième niveau, expert, où l’on pioche 4 cartes à la fois.",
+  "ou": "Le choix du niveau est dans menu.py. Mais regarde aussi ce que le niveau change à l’écran.",
+  "quoi": "Dans menu.py : la liste des choix, le texte, les noms des niveaux. Ensuite, lance le jeu en expert et pioche : regarde la ligne de la défausse.",
+  "edits": [
+   {
+    "fichier": "menu.py",
+    "avant": "noms_difficulte = [\"facile\", \"moyen\", \"difficile\"]",
+    "apres": "noms_difficulte = [\"facile\", \"moyen\", \"difficile\", \"expert\"]"
+   },
+   {
+    "fichier": "menu.py",
+    "avant": "    choix_possibles = [\"1\", \"2\", \"3\"]\n",
+    "apres": "    choix_possibles = [\"1\", \"2\", \"3\", \"4\"]\n"
+   },
+   {
+    "fichier": "menu.py",
+    "avant": "    print(\"   3 : difficile (3 cartes à chaque pioche)\")\n",
+    "apres": "    print(\"   3 : difficile (3 cartes à chaque pioche)\")\n    print(\"   4 : expert    (4 cartes à chaque pioche)\")\n"
+   },
+   {
+    "fichier": "menu.py",
+    "avant": "        print(\"Ce niveau n'existe pas, tapez 1, 2 ou 3\")",
+    "apres": "        print(\"Ce niveau n'existe pas, tapez 1, 2, 3 ou 4\")"
+   },
+   {
+    "fichier": "affichage.py",
+    "avant": "    visibles = defausse[-difficulte:]\n",
+    "apres": "    #on montre 3 cartes au plus : 4 cartes ne tiennent pas dans les 2 cases de la défausse\n    visibles = defausse[-min(difficulte, 3):]\n"
+   },
+   {
+    "fichier": "affichage.py",
+    "avant": "    print(\"  p          : piocher (1 à 3 cartes selon le niveau)\")",
+    "apres": "    print(\"  p          : piocher (1 à 4 cartes selon le niveau)\")"
+   }
+  ],
+  "explication": "Le menu accepte 4, et `piocher` tire déjà `difficulte` cartes. Le piège est l’affichage : 4 cartes ne tiennent pas dans les 16 caractères de la défausse, et les fondations se décalent. On limite l’éventail à 3 cartes avec `defausse[-min(difficulte, 3):]`.",
+  "test": "`python3 main.py`, 3, 4 : le menu affiche expert. Puis 5 et p : 20 cartes dans la pioche, et les fondations restent alignées.",
+  "pieges": [
+   "Le piège classique : la modif marche, mais elle casse autre chose. Relance toujours le jeu et regarde l’écran.",
+   "Mets à jour le message d’erreur du menu (1, 2, 3 ou 4) et l’écran des règles (1 à 4 cartes).",
+   "`noms_difficulte[difficulte - 1]` marche tout seul avec le 4e nom."
+  ]
+ },
+ {
+  "id": "m15",
+  "niveau": "moyen",
+  "minutes": 6,
+  "demande": "Ajoute un score : +10 par carte qui monte sur une fondation, -2 par pioche, affiché sous le plateau.",
+  "ou": "main.py, dans la boucle : c’est là qu’on sait ce que `deplacement` a renvoyé.",
+  "quoi": "main.py ne sait pas où la carte est allée. Comment savoir qu’une carte est montée sur une fondation ? Compte les cartes des fondations avant et après le coup.",
+  "edits": [
+   {
+    "fichier": "main.py",
+    "avant": "    #combien de fois l'ordinateur a retourné la défausse sans rien jouer d'autre\n    nb_tours = 0\n",
+    "apres": "    #combien de fois l'ordinateur a retourné la défausse sans rien jouer d'autre\n    nb_tours = 0\n\n    #le score : +10 par carte qui monte sur une fondation, -2 par pioche\n    score = 0\n"
+   },
+   {
+    "fichier": "main.py",
+    "avant": "        #maintenant, on va appeller le premier mouvement\n        resultat = deplacement(piles, cachees, index, nb_coups, difficulte, coup_ordi)\n",
+    "apres": "        #on compte les cartes des fondations avant le coup\n        avant_fondations = len(piles[\"fca\"]) + len(piles[\"fpi\"]) + len(piles[\"fco\"]) + len(piles[\"ftr\"])\n\n        #maintenant, on va appeller le premier mouvement\n        resultat = deplacement(piles, cachees, index, nb_coups, difficulte, coup_ordi)\n\n        #le score bouge selon ce qui s'est passé\n        apres_fondations = len(piles[\"fca\"]) + len(piles[\"fpi\"]) + len(piles[\"fco\"]) + len(piles[\"ftr\"])\n        if resultat == True:\n            score = score + 10 * (apres_fondations - avant_fondations)\n        if resultat == \"pioche\":\n            score = score - 2\n        print(\"Score : \" + str(score))\n"
+   }
+  ],
+  "explication": "On compte les cartes des 4 fondations avant et après le coup. La différence vaut 1 si une carte est montée (+10), -1 si elle est redescendue (-10). Une pioche enlève 2.",
+  "test": "`python3 main.py`, 5, p, p, p : « Score : -6 ». Puis aca-fca : « Score : 4 ».",
+  "pieges": [
+   "`annuler` ne remet pas le score : pour être juste, il faudrait le mettre dans la copie gardée.",
+   "Le score n’est pas sauvegardé : il faudrait l’ajouter au dictionnaire de la sauvegarde.",
+   "Avec la différence avant et après, une carte qui redescend d’une fondation fait bien -10."
+  ]
+ },
+ {
+  "id": "m11",
+  "niveau": "vicieux",
+  "minutes": 8,
+  "demande": "Les fondations doivent se construire du roi jusqu’à l’as, et non plus de l’as jusqu’au roi.",
+  "ou": "Les règles d’une fondation : `verifier_fondation()` dans verif_fondations.py. Puis cherche ce qui suppose l’ordre de l’as vers le roi ailleurs dans le jeu.",
+  "quoi": "Fondation vide : quelle carte accepter ? Sinon : la valeur doit être juste au-dessus ou juste en dessous ? Et la fin automatique, est-elle encore toujours gagnée ?",
+  "edits": [
+   {
+    "fichier": "verif_fondations.py",
+    "avant": "    if len(piles[destination]) == 0:      ## obligé car sinon aucun as ne peut être accepté\n        if valeur_cartes_origines != \"a\":\n            if parler:\n                print(\"Seul un as peut aller sur la fondation vide\")\n            return False\n        if valeur_cartes_origines == \"a\" :\n            return True\n",
+    "apres": "    if len(piles[destination]) == 0:      ## maintenant une fondation commence par le roi\n        if valeur_cartes_origines != \"r\":\n            if parler:\n                print(\"Seul un roi peut aller sur la fondation vide\")\n            return False\n        if valeur_cartes_origines == \"r\" :\n            return True\n"
+   },
+   {
+    "fichier": "verif_fondations.py",
+    "avant": "    if ordredelacarte != ordredelacarte_destination +1 :\n        if parler:\n            print(\"Seul une carte avec une valeur supérieur de 1 est accepté\")\n        return False\n",
+    "apres": "    if ordredelacarte != ordredelacarte_destination - 1 :\n        if parler:\n            print(\"Seule une carte avec une valeur inférieure de 1 est acceptée\")\n        return False\n"
+   },
+   {
+    "fichier": "main.py",
+    "avant": "        #comme dans le vrai solitaire : quand tout est retourné, la partie est gagnée\n        #l'ordinateur range alors tout seul les cartes qui restent dans les fondations\n        if auto == False and tout_est_retourne(piles, cachees):\n            auto = True\n            print(\"Toutes les cartes sont retournées, la partie est gagnée : l'ordinateur range les cartes\")\n            time.sleep(1)\n\n",
+    "apres": ""
+   },
+   {
+    "fichier": "affichage.py",
+    "avant": "    print(\"  - sur une fondation : même famille, de l'as au roi\")",
+    "apres": "    print(\"  - sur une fondation : même famille, du roi à l'as\")"
+   }
+  ],
+  "explication": "Fondation vide : seul un roi. Sinon, la place de la carte doit valoir celle du dessus moins 1. La fin automatique ne tient plus : sa preuve repose sur la plus petite carte, qui peut toujours monter. Maintenant il faudrait la plus grande, souvent coincée sous les autres. On enlève donc la fin automatique de main.py.",
+  "test": "`python3 -c \"from verif_fondations import verifier_fondation; print(verifier_fondation('rca', {'fca': []}, 'fca'), verifier_fondation('dca', {'fca': ['rca']}, 'fca'))\"` affiche True True.",
+  "pieges": [
+   "`verif_gagnee` ne change pas : une fondation reste complète à 13 cartes.",
+   "Le vrai piège : la fin automatique pourrait se bloquer et répéter ses messages à chaque tour. Il faut le voir et le dire au prof.",
+   "Mets à jour l’écran des règles : « du roi à l’as »."
+  ]
+ },
+ {
+  "id": "m12",
+  "niveau": "vicieux",
+  "minutes": 8,
+  "demande": "Au niveau difficile, on ne doit pouvoir retourner la pioche que 2 fois dans la partie.",
+  "ou": "Le retournement de la défausse est dans `piocher()`, pioche.py, dans le `else`.",
+  "quoi": "Il faut un compteur qui ne repart pas à 0 à chaque appel de `piocher`. Où le ranger ?",
+  "edits": [
+   {
+    "fichier": "pioche.py",
+    "avant": "from affichage import afficher\n\n\ndef piocher(",
+    "apres": "from affichage import afficher\n\n#combien de fois la pioche a été retournée depuis le début de la partie\nnb_retournements = 0\n\n\ndef piocher("
+   },
+   {
+    "fichier": "pioche.py",
+    "avant": "    pioche = piles[\"p\"]\n    defausse = piles[\"d\"]\n",
+    "apres": "    pioche = piles[\"p\"]\n    defausse = piles[\"d\"]\n    #on modifie la variable du fichier, pas une nouvelle variable de la fonction\n    global nb_retournements\n"
+   },
+   {
+    "fichier": "pioche.py",
+    "avant": "    else:\n        while len(defausse) > 0:      # tant qu'il reste des cartes dans la défausse\n",
+    "apres": "    else:\n        #en difficile, on ne peut retourner la pioche que 2 fois\n        if difficulte == 3 and nb_retournements >= 2:\n            print(\"La pioche a déjà été retournée 2 fois : plus de pioche en difficile\")\n            return\n        nb_retournements = nb_retournements + 1\n        while len(defausse) > 0:      # tant qu'il reste des cartes dans la défausse\n"
+   }
+  ],
+  "explication": "Une variable créée dans la fonction repartirait à 0 à chaque appel. On la met au niveau du fichier, et `global nb_retournements` permet de la modifier dans la fonction. Au troisième retournement en difficile, on affiche un message et on sort avec `return`.",
+  "test": "`python3 main.py`, 3, 3, 5, puis p une trentaine de fois : après 2 retournements, « plus de pioche en difficile ».",
+  "pieges": [
+   "Le prof vicieux : « et si je sauvegarde puis je reprends ? » Le compteur repart à 0 : il faudrait l’ajouter au dictionnaire de la sauvegarde.",
+   "`annuler` ne remet pas le compteur en arrière.",
+   "L’ordinateur ne boucle pas : son compteur `nb_tours` l’arrête quand la pioche ne se retourne plus."
+  ]
+ },
+ {
+  "id": "m17",
+  "niveau": "vicieux",
+  "minutes": 10,
+  "demande": "Le jeu doit avoir 8 colonnes au lieu de 7.",
+  "ou": "Partout où la liste des colonnes est écrite. Cherche \"c7\" dans tout le projet : Cmd+Maj+F dans PyCharm.",
+  "quoi": "La liste est recopiée dans plusieurs fichiers, et la distribution compte jusqu’à 7. N’oublie pas la partie de démonstration, ni l’alignement des fondations à l’écran.",
+  "edits": [
+   {
+    "fichier": "jeu_depart.py",
+    "avant": "    \"c7\": [\"rpi\", \"api\", \"8ca\", \"9co\", \"3pi\", \"dtr\", \"9pi\"],\n",
+    "apres": "    \"c7\": [\"rpi\", \"api\", \"8ca\", \"9co\", \"3pi\", \"dtr\", \"9pi\"],\n    \"c8\": [],\n"
+   },
+   {
+    "fichier": "jeu_depart.py",
+    "avant": "\"c6\": 5, \"c7\": 6}",
+    "apres": "\"c6\": 5, \"c7\": 6, \"c8\": 0}"
+   },
+   {
+    "fichier": "jeu_depart.py",
+    "avant": "\"c6\":[],\"c7\":[],\"fca\":[]",
+    "apres": "\"c6\":[],\"c7\":[],\"c8\":[],\"fca\":[]"
+   },
+   {
+    "fichier": "jeu_depart.py",
+    "avant": "    while nbr_colonne <= 7:",
+    "apres": "    while nbr_colonne <= 8:"
+   },
+   {
+    "fichier": "affichage.py",
+    "avant": "    colonnes = [\"c1\", \"c2\", \"c3\", \"c4\", \"c5\", \"c6\", \"c7\"]",
+    "apres": "    colonnes = [\"c1\", \"c2\", \"c3\", \"c4\", \"c5\", \"c6\", \"c7\", \"c8\"]"
+   },
+   {
+    "fichier": "affichage.py",
+    "avant": "def afficher_titre():\n    print(gras + \"S O L I T A I R E\".center(largeur * 7) + normal)\n    print(gris + \"─\" * (largeur * 7) + normal)",
+    "apres": "def afficher_titre():\n    print(gras + \"S O L I T A I R E\".center(largeur * 8) + normal)\n    print(gris + \"─\" * (largeur * 8) + normal)"
+   },
+   {
+    "fichier": "affichage.py",
+    "avant": "    titres = case(\"pioche\", gris) + case(\"défausse\", gris) + \" \" * largeur\n",
+    "apres": "    titres = case(\"pioche\", gris) + case(\"défausse\", gris) + \" \" * (largeur * 2)\n"
+   },
+   {
+    "fichier": "affichage.py",
+    "avant": "    for f in fondation:\n        if len(piles[f]) > 0:\n",
+    "apres": "    #une case de plus avant les fondations, pour qu'elles restent au dessus des 4 dernières colonnes\n    cartes = cartes + \" \" * largeur\n\n    for f in fondation:\n        if len(piles[f]) > 0:\n"
+   },
+   {
+    "fichier": "affichage.py",
+    "avant": "    nombres = case(str(len(piles[\"p\"])), gris) + case(str(len(piles[\"d\"])), gris) + \" \" * largeur\n",
+    "apres": "    nombres = case(str(len(piles[\"p\"])), gris) + case(str(len(piles[\"d\"])), gris) + \" \" * (largeur * 2)\n"
+   },
+   {
+    "fichier": "deplacement.py",
+    "avant": "    move_possible=[\"c1\",\"c2\",\"c3\",\"c4\",\"c5\",\"c6\",\"c7\",\"fca\"",
+    "apres": "    move_possible=[\"c1\",\"c2\",\"c3\",\"c4\",\"c5\",\"c6\",\"c7\",\"c8\",\"fca\""
+   },
+   {
+    "fichier": "deplacement.py",
+    "avant": "    colonne = [\"c1\",\"c2\",\"c3\",\"c4\",\"c5\",\"c6\",\"c7\"]",
+    "apres": "    colonne = [\"c1\",\"c2\",\"c3\",\"c4\",\"c5\",\"c6\",\"c7\",\"c8\"]"
+   },
+   {
+    "fichier": "verif_coup.py",
+    "avant": "\"c6\", \"c7\", \"fca\"",
+    "apres": "\"c6\", \"c7\", \"c8\", \"fca\""
+   },
+   {
+    "fichier": "coup_iav1.py",
+    "avant": "    colonnes = [\"c1\", \"c2\", \"c3\", \"c4\", \"c5\", \"c6\", \"c7\"]",
+    "apres": "    colonnes = [\"c1\", \"c2\", \"c3\", \"c4\", \"c5\", \"c6\", \"c7\", \"c8\"]"
+   },
+   {
+    "fichier": "verif_gagnee.py",
+    "avant": "    colonnes = [\"c1\", \"c2\", \"c3\", \"c4\", \"c5\", \"c6\", \"c7\"]",
+    "apres": "    colonnes = [\"c1\", \"c2\", \"c3\", \"c4\", \"c5\", \"c6\", \"c7\", \"c8\"]"
+   }
+  ],
+  "explication": "Il faut ajouter c8 dans jeu_depart.py (les piles de la démo, `cachees`, `piles_jeu`, la distribution jusqu’à 8), affichage.py (les colonnes, le titre, une case de plus avant les fondations), deplacement.py, verif_coup.py, coup_iav1.py et verif_gagnee.py. Avec 8 colonnes, 36 cartes sont distribuées et la pioche en garde 16.",
+  "test": "`python3 main.py`, 1 : 8 colonnes, 16 cartes dans la pioche. Puis 5 : la démo marche, avec une colonne c8 vide. La partie gagnante finit toujours en 95 coups.",
+  "pieges": [
+   "Le piège, c’est le nombre d’endroits : un seul oubli et le jeu plante ou refuse c8. Le réflexe Cmd+Maj+F sur \"c7\" les trouve tous.",
+   "La partie de démonstration a besoin d’une colonne c8, même vide, sinon l’affichage plante (KeyError).",
+   "L’écran passe à 64 caractères, au-delà de la limite de 60. Pour y rester : `largeur = 7`, car 8 × 7 = 56.",
+   "La bonne réponse de fond : une seule liste des colonnes, dans jeu_depart.py et importée partout, aurait évité tout ça."
+  ]
+ },
+ {
+  "id": "m19",
+  "niveau": "vicieux",
+  "minutes": 10,
+  "demande": "Quand la partie est gagnée, le jeu doit proposer de rejouer.",
+  "ou": "main.py n’est pas une fonction : tout le jeu est écrit au niveau du fichier. Il faut le mettre dans une boucle.",
+  "quoi": "Mets tout, du menu jusqu’à l’animation, dans un `while`. Puis rejoue la partie de démonstration : que vaut la donne la deuxième fois ?",
+  "edits": [],
+  "extrait": "#la donne de démonstration est modifiée pendant le jeu : on en garde une copie\ndemo_piles = {}\nfor i in piles:\n    demo_piles[i] = list(piles[i])\ndemo_cachees = dict(cachees)\ndemo_index = dict(index)\n\n#on recommence tant que le joueur veut rejouer\nrejouer = True\nwhile rejouer:\n    choix = menu(difficulte)\n    #tout l'ancien code est décalé d'un cran (sélection, puis Tab)\n    ...\n    #partie de démonstration : on repart d'une copie neuve de la donne\n    if choix == \"5\":\n        piles = {}\n        for i in demo_piles:\n            piles[i] = list(demo_piles[i])\n        cachees = dict(demo_cachees)\n        index = dict(demo_index)\n        nb_coups = 0\n\n    if choix == \"4\":\n        print(\"À bientôt !\")\n        rejouer = False\n    else:\n        ...\n        animation_victoire(nb_coups)\n        rejouer = input(\"Rejouer ? (o/n) \") == \"o\"",
+  "explication": "Une boucle `while rejouer:` autour de tout le jeu : sélectionne le code et appuie sur Tab pour le décaler. Le piège : la donne de démonstration est modifiée pendant la partie, puisque les `pop` et `append` touchent les listes de jeu_depart.py. La deuxième fois, elle repartirait de la fin. On en garde donc une copie au lancement, et on repart de cette copie à chaque choix 5.",
+  "test": "`python3 main.py`, 5, puis ia : victoire, puis « Rejouer ? ». Tape o, puis 5 et ia : la démo repart du début et se gagne encore en 91 coups.",
+  "pieges": [
+   "Le vrai piège : la donne de démonstration abîmée par la première partie.",
+   "Avec une nouvelle partie (choix 1), pas de souci : `nouvelle_partie()` crée de nouveaux dictionnaires à chaque fois.",
+   "La difficulté choisie est gardée d’une partie à l’autre, puisque `difficulte` est défini avant la boucle."
+  ]
+ },
+ {
+  "id": "m16",
+  "niveau": "vicieux",
+  "minutes": 8,
+  "demande": "Le jeu doit détecter quand la partie est perdue.",
+  "ou": "main.py, au début de chaque tour de la boucle. Et `trouver_coups()` sait déjà lister les coups possibles.",
+  "quoi": "Qu’est-ce qu’une partie perdue ? Si `trouver_coups` ne renvoie plus rien, il n’y a plus aucun coup. Mais tant qu’il reste des cartes dans la pioche, `p` est proposé.",
+  "edits": [
+   {
+    "fichier": "main.py",
+    "avant": "        avant_nb_coups = nb_coups\n",
+    "apres": "        avant_nb_coups = nb_coups\n\n        #plus aucun coup possible, même en piochant : la partie est perdue\n        if len(trouver_coups(piles, cachees, index)) == 0:\n            print(\"Plus aucun coup possible : partie perdue\")\n            break\n"
+   },
+   {
+    "fichier": "main.py",
+    "avant": "    animation_victoire(nb_coups)",
+    "apres": "    #on ne fête la victoire que si la partie est vraiment gagnée\n    if verif_gagnee(piles):\n        animation_victoire(nb_coups)"
+   }
+  ],
+  "explication": "Si `trouver_coups(...)` renvoie une liste vide, on affiche « partie perdue » et on sort de la boucle, sans animation de victoire. Avec cette définition, on ne perd que quand la pioche et la défausse sont vides et qu’aucun coup n’est possible.",
+  "test": "Une vraie défaite est longue à atteindre : vérifie au moins que la partie gagnante finit toujours en 95 coups, et sache expliquer au prof quand le message apparaît.",
+  "pieges": [
+   "Le prof vicieux : « mais on peut piocher à l’infini sans rien pouvoir jouer ! » Une meilleure définition : aucun coup utile, même après deux tours de pioche. C’est la règle d’arrêt de l’ordinateur, avec `nb_tours`.",
+   "Sans changer la fin de main.py, l’animation de victoire se lancerait après une défaite."
+  ]
+ }
+];
+
+  var METHODE = [
+    "Répète la demande avec tes mots, et demande une précision si elle est floue : « toutes les cartes, ou seulement celles des colonnes ? »",
+    "Dis où tu vas modifier avant de toucher au code : « c’est dans `verif_carte`, parce que c’est elle qui décide si une carte peut bouger ».",
+    "Fais le plus petit changement possible, puis relance le jeu tout de suite.",
+    "Teste le cas demandé, puis un coup normal, pour vérifier que tu n’as rien cassé.",
+    "Si ça plante, lis la dernière ligne de l’erreur (son type et son message), puis la ligne de code qu’elle indique.",
+    "Pense aux effets de bord : `h` et l’ordinateur, l’écran des règles, la partie de démonstration, la sauvegarde, `annuler`."
+  ];
+
+  /* ---------- présenter le code ---------- */
+  var CODE_TOUR = [
+    { fichier: "main.py", dire: "Le point de départ : le menu, puis la boucle du jeu. Tant que les quatre fondations ne sont pas pleines, on copie la partie pour pouvoir annuler, l’ordinateur choisit le coup s’il joue tout seul, puis on appelle `deplacement` et on regarde ce qu’elle renvoie : True, False, \"pioche\", \"annuler\" ou \"ia\".",
+      ancres: ["while verif_gagnee(piles) == False:", "avant_piles[i] = list(piles[i])", "resultat = deplacement("] },
+    { fichier: "jeu_depart.py", dire: "Les données : le paquet de 52 textes, et pour la partie de démonstration les trois dictionnaires `piles`, `cachees` et `index`. `nouvelle_partie` copie le paquet, le mélange et distribue.",
+      ancres: ["piles = {", "cachees = {", "def nouvelle_partie():"] },
+    { fichier: "deplacement.py", dire: "Lit la commande. D’abord les commandes spéciales (h, sauvegarde, p, ?, annuler, ia). Sinon c’est un déplacement : on vérifie la saisie, la carte et l’arrivée, puis on déplace le morceau, et on retourne la carte cachée si besoin.",
+      ancres: ["move = input(", "morceau = piles[depart][position:]", "del piles[depart][position:]"] },
+    { fichier: "verif_coup.py, verif_carte.py, verif_colonne.py, verif_fondations.py", dire: "Les règles, une fonction par vérification. Chacune renvoie True ou False, et le paramètre `parler` dit si elle affiche son message de refus.",
+      ancres: ["def verif_coup(move):", "def verif_carte(", "def verif_colonne(", "def verifier_fondation("] },
+    { fichier: "pioche.py", dire: "La commande p : on tire 1, 2 ou 3 cartes selon le niveau, ou on retourne la défausse quand la pioche est vide.",
+      ancres: ["def piocher("] },
+    { fichier: "affichage.py", dire: "Tout l’écran : une case de 8 caractères par pile, les couleurs ANSI, les colonnes écrites ligne par ligne, la défausse en éventail, l’écran des règles.",
+      ancres: ["largeur = 8", "def afficher_colonnes(", "def afficher_defausse("] },
+    { fichier: "coup_iav1.py", dire: "Les coups possibles : on essaie chaque carte sur chaque pile avec nos fonctions de vérification, puis on range les coups en 8 rangs, du plus utile au moins utile.",
+      ancres: ["def trouver_coups(", "seulement_utiles"] },
+    { fichier: "sauvegarder.py, menu.py, verif_gagnee.py, victoire.py", dire: "La sauvegarde en JSON, le menu et le choix du niveau, la détection de la victoire et de la fin automatique, l’animation de victoire.",
+      ancres: ["json.dump", "def choisir_difficulte():", "def tout_est_retourne(", "def animation_victoire("] }
+  ];
+  var CARTE_MODIFS = [
+    ["les règles pour poser sur une colonne", "verif_colonne.py, `verif_colonne`"],
+    ["les règles d’une fondation", "verif_fondations.py, `verifier_fondation`"],
+    ["quelles cartes ont le droit de bouger", "verif_carte.py, `verif_carte`"],
+    ["la forme de la saisie (majuscules, séparateur…)", "deplacement.py juste après `input()`, et verif_coup.py"],
+    ["ajouter une commande", "deplacement.py pour la reconnaître, main.py pour agir"],
+    ["la distribution, les cartes cachées du début", "jeu_depart.py, `nouvelle_partie`, et la donne de démonstration"],
+    ["la pioche", "pioche.py, `piocher`"],
+    ["les niveaux", "menu.py, `choisir_difficulte` et `noms_difficulte`"],
+    ["ce qu’on voit à l’écran", "affichage.py"],
+    ["le compteur, annuler, la fin de partie", "main.py, la boucle du jeu"],
+    ["les coups proposés, l’ordinateur", "coup_iav1.py, `trouver_coups` ; main.py pour `ia`"],
+    ["la sauvegarde", "sauvegarder.py, et main.py pour la reprise"],
+    ["la victoire", "verif_gagnee.py, et victoire.py pour l’animation"]
+  ];
+  var RACCOURCIS = [
+    ["Cmd+Maj+F", "chercher dans tous les fichiers, par exemple \"c7\" ou `verif_carte(`"],
+    ["Cmd+F", "chercher dans le fichier ouvert"],
+    ["Cmd+B", "aller à la définition d’une fonction (ou Cmd+clic sur son nom)"],
+    ["Option+F7", "trouver tous les endroits qui appellent une fonction"],
+    ["Cmd+L", "aller à un numéro de ligne, celui d’un message d’erreur"],
+    ["Maj+F6", "renommer une variable ou une fonction partout"],
+    ["Cmd+/", "mettre ou enlever des lignes en commentaire"],
+    ["Tab, Maj+Tab", "décaler un bloc sélectionné vers la droite ou vers la gauche"],
+    ["Cmd+Z, Cmd+Maj+Z", "annuler, refaire"],
+    ["Ctrl+R", "relancer le programme"],
+    ["git restore .", "dans le terminal : remettre tout le code comme au dernier commit"]
   ];
 
   /* ---------- le plan jusqu'à la soutenance ---------- */
   var PLAN = [
-    { d: "2026-10-30", nom: "Vendredi 30 octobre", taches: [
-      ["mail", "Envoyer le mail au prof (un ou plusieurs .py, diaporama ?)"],
-      ["pr", "Commit, push et pull request mattias vers main"],
-      ["jules", "Prévenir Jules : la priorité et ia sont faites, il arrête et fait git pull"],
-      ["s30", "Première séance de questions (15 cartes)"] ] },
-    { d: "2026-10-31", nom: "Samedi 31 octobre", taches: [
-      ["s31", "Séance de questions"],
-      ["lire31", "Lire à voix haute le script de ses diapos"] ] },
-    { d: "2026-11-01", nom: "Dimanche 1er novembre", taches: [
-      ["s01", "Séance de questions"],
-      ["demo01", "Faire la démo 1 en entier, chronométrée"],
-      ["oral01", "Un oral blanc de 8 questions"] ] },
     { d: "2026-11-02", nom: "Lundi 2 novembre", taches: [
-      ["nettoyage", "Nettoyer le code (liste du chantier), puis partie gagnante en 95 coups"],
-      ["s02", "Séance de questions"] ] },
+      ["n_nettoyage", "Nettoyer le code avant le gel : commentaires périmés, imports inutiles, fautes dans les messages (liste du chantier)"],
+      ["n_git", "Tout commiter, puis vérifier que python3 main.py < partie_gagnante.txt finit en 95 coups"],
+      ["n_defis_f", "Les 7 défis faciles, chronométrés, avec git restore . après chacun"],
+      ["n_q02", "Une séance de questions (15 cartes)"] ] },
     { d: "2026-11-03", nom: "Mardi 3 novembre", taches: [
-      ["repet03", "Répétition complète à deux, chronométrée (onglet Script)"],
-      ["s03", "Séance de questions"] ] },
+      ["n_defis_m", "Les 8 défis moyens"],
+      ["n_code03", "Présenter le code à voix haute en 3 minutes, fichier par fichier (onglet Le code)"],
+      ["n_q03", "Une séance de questions"] ] },
     { d: "2026-11-04", nom: "Mercredi 4 novembre", taches: [
-      ["croise04", "Oral blanc croisé : Mattias interroge Jules, puis l’inverse"],
-      ["s04", "Séance de questions"] ] },
+      ["n_defis_v", "Les 5 défis vicieux"],
+      ["n_rates", "Refaire les défis ratés ou faits avec les indices"],
+      ["n_oral04", "Un oral blanc de 8 questions"],
+      ["n_q04", "Une séance de questions"] ] },
     { d: "2026-11-05", nom: "Jeudi 5 novembre, la veille", taches: [
-      ["s05", "Séance finale : cartes rouges et réponses partielles"],
-      ["impr", "Imprimer le dossier papier"],
-      ["moodle", "Déposer le PDF et le .py sur Moodle (un seul dépôt pour le binôme)"],
-      ["pc", "Charger l’ordinateur et préparer les onglets du terminal"] ] },
+      ["n_blanc", "Examen blanc, seul : présenter le code, 5 questions, puis 2 défis au hasard sans indice"],
+      ["n_rouges", "Revoir les cartes rouges"],
+      ["n_impr", "Imprimer le dossier papier"],
+      ["n_moodle", "Déposer le PDF et le .py sur Moodle (un seul dépôt pour le binôme)"],
+      ["n_pc", "Charger l’ordinateur, préparer PyCharm (police agrandie, projet ouvert)"] ] },
     { d: "2026-11-06", nom: "Vendredi 6 novembre, jour J", taches: [
-      ["moodle2", "Vérifier le dépôt Moodle avant 14 h"],
-      ["jourj", "La soutenance"] ] }
+      ["n_moodle2", "Vérifier le dépôt Moodle avant 14 h"],
+      ["n_jourj", "La soutenance"] ] }
   ];
   var JOURJ = [
-    ["jj1", "Ordinateur chargé, et le chargeur dans le sac"],
-    ["jj2", "Terminal ouvert dans le dossier du projet, police agrandie"],
-    ["jj3", "python3 main.py testé le matin même"],
-    ["jj4", "Un 2e onglet prêt pour la reprise de la sauvegarde"],
-    ["jj5", "Diaporama ouvert, et le PDF du diaporama téléchargé en secours"],
-    ["jj6", "PyCharm ouvert sur le code, pour montrer une ligne"],
-    ["jj7", "Le dossier papier imprimé"]
+    ["j1", "Ordinateur chargé, et le chargeur dans le sac"],
+    ["j2", "PyCharm ouvert sur le projet, police agrandie pour la projection (Réglages, Éditeur, Police : 18 ou plus)"],
+    ["j3", "Tout est commité : git status propre, pour revenir en arrière après chaque modification avec git restore ."],
+    ["j4", "Le terminal de PyCharm ouvert dans le dossier du projet, et python3 main.py testé le matin même"],
+    ["j5", "Les raccourcis en tête : Cmd+Maj+F, Cmd+F, Cmd+B, Cmd+Z (onglet Le code)"],
+    ["j6", "Le dossier papier imprimé"]
   ];
 
   /* ---------- état et sauvegarde ---------- */
   var CLE = "prepa-solitaire-v1";
-  var etat = { v: 1, cartes: {}, plan: {}, repet: null, maj: 0 };
+  var etat = { v: 1, cartes: {}, plan: {}, defis: {}, maj: 0 };
   var mode = "memoire";
   var docRef = null, ecritureEnCours = false, aRefaire = false;
 
@@ -571,7 +1245,7 @@ resultat = deplacement(piles, cachees, index, nb_coups, difficulte, coup_ordi)`,
     try { localStorage.setItem(CLE, JSON.stringify(etat)); return true; } catch (e) { return false; }
   }
   function normaliser(o) {
-    return { v: 1, cartes: o.cartes || {}, plan: o.plan || {}, repet: o.repet || null, maj: o.maj || 0 };
+    return { v: 1, cartes: o.cartes || {}, plan: o.plan || {}, defis: o.defis || {}, maj: o.maj || 0 };
   }
   function afficherStatut() {
     var el = document.getElementById("statut");
@@ -881,90 +1555,141 @@ resultat = deplacement(piles, cachees, index, nb_coups, difficulte, coup_ordi)`,
     $("btn-oral-retour").onclick = function () { oral = null; rendreOral(); };
   }
 
-  /* ---------- vue : script ---------- */
-  var repet = null, minuterieRepet = null;
-  var reglage = { court: false, qui: "tous" };
+  /* ---------- vue : défis de code ---------- */
+  var NIVEAUX = { facile: "Facile", moyen: "Moyen", vicieux: "Vicieux" };
+  var RESULTATS = { seul: "réussi seul", indices: "avec les indices", rate: "raté" };
+  var DEFI_PAR_ID = {};
+  DEFIS.forEach(function (d) { DEFI_PAR_ID[d.id] = d; });
+  var defi = null, minuterieDefi = null, filtreNiveau = "tous";
 
-  function diaposActives() { return SCRIPT.filter(function (d) { return !reglage.court || d.court; }); }
-  function quiClasse(qui) { return /^Jules/.test(qui) ? "qui jules" : "qui"; }
-
-  function rendreScript() {
-    var v = $("v-script");
-    var actives = diaposActives();
-    var total = actives.reduce(function (s, d) { return s + d.s; }, 0);
-    var h = "<h2>Script de la soutenance</h2>";
-    h += '<p class="intro">Le même texte que les notes du diaporama. Lancez la répétition : le chrono montre le temps de chaque diapo, et passe au rouge quand vous dépassez.</p>';
-    h += '<div class="panneau"><div class="rang">';
-    h += '<label class="tache"><input type="checkbox" id="opt-court"' + (reglage.court ? " checked" : "") + "><span>Version courte, sans les diapos 4 et 10</span></label>";
-    h += '<label class="etiquette" for="opt-qui">Afficher</label><select id="opt-qui"><option value="tous">Tout le monde</option><option value="Mattias">Les parties de Mattias</option><option value="Jules">Les parties de Jules</option></select>';
-    h += '</div><p>Durée prévue : <b>' + mmss(total) + "</b>";
-    if (etat.repet) h += ' · dernière répétition le ' + esc(etat.repet.date.split("-").reverse().join("/")) + " : <b>" + mmss(etat.repet.total) + "</b>" + (etat.repet.court ? " (version courte)" : "");
-    h += '</p><div class="rang"><a href="' + DECK + '" target="_blank" rel="noopener">Ouvrir le diaporama</a></div>';
-    h += '<div id="zone-repet"></div></div>';
-    actives.forEach(function (d) {
-      if (reglage.qui !== "tous" && d.qui.indexOf(reglage.qui) < 0) return;
-      h += '<article class="diapo" id="diapo-' + d.n + '"><div class="ligne1"><span class="num">' + String(d.n).padStart(2, "0") + "</span><h3>" + esc(d.titre) + '</h3><span class="' + quiClasse(d.qui) + '">' + esc(d.qui) + '</span><span class="duree">' + mmss(d.s) + "</span></div>";
-      h += '<p class="texte">' + fmt(d.txt) + '</p><a href="' + DECK + "#slide-" + d.n + '" target="_blank" rel="noopener">Voir la diapo ' + d.n + "</a></article>";
+  function etatDefi(id) { return etat.defis[id] || null; }
+  function noterDefi(id, r, sec) {
+    var e = etat.defis[id] || { n: 0 };
+    e.n = (e.n || 0) + 1;
+    e.r = r;
+    e.t = Math.round(sec);
+    if (r === "seul" && (!e.best || sec < e.best)) e.best = Math.round(sec);
+    // raté : on le refait aujourd'hui ; avec les indices : demain ; seul : dans 3 jours, au plus tard la veille
+    e.due = r === "rate" ? AUJ : plafond(ajouterJours(AUJ, r === "indices" ? 1 : 3));
+    etat.defis[id] = e;
+    sauver();
+  }
+  function defiAuHasard() {
+    var ordre = { facile: 0, moyen: 1, vicieux: 2 };
+    var possibles = DEFIS.filter(function (d) { return filtreNiveau === "tous" || d.niveau === filtreNiveau; });
+    var aRefaire = possibles.filter(function (d) { var e = etatDefi(d.id); return e && e.r !== "seul" && e.due <= AUJ; });
+    var jamais = possibles.filter(function (d) { return !etatDefi(d.id); });
+    var dus = possibles.filter(function (d) { var e = etatDefi(d.id); return e && e.r === "seul" && e.due <= AUJ; });
+    var choix = aRefaire.length ? aRefaire : (jamais.length ? jamais : (dus.length ? dus : possibles));
+    if (choix === jamais) {
+      // les jamais faits : on commence par les plus faciles
+      var min = Math.min.apply(null, jamais.map(function (d) { return ordre[d.niveau]; }));
+      choix = jamais.filter(function (d) { return ordre[d.niveau] === min; });
+    }
+    return choix[Math.floor(Math.random() * choix.length)];
+  }
+  function rendreDefis() {
+    var v = $("v-defis");
+    clearInterval(minuterieDefi);
+    if (defi) { rendreDefi(); return; }
+    var faits = DEFIS.filter(function (d) { var e = etatDefi(d.id); return e && e.r === "seul"; }).length;
+    var h = "<h2>Défis de code</h2>";
+    h += '<p class="intro">Le jour J, le prof te demandera de modifier ton code en direct. Chaque défi est une demande de ce genre : fais-la dans PyCharm, sur ton vrai projet, puis compare avec la correction. Toutes les corrections ont été appliquées et testées sur votre code.</p>';
+    h += '<div class="panneau"><h3>La méthode, devant le prof</h3><ol class="methode">' + METHODE.map(function (m) { return "<li>" + fmt(m) + "</li>"; }).join("") + "</ol></div>";
+    h += '<div class="panneau"><div class="compte"><span><b>' + faits + "</b> / " + DEFIS.length + " défis réussis seul</span></div>";
+    h += '<p class="note">Avant de commencer : tout doit être commité (<code>git status</code> propre). Après chaque défi, <code>git restore .</code> dans le terminal remet le code comme avant.</p>';
+    h += '<div class="rang"><label class="etiquette" for="filtre-niveau">Niveau</label><select id="filtre-niveau"><option value="tous">Tous</option><option value="facile">Faciles</option><option value="moyen">Moyens</option><option value="vicieux">Vicieux</option></select><button class="principal" id="btn-defi-hasard">Défi au hasard</button></div></div>';
+    ["facile", "moyen", "vicieux"].forEach(function (niv) {
+      if (filtreNiveau !== "tous" && filtreNiveau !== niv) return;
+      h += '<h3 class="groupe-titre">' + NIVEAUX[niv] + "</h3>";
+      DEFIS.filter(function (d) { return d.niveau === niv; }).forEach(function (d) {
+        var e = etatDefi(d.id);
+        h += '<div class="ligne-defi"><span class="txt">' + fmt(d.demande) + '</span><span class="temps">' + d.minutes + " min</span>";
+        h += e ? '<span class="resultat ' + e.r + '">' + RESULTATS[e.r] + (e.t ? " · " + mmss(e.t) : "") + "</span>" : '<span class="resultat">à faire</span>';
+        h += '<button data-defi="' + d.id + '">Faire ce défi</button></div>';
+      });
     });
     v.innerHTML = h;
-    $("opt-qui").value = reglage.qui;
-    $("opt-court").onchange = function () { reglage.court = this.checked; repet = null; clearInterval(minuterieRepet); rendreScript(); };
-    $("opt-qui").onchange = function () { reglage.qui = this.value; rendreScript(); };
-    rendreRepet();
+    $("filtre-niveau").value = filtreNiveau;
+    $("filtre-niveau").onchange = function () { filtreNiveau = this.value; rendreDefis(); };
+    $("btn-defi-hasard").onclick = function () { lancerDefi(defiAuHasard().id); };
+    v.querySelectorAll("button[data-defi]").forEach(function (b) { b.onclick = function () { lancerDefi(b.dataset.defi); }; });
   }
-  function rendreRepet() {
-    var z = $("zone-repet");
-    if (!z) return;
-    var actives = diaposActives();
-    if (!repet) {
-      z.innerHTML = '<div class="rang"><button class="principal" id="btn-repet">Lancer la répétition</button></div>';
-      $("btn-repet").onclick = function () {
-        repet = { i: 0, debut: Date.now(), debutDiapo: Date.now(), temps: [] };
-        rendreRepet();
-        clearInterval(minuterieRepet);
-        minuterieRepet = setInterval(majChrono, 250);
-      };
-      return;
-    }
-    if (repet.i >= actives.length) {
-      clearInterval(minuterieRepet);
-      var total = repet.temps.reduce(function (s, x) { return s + x; }, 0);
-      var h = "<h3>Répétition terminée : " + mmss(total) + "</h3><div class=\"tableau\"><table class=\"temps\"><tr><th>Diapo</th><th>Qui</th><th>Prévu</th><th>Fait</th></tr>";
-      actives.forEach(function (d, k) {
-        var fait = repet.temps[k] || 0;
-        h += "<tr><td>" + d.n + ". " + esc(d.titre) + "</td><td>" + esc(d.qui) + '</td><td class="n">' + mmss(d.s) + '</td><td class="n' + (fait > d.s * 1.2 ? " depasse" : "") + '">' + mmss(fait) + "</td></tr>";
+  function lancerDefi(id) {
+    defi = { id: id, debut: Date.now(), indices: 0, correction: false };
+    rendreDefis();
+    window.scrollTo(0, 0);
+  }
+  function rendreDefi() {
+    var v = $("v-defis"), d = DEFI_PAR_ID[defi.id];
+    var h = '<h2>Défi de code</h2><article class="carte">';
+    h += '<div class="carte-tete"><span class="niveau ' + d.niveau + '">' + NIVEAUX[d.niveau] + '</span><span class="puce proba">objectif : ' + d.minutes + ' min</span><span class="progression" id="chrono-defi">00:00</span></div>';
+    h += '<p class="demande"><span class="prof">Le prof te demande</span>« ' + fmt(d.demande) + " »</p>";
+    h += '<p class="note">Fais la modification dans PyCharm, relance le jeu et vérifie. Prends un indice seulement si tu bloques.</p>';
+    h += '<div class="rang"><button id="btn-indice1"' + (defi.indices >= 1 ? " disabled" : "") + '>Indice 1 : où ?</button><button id="btn-indice2"' + (defi.indices >= 2 ? " disabled" : "") + '>Indice 2 : quoi ?</button><button class="principal" id="btn-correction"' + (defi.correction ? " disabled" : "") + ">Voir la correction</button></div>";
+    if (defi.indices >= 1) h += '<p class="indice"><b>Où : </b>' + fmt(d.ou) + "</p>";
+    if (defi.indices >= 2) h += '<p class="indice"><b>Quoi : </b>' + fmt(d.quoi) + "</p>";
+    if (defi.correction) {
+      h += '<div class="reponse"><span class="titre">La correction</span>';
+      d.edits.forEach(function (e) {
+        h += '<div class="edit"><span class="fichier-titre">' + esc(e.fichier) + '</span><span class="etiq-diff">Avant</span><pre class="code avant"><code>' + esc(e.avant) + '</code></pre><span class="etiq-diff">Après</span><pre class="code apres"><code>' + esc(e.apres) + "</code></pre></div>";
       });
-      h += '</table></div><div class="rang"><button id="btn-repet-fin">Fermer</button></div>';
-      z.innerHTML = h;
-      etat.repet = { date: AUJ, total: Math.round(total), court: reglage.court };
-      sauver();
-      $("btn-repet-fin").onclick = function () { repet = null; rendreScript(); };
-      return;
+      if (d.extrait) h += '<div class="edit"><span class="fichier-titre">main.py, les lignes clés</span><pre class="code apres"><code>' + esc(d.extrait) + "</code></pre></div>";
+      h += "<p>" + fmt(d.explication) + "</p>";
+      h += '<p class="indice"><b>Pour vérifier : </b>' + fmt(d.test) + "</p>";
+      h += '<div class="piege"><b>Les pièges du prof</b><ul>' + d.pieges.map(function (p) { return "<li>" + fmt(p) + "</li>"; }).join("") + "</ul></div>";
+      h += '<p class="note">Ensuite : <code>git restore .</code> pour remettre le code comme avant.</p>';
+      h += '<div class="rang" role="group" aria-label="Comment ça s’est passé"><button class="ok" id="res-seul">Réussi seul</button><button class="partiel" id="res-indices">Réussi avec les indices</button><button class="faux" id="res-rate">Raté</button></div>';
+      h += "</div>";
     }
-    var d = actives[repet.i];
-    z.innerHTML = '<div class="rang"><span class="gros-chrono" id="chrono-total">00:00</span><span>Diapo ' + d.n + " : " + esc(d.titre) + ' · <span class="' + quiClasse(d.qui) + '">' + esc(d.qui) + '</span></span></div><p>Cette diapo : <b id="chrono-diapo">00:00</b> sur ' + chrono(d.s) + '</p><div class="rang"><button class="principal" id="btn-suivante">' + (repet.i === actives.length - 1 ? "Terminer" : "Diapo suivante") + '</button><button id="btn-stop">Arrêter</button></div>';
-    $("btn-suivante").onclick = function () {
-      repet.temps.push((Date.now() - repet.debutDiapo) / 1000);
-      repet.debutDiapo = Date.now();
-      repet.i++;
-      document.querySelectorAll(".diapo.courante").forEach(function (e) { e.classList.remove("courante"); });
-      rendreRepet();
-    };
-    $("btn-stop").onclick = function () { repet = null; clearInterval(minuterieRepet); rendreScript(); };
-    document.querySelectorAll(".diapo.courante").forEach(function (e) { e.classList.remove("courante"); });
-    var art = $("diapo-" + d.n);
-    if (art) art.classList.add("courante");
-    majChrono();
+    h += '<div class="rang"><button id="btn-defi-retour">Retour à la liste</button></div></article>';
+    v.innerHTML = h;
+    $("btn-indice1").onclick = function () { defi.indices = Math.max(defi.indices, 1); rendreDefi(); };
+    $("btn-indice2").onclick = function () { defi.indices = 2; rendreDefi(); };
+    $("btn-correction").onclick = function () { defi.correction = true; rendreDefi(); };
+    $("btn-defi-retour").onclick = function () { defi = null; rendreDefis(); };
+    if (defi.correction) {
+      [["seul", "res-seul"], ["indices", "res-indices"], ["rate", "res-rate"]].forEach(function (x) {
+        $(x[1]).onclick = function () {
+          var r = x[0];
+          // un indice pris ne compte pas comme réussi seul
+          if (r === "seul" && defi.indices > 0) r = "indices";
+          noterDefi(defi.id, r, (Date.now() - defi.debut) / 1000);
+          defi = null;
+          rendreDefis();
+        };
+      });
+    }
+    majChronoDefi();
+    clearInterval(minuterieDefi);
+    minuterieDefi = setInterval(majChronoDefi, 500);
   }
-  function majChrono() {
-    if (!repet) return;
-    var actives = diaposActives(), d = actives[repet.i];
-    var t = $("chrono-total"), td = $("chrono-diapo");
-    if (!t || !td || !d) return;
-    t.textContent = chrono((Date.now() - repet.debut) / 1000);
-    var ecoule = (Date.now() - repet.debutDiapo) / 1000;
-    td.textContent = chrono(ecoule);
-    td.className = ecoule > d.s ? "depasse" : "";
+  function majChronoDefi() {
+    var el = $("chrono-defi");
+    if (!defi || !el) { clearInterval(minuterieDefi); return; }
+    var s = (Date.now() - defi.debut) / 1000;
+    el.textContent = chrono(s);
+    el.className = "progression" + (s > DEFI_PAR_ID[defi.id].minutes * 60 ? " depasse" : "");
+  }
+
+  /* ---------- vue : le code ---------- */
+  function rendreCode() {
+    var v = $("v-code");
+    var h = "<h2>Présenter le code</h2>";
+    h += '<p class="intro">Le prof regarde ton code projeté. Présente-le fichier par fichier, dans cet ordre, en 3 minutes environ : il doit voir que tu sais où est chaque chose. Les bouts de code en gris sont à chercher avec Cmd+F, pour tomber tout de suite sur la bonne ligne.</p>';
+    CODE_TOUR.forEach(function (f, k) {
+      h += '<article class="diapo"><div class="ligne1"><span class="num">' + String(k + 1).padStart(2, "0") + "</span><h3>" + esc(f.fichier) + "</h3></div>";
+      h += '<p class="texte">' + fmt(f.dire) + "</p>";
+      if (f.ancres.length) h += '<div class="ancres">' + f.ancres.map(function (a) { return "<code>" + esc(a) + "</code>"; }).join("") + "</div>";
+      h += "</article>";
+    });
+    h += '<div class="panneau"><h3>Où modifier quoi</h3><div class="tableau"><table class="carte-code"><tr><th>Le prof demande de changer…</th><th>Va dans</th></tr>';
+    CARTE_MODIFS.forEach(function (c) { h += "<tr><td>" + fmt(c[0]) + "</td><td>" + fmt(c[1]) + "</td></tr>"; });
+    h += "</table></div></div>";
+    h += '<div class="panneau"><h3>Les réflexes PyCharm</h3><div class="tableau"><table class="carte-code"><tr><th>Raccourci</th><th>À quoi il sert</th></tr>';
+    RACCOURCIS.forEach(function (c) { h += "<tr><td><code>" + esc(c[0]) + "</code></td><td>" + fmt(c[1]) + "</td></tr>"; });
+    h += "</table></div></div>";
+    v.innerHTML = h;
   }
 
   /* ---------- vue : plan ---------- */
@@ -1038,8 +1763,8 @@ resultat = deplacement(piles, cachees, index, nb_coups, difficulte, coup_ordi)`,
   }
 
   /* ---------- navigation ---------- */
-  var VUES = { seance: rendreSeance, oral: rendreOral, script: rendreScript, plan: rendrePlan, fiches: rendreFiches };
-  function vueCourante() { var h = (location.hash || "").slice(1); return VUES[h] ? h : "seance"; }
+  var VUES = { defis: rendreDefis, seance: rendreSeance, oral: rendreOral, code: rendreCode, plan: rendrePlan, fiches: rendreFiches };
+  function vueCourante() { var h = (location.hash || "").slice(1); return VUES[h] ? h : "defis"; }
   function montrer() {
     var nom = vueCourante();
     Object.keys(VUES).forEach(function (k) {
@@ -1092,7 +1817,7 @@ resultat = deplacement(piles, cachees, index, nb_coups, difficulte, coup_ordi)`,
               etat = distant;
               ecrireLocal();
               rendrePiles();
-              if (!seance && !oral && !repet) montrer();
+              if (!seance && !oral && !defi) montrer();
             } else {
               envoyer(0);
             }

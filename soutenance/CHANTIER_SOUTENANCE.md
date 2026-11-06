@@ -3,6 +3,10 @@
 > Source de vérité pour la soutenance du **vendredi 6 novembre 2026** et le rendu Moodle (**avant 14 h 00**).
 > À lire avant de reprendre le sujet. À mettre à jour à la fin de chaque session.
 
+## Le format de la soutenance (annoncé par le prof, 02/11/2026)
+
+Chacun passe **seul**, avec son ordinateur. On **projette notre code**, les profs posent des questions dessus, puis demandent des **modifications en direct** (exemple donné : « au début du jeu, toutes les cartes doivent être retournées »). Il faut savoir modifier n'importe quelle partie du code, y compris celle écrite par l'autre. Les profs chercheront à nous mettre en difficulté. Le diaporama et le script de présentation ne servent donc plus.
+
 ## État au 30/10/2026
 
 | Étape | Statut |
@@ -11,15 +15,16 @@
 | Code : l'ordinateur joue tout seul (`ia`) | fait et testé, **pas encore commité** |
 | Code : fin automatique quand tout est retourné | fait et testé, **pas encore commité** |
 | Code : défausse en éventail (1, 2 ou 3 cartes selon le niveau) | fait et testé, **pas encore commité** |
+| Dossier court de 2 pages (info du prof pas sûre) | fait le 04/11 : `Solitaire_Mathevon_Damour_2pages.pdf` |
 | Dossier PDF (les 5 rubriques du sujet + annexes) | v1 faite, 12 pages : `Solitaire_Mathevon_Damour.pdf` |
 | Mail au prof (un ou plusieurs `.py` ? diaporama ?) | écrit (`mail_prof.txt`), à envoyer par Mattias |
-| Réponse du prof | en attente |
+| Réponse du prof | reçue : un seul fichier `.py` à rendre |
+| Fusion en un seul fichier : `Solitaire_Mathevon_Damour.py` | fait le 04/11, même sortie que `main.py` |
 | Nettoyage avant le gel du code | à faire |
-| Diaporama (11 diapos, le script dans les notes) | fait : https://claude.ai/artifact/2KnRT7MPrF2fyRRiivtwMV |
-| Script de la soutenance et des démos (≈ 14 min, version courte ≈ 12 min) | fait : notes du diaporama et onglet Script du site |
-| Site d'entraînement (87 questions, oral blanc, script chronométré, plan) | fait : https://claude.ai/artifact/Aovw1Rf4nyWqddQVNxRemo |
-| Partage du diaporama et du site avec Jules | à faire (menu Partager de chaque page) |
-| Entraînement aux questions individuelles | en cours : une séance par jour sur le site |
+| Diaporama et script de présentation | abandonnés : la soutenance se fait sur le code projeté (le diaporama reste en ligne, inutile) |
+| Site d'entraînement : 20 défis de modification (corrections testées), 95 questions, oral blanc, présentation du code, plan | fait : https://claude.ai/artifact/Aovw1Rf4nyWqddQVNxRemo |
+| Partage du site avec Jules | à faire (menu Partager de la page) |
+| Entraînement : défis de code et questions | en cours, suivre l'onglet Plan du site |
 | Impression du dossier papier | à faire, juste avant le 6/11 |
 | Dépôt Moodle (`.pdf` + `.py`, un seul dépôt pour le binôme) | à faire, avant le 6/11 à 14 h |
 
@@ -31,6 +36,9 @@
 | `dossier.html` | la source du dossier : le texte et les captures d'écran en couleur |
 | `Solitaire_Mathevon_Damour.pdf` | le dossier à déposer sur Moodle et à imprimer |
 | `mail_prof.txt` | le mail au prof |
+| `../Solitaire_Mathevon_Damour.py` | le fichier unique à déposer sur Moodle (fusion des 14 fichiers, à la racine du projet) |
+| `dossier_2pages.html` | la source du dossier court (2 pages), même méthode d'impression que `dossier.html` |
+| `Solitaire_Mathevon_Damour_2pages.pdf` | le dossier court, au cas où le prof veut bien 2 pages |
 | `prepa_soutenance.html` | la source du site d'entraînement (republier ce fichier garde le même lien) |
 
 Le diaporama n'a pas de fichier local : il se modifie dans sa page (ou en demandant à Claude, avec son lien).
@@ -56,9 +64,9 @@ Les captures d'écran sont figées dans `dossier.html` : si l'affichage du jeu c
 - Fin automatique seulement si plus aucune carte n'est cachée **et** si la pioche et la défausse sont vides : sinon la victoire n'est pas garantie au niveau difficile.
 - Défausse : on montre les `difficulte` dernières cartes ; celles qu'on ne peut pas jouer sont en gris.
 - Ligne d'aide : `p : piocher  h : coups  ia : auto  annuler  ? : règles` (56 caractères : l'écran de départ reste à 18 × 56).
-- Le script existe à deux endroits, avec le même texte : les notes du diaporama et l'onglet Script du site. Si on le change, changer les deux.
-- Répartition : Mattias présente les diapos 1, 3, 4, 6 (démo 1 au clavier) et 8 ; Jules les diapos 2, 5, 7, 9 (démo 2 au clavier) et 10. Chacun présente ce qu'il a codé.
-- Démo : la reprise de la sauvegarde se montre dans un 2e onglet du terminal, car il n'y a pas de commande pour quitter pendant la partie.
+- Préparation adaptée au format : des défis de modification au format exact de l'épreuve. Chaque correction a été appliquée sur une copie neuve du projet puis testée (script de test de la session du 02/11). Si le code change (nettoyage), revérifier les corrections qui touchent les lignes modifiées.
+- L'onglet Script du site est remplacé par « Le code » : l'ordre de présentation des fichiers, où modifier quoi, les raccourcis PyCharm.
+- Méthode devant le prof : reformuler, dire où on va modifier, plus petit changement, relancer, tester, penser aux effets de bord (h et ia, écran des règles, partie de démo, sauvegarde, annuler).
 - Site : la progression de chacun est privée, sur son compte claude.ai ; sans accès Contributeur, elle reste dans le navigateur.
 
 ## Chiffres vérifiés, cités dans le dossier
@@ -71,7 +79,8 @@ Les captures d'écran sont figées dans `dossier.html` : si l'affichage du jeu c
 
 ## À vérifier avant d'imprimer
 
-- [ ] Réponse du prof. Si un seul fichier est exigé : fusionner, puis mettre à jour l'annexe A, les noms de fichiers cités dans le dossier (`coup_iav1.py`, `main.py`, `verif_*.py`…) et la commande de l'annexe C.
+- [x] Réponse du prof : un seul fichier. Fusion faite (04/11).
+- [ ] Mettre à jour l'annexe A, les noms de fichiers cités dans le dossier (`coup_iav1.py`, `main.py`, `verif_*.py`…) et la commande de l'annexe C.
 - [ ] Nettoyage fait (liste ci-dessous), et `partie_gagnante.txt` toujours gagnée en 95 coups.
 - [ ] Relire le dossier en entier : le prof peut interroger sur n'importe quelle phrase.
 
@@ -86,8 +95,9 @@ Les captures d'écran sont figées dans `dossier.html` : si l'affichage du jeu c
    - `pioche.py` : le commentaire « À AJOUTER : il manque un paramètre (lequel ?) » et la docstring.
    - Fautes dans les messages : « Seul une carte inférieur a la carte de destination est autorisé », « Seul une carte avec une valeur supérieur de 1 est accepté », « Il faut un tiret(-) entre la carte et le deplacement ».
    - Idée : une commande pour quitter pendant la partie. Aujourd'hui, après `sauvegarde`, il faut faire Ctrl+C.
-5. **Partager** le diaporama et le site avec Jules (menu Partager de chaque page).
-6. **Répéter** en suivant l'onglet Plan du site : une séance de questions par jour, des répétitions chronométrées. Télécharger le PDF du diaporama en secours (menu Partager, Exporter).
+5. **Partager** le site avec Jules (menu Partager de la page) : il passe seul lui aussi.
+6. **S'entraîner** en suivant l'onglet Plan du site : défis faciles le lundi, moyens le mardi, vicieux le mercredi, examen blanc le jeudi, plus une séance de questions par jour.
+7. Le nettoyage du point 4 est plus important qu'avant : le code est projeté, les profs liront les commentaires et les messages.
 7. **Imprimer** le dossier, puis **déposer** le PDF et le `.py` sur Moodle avant le 6/11 à 14 h.
 
 ## Journal
@@ -104,3 +114,14 @@ Les captures d'écran sont figées dans `dossier.html` : si l'affichage du jeu c
 - Site d'entraînement publié : 87 questions d'oral sur tout le code (répétition espacée, indice de confiance, cartes rouges), oral blanc chronométré, script avec chrono de répétition, plan jusqu'au 6/11.
 - Site corrigé : le bouton « Retourner la carte » restait grisé tant qu'on n'avait pas choisi sa confiance. Il est remplacé par trois boutons qui retournent la carte (Je suis sûr, J'hésite, Je ne sais pas). Tous les parcours ont été testés dans un navigateur.
 - Commit et push sur la branche mattias : le code, puis la soutenance.
+
+### 02/11/2026
+- Le prof a donné le format : passage seul, code projeté, questions et modifications en direct. Diaporama et script abandonnés.
+- Site refait pour ce format : 20 défis de modification (7 faciles, 8 moyens, 5 vicieux) avec deux indices, la correction avant/après, le test à faire et les pièges ; chaque correction a été appliquée et testée sur une copie du projet. Onglet « Le code » (ordre de présentation, où modifier quoi, raccourcis PyCharm), 8 questions pièges de plus (95 au total), plan du 2 au 6 novembre. Tous les parcours testés dans un navigateur.
+
+### 04/11/2026
+- Le prof veut un seul fichier : création de `Solitaire_Mathevon_Damour.py` à la racine, qui regroupe les 14 fichiers dans l'ordre : paquet et donne, affichage, menu, sauvegarde, vérifications, fin de partie, pioche, coups possibles et `ia`, jouer un coup, victoire, lancement. Les anciens fichiers sont gardés.
+- Dans le fichier unique : plus d'imports entre fichiers, `from operator import truediv` enlevé, le `if __name__ == "__main__"` de la victoire enlevé (il aurait lancé l'animation au démarrage), la docstring et le « À AJOUTER » de la pioche remplacés par un commentaire, « Je fais demain » remplacé, les « main.py » des commentaires remplacés.
+- Tests dans une copie : `partie_gagnante.txt` donne exactement la même sortie qu'avec `main.py` (95 coups) ; `ia` sur la démo, même sortie aux 3 niveaux ; sauvegarde puis reprise OK.
+- Attention : si on modifie le code maintenant, le faire dans `Solitaire_Mathevon_Damour.py` (c'est lui qui est rendu et projeté). Les fautes dans les messages ne sont pas encore corrigées.
+- Le prof aurait parlé d'un dossier de 2 pages (pas sûr). Fait quand même : `dossier_2pages.html` et `Solitaire_Mathevon_Damour_2pages.pdf`, les 5 rubriques du sujet en 2 pages A4, avec la commande du fichier unique. Le grand dossier reste celui qu'on compte utiliser.
