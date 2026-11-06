@@ -1,6 +1,8 @@
 import os
+import time
 from affichage import *
 from deplacement import deplacement
+from coup_iav1 import trouver_coups
 from jeu_depart import nouvelle_partie, piles, cachees, index
 from sauvegarder import recharger_partie, sauvegarde_existe
 from verif_gagnee import *
@@ -45,11 +47,16 @@ if choix == "5":
 if choix == "4":
     print("À bientôt !")
 else:
-    afficher(piles, cachees)#permet de lancer le premier affichage
+    afficher(piles, cachees, difficulte)#permet de lancer le premier affichage
 
     #la partie telle qu'elle était avant le dernier coup, pour pouvoir l'annuler
     #None veut dire qu'il n'y a rien à annuler
     copie_piles = None
+
+    #auto vaut True quand l'ordinateur joue tout seul (commande ia)
+    auto = False
+    #combien de fois l'ordinateur a retourné la défausse sans rien jouer d'autre
+    nb_tours = 0
 
     #tant que toute les fondations ne sont pas rempli
     while verif_gagnee(piles) == False:
@@ -63,8 +70,48 @@ else:
         avant_index = dict(index)
         avant_nb_coups = nb_coups
 
+        #comme dans le vrai solitaire : quand tout est retourné, la partie est gagnée
+        #l'ordinateur range alors tout seul les cartes qui restent dans les fondations
+        if auto == False and tout_est_retourne(piles, cachees):
+            auto = True
+            print("Toutes les cartes sont retournées, la partie est gagnée : l'ordinateur range les cartes")
+            time.sleep(1)
+
+        #quand l'ordinateur joue tout seul, il prend le premier coup utile de la liste
+        coup_ordi = ""
+        if auto == True:
+            coups = trouver_coups(piles, cachees, index, seulement_utiles=True)
+            if len(coups) > 0:
+                coup_ordi = coups[0]
+
+            #la pioche est vide : ce p va retourner la défausse
+            if coup_ordi == "p" and len(piles["p"]) == 0:
+                nb_tours = nb_tours + 1
+
+            #deuxième fois sans avoir rien joué : il a vu toutes les cartes de la pioche, il est bloqué
+            if nb_tours == 2:
+                coup_ordi = ""
+
+            if coup_ordi == "":
+                auto = False
+                print("L'ordinateur ne trouve plus de coup utile, à vous de jouer")
+
         #maintenant, on va appeller le premier mouvement
-        resultat = deplacement(piles, cachees, index, nb_coups, difficulte)
+        resultat = deplacement(piles, cachees, index, nb_coups, difficulte, coup_ordi)
+
+        #on laisse le coup de l'ordinateur affiché un petit moment avant le suivant
+        if coup_ordi != "":
+            print("L'ordinateur a joué : " + coup_ordi)
+            time.sleep(0.2)
+
+        #l'ordinateur prend la main
+        if resultat == "ia":
+            auto = True
+            nb_tours = 0
+
+        #un vrai coup a été joué : on repart de zéro pour les tours de pioche
+        if resultat == True:
+            nb_tours = 0
 
         #un coup joué ou une pioche ont changé le plateau : on garde la copie d'avant
         if resultat == True or resultat == "pioche":
@@ -88,6 +135,6 @@ else:
                 nb_coups = copie_nb_coups
                 #on ne peut annuler qu'une fois, le coup d'encore avant n'est pas gardé
                 copie_piles = None
-                afficher(piles, cachees)
+                afficher(piles, cachees, difficulte)
 
     animation_victoire(nb_coups)

@@ -8,18 +8,21 @@ from jeu_depart import piles
 
 ordre = ["a", "2", "3", "4", "5", "6", "7", "8", "9", "10", "v", "d", "r"]
 
-def verifier_fondation(carte, piles,destination):
+#parler = False : on vérifie sans afficher de message (sert pour la liste des coups possibles)
+def verifier_fondation(carte, piles,destination, parler=True):
     valeur_cartes_origines=carte[:-2]
     couleur_carte_origines=carte[-2:]
     couleur_fondations=destination[-2:]
 
     if couleur_carte_origines != couleur_fondations :
-        print("Il faut mettre la bonne couleur dans la bonne fondation")
+        if parler:
+            print("Il faut mettre la bonne couleur dans la bonne fondation")
         return False
 
     if len(piles[destination]) == 0:      ## obligé car sinon aucun as ne peut être accepté
         if valeur_cartes_origines != "a":
-            print("Seul un as peut aller sur la fondation vide")
+            if parler:
+                print("Seul un as peut aller sur la fondation vide")
             return False
         if valeur_cartes_origines == "a" :
             return True
@@ -31,7 +34,8 @@ def verifier_fondation(carte, piles,destination):
 
 
     if ordredelacarte != ordredelacarte_destination +1 :
-        print("Seul une carte avec une valeur supérieur de 1 est accepté")
+        if parler:
+            print("Seul une carte avec une valeur supérieur de 1 est accepté")
         return False
     return True
 

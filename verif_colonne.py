@@ -3,7 +3,8 @@ from operator import truediv
 
 # cette verification va permettre de vérifier si notre déplacement d'une colonne
 # a une autre est correct en termes de rouge/noir ainsi que décroissant
-def verif_colonne(carte,destination, piles):
+#parler = False : on vérifie sans afficher de message (sert pour la liste des coups possibles)
+def verif_colonne(carte,destination, piles, parler=True):
 
     #on répertorie dans l'ordre croissant les valeurs d'une carte ainsi que sa couleur
     rouge = ["ca","co"]
@@ -14,7 +15,8 @@ def verif_colonne(carte,destination, piles):
         if carte[:-2] == "r":
             return True
         else:
-            print("Seul un roi peut aller sur une colonne vide")
+            if parler:
+                print("Seul un roi peut aller sur une colonne vide")
             return False
 
     # sinon on récupère la dernière carte de la pile de destination
@@ -34,10 +36,12 @@ def verif_colonne(carte,destination, piles):
 
     #ici on vérifie si la couleur est différente
     if carte_rouge==True and carte_destination_rouge==True:
-        print("carte de la même couleur")
+        if parler:
+            print("carte de la même couleur")
         return False
     elif carte_rouge==False and carte_destination_rouge==False:
-        print("carte de la même couleur")
+        if parler:
+            print("carte de la même couleur")
         return False
 
     #ici on recupère que la valeur de la carte avec le carte[:-2] et ensuite
@@ -47,7 +51,8 @@ def verif_colonne(carte,destination, piles):
 
     #ici on vérifie que la carte est inférieur a la dernière colonne
     if position_carte != position_destination - 1:
-        print("Seul une carte inférieur a la carte de destination est autorisé")
+        if parler:
+            print("Seul une carte inférieur a la carte de destination est autorisé")
         return False
 
     return True

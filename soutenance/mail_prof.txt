@@ -1,0 +1,15 @@
+Objet : Projet Solitaire : plusieurs fichiers .py, et contenu de la soutenance
+
+Bonjour,
+
+Je suis en binôme avec Jules Damour pour le projet Solitaire, et nous avons deux questions avant le rendu.
+
+1. Nous avons découpé notre programme en plusieurs fichiers .py, un par grosse fonction (affichage, pioche, déplacements, vérifications, sauvegarde, etc.), que main.py importe. Est-ce qu'on a le droit de le rendre comme ça, par exemple dans un .zip, ou faut-il tout regrouper dans un seul fichier Solitaire_Mathevon_Damour.py ?
+
+2. Pour la soutenance, nous préparons la démonstration et le dossier papier demandés dans le sujet. Faut-il aussi préparer un diaporama, ou la démonstration et le dossier suffisent ?
+
+Merci d'avance pour votre réponse.
+
+Bonne journée,
+Mattias Mathevon
+L3 MIAGE
